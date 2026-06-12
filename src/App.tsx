@@ -445,6 +445,228 @@ const fruitDiseasesData: Record<string, DiseaseDetail> = {
   }
 };
 
+// Help convert modern Keras 3 Functional models to standard Keras 2 layout supported by TensorFlow.js Layers loader
+function convertKeras3ToKeras2(config: any): any {
+  const modelConfig = JSON.parse(JSON.stringify(config.model_config));
+  
+  if (modelConfig.class_name === "Functional") {
+    // 1. Check and convert input_layers
+    if (modelConfig.config.input_layers && Array.isArray(modelConfig.config.input_layers)) {
+      if (!Array.isArray(modelConfig.config.input_layers[0])) {
+        modelConfig.config.input_layers = [modelConfig.config.input_layers];
+      }
+    }
+
+    // 2. Check and convert output_layers
+    if (modelConfig.config.output_layers && Array.isArray(modelConfig.config.output_layers)) {
+      if (!Array.isArray(modelConfig.config.output_layers[0])) {
+        modelConfig.config.output_layers = [modelConfig.config.output_layers];
+      }
+    }
+
+    const layers = modelConfig.config.layers;
+    for (const layer of layers) {
+      // 3. Rename batch_shape for InputLayer
+      if (layer.class_name === "InputLayer" && layer.config && layer.config.batch_shape) {
+        layer.config.batch_input_shape = layer.config.batch_shape;
+        delete layer.config.batch_shape;
+      }
+      
+      // 4. Convert Functional inbound_nodes
+      if (layer.inbound_nodes && Array.isArray(layer.inbound_nodes)) {
+        const keras2Inbound: any[] = [];
+        
+        for (const node of layer.inbound_nodes) {
+          if (node && typeof node === 'object' && 'args' in node) {
+            const connections: any[] = [];
+            
+            const extractHistory = (val: any) => {
+              if (!val) return;
+              if (Array.isArray(val)) {
+                val.forEach(extractHistory);
+              } else if (typeof val === 'object') {
+                if (val.class_name === '__keras_tensor__' && val.config && val.config.keras_history) {
+                  const hist = val.config.keras_history;
+                  connections.push([hist[0], hist[1], hist[2], {}]);
+                } else {
+                  for (const key of Object.keys(val)) {
+                    extractHistory(val[key]);
+                  }
+                }
+              }
+            };
+            
+            extractHistory(node.args);
+            keras2Inbound.push(connections);
+          } else {
+            keras2Inbound.push(node);
+          }
+        }
+        
+        layer.inbound_nodes = keras2Inbound;
+      }
+    }
+  }
+  
+  config.model_config = modelConfig;
+  return config;
+}
+
+// Helper to dynamically load and compile a Keras 3 model in the browser by converting its topology and patching weights naming
+async function loadKeras3Model(pathPrefix: string, logger: (msg: string) => void): Promise<tf.LayersModel> {
+  const modelJsonRes = await fetch(pathPrefix + 'model.json');
+  if (!modelJsonRes.ok) {
+    throw new Error(`Failed to load model.json from ${pathPrefix}`);
+  }
+  const modelJson = await modelJsonRes.json();
+
+  modelJson.modelTopology = convertKeras3ToKeras2(modelJson.modelTopology);
+
+  if (modelJson.weightsManifest && Array.isArray(modelJson.weightsManifest)) {
+    for (const group of modelJson.weightsManifest) {
+      if (group.weights && Array.isArray(group.weights)) {
+        for (const w of group.weights) {
+          if (w.name) {
+            if (w.name.includes('_depthwise/kernel')) {
+              w.name = w.name.replace('_depthwise/kernel', '_depthwise/depthwise_kernel');
+            } else if (w.name.includes('/expanded_conv_depthwise/kernel')) {
+              w.name = w.name.replace('/expanded_conv_depthwise/kernel', '/expanded_conv_depthwise/depthwise_kernel');
+            } else if (w.name.startsWith('expanded_conv_depthwise/kernel')) {
+              w.name = w.name.replace('expanded_conv_depthwise/kernel', 'expanded_conv_depthwise/depthwise_kernel');
+            }
+          }
+        }
+      }
+    }
+  }
+
+  const browserIOHandler = {
+    load: async () => {
+      const weightsManifest = modelJson.weightsManifest;
+      const weightSpecs: any[] = [];
+      const buffers: ArrayBuffer[] = [];
+      
+      logger(`Pulling binary weight tensors from ${pathPrefix}...`);
+      for (const group of weightsManifest) {
+        if (group.weights) {
+          weightSpecs.push(...group.weights);
+        }
+        for (const shardPath of group.paths) {
+          const shardRes = await fetch(pathPrefix + shardPath);
+          if (!shardRes.ok) {
+            throw new Error(`Failed to fetch weight slice: ${shardPath}`);
+          }
+          const shardBuf = await shardRes.arrayBuffer();
+          buffers.push(shardBuf);
+        }
+      }
+      
+      let totalLength = 0;
+      for (const buf of buffers) {
+        totalLength += buf.byteLength;
+      }
+      const combinedBuffer = new Uint8Array(totalLength);
+      let offset = 0;
+      for (const buf of buffers) {
+        combinedBuffer.set(new Uint8Array(buf), offset);
+        offset += buf.byteLength;
+      }
+      
+      return {
+        modelTopology: modelJson.modelTopology,
+        weightSpecs,
+        weightData: combinedBuffer.buffer
+      };
+    }
+  };
+
+  return await tf.loadLayersModel(browserIOHandler);
+}
+
+// Simple IndexedDB wrapper for storing uploaded disease dataset images
+class ImageStore {
+  private dbName = 'disease_images_db';
+  private storeName = 'images';
+  private db: IDBDatabase | null = null;
+
+  async init(): Promise<IDBDatabase> {
+    if (this.db) return this.db;
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.dbName, 1);
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(this.storeName)) {
+          db.createObjectStore(this.storeName);
+        }
+      };
+      request.onsuccess = () => {
+        this.db = request.result;
+        resolve(request.result);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async set(key: string, base64Data: string): Promise<void> {
+    const db = await this.init();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(this.storeName, 'readwrite');
+      const store = tx.objectStore(this.storeName);
+      const request = store.put(base64Data, key);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async get(key: string): Promise<string | null> {
+    const db = await this.init();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(this.storeName, 'readonly');
+      const store = tx.objectStore(this.storeName);
+      const request = store.get(key);
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async getAll(): Promise<Record<string, string>> {
+    const db = await this.init();
+    return new Promise((resolve, reject) => {
+      try {
+        const tx = db.transaction(this.storeName, 'readonly');
+        const store = tx.objectStore(this.storeName);
+        const request = store.openCursor();
+        const results: Record<string, string> = {};
+        request.onsuccess = (event) => {
+          const cursor = (event.target as any).result;
+          if (cursor) {
+            results[cursor.key as string] = cursor.value;
+            cursor.continue();
+          } else {
+            resolve(results);
+          }
+        };
+        request.onerror = () => reject(request.error);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
+  async delete(key: string): Promise<void> {
+    const db = await this.init();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(this.storeName, 'readwrite');
+      const store = tx.objectStore(this.storeName);
+      const request = store.delete(key);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+}
+
+const imageStore = new ImageStore();
+
 export default function App() {
   // Navigation Tabs
   const [activeTab, setActiveTab] = useState<'leaf' | 'fruit' | 'encyclopedia' | 'academy'>('leaf');
@@ -571,6 +793,34 @@ export default function App() {
   const [selectedEncycloGroup, setSelectedEncycloGroup] = useState<'leaf' | 'fruit'>('leaf');
   const [selectedEncycloDisease, setSelectedEncycloDisease] = useState<string>("Anthracnose");
   const [showDetailsPage, setShowDetailsPage] = useState<boolean>(false);
+  const [customSampleImages, setCustomSampleImages] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    // Hydrate saved custom sample images from IndexedDB safely on mount
+    imageStore.getAll()
+      .then(images => {
+        setCustomSampleImages(images);
+      })
+      .catch(err => {
+        console.error('Failed to load custom images from IndexedDB:', err);
+      });
+  }, []);
+
+  const handleCustomSampleImageUpload = (compositeKey: string, file: File) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64data = reader.result as string;
+      setCustomSampleImages(prev => {
+        const updated = { ...prev, [compositeKey]: base64data };
+        imageStore.set(compositeKey, base64data)
+          .catch(err => {
+            console.error('Failed to store custom image to IndexedDB:', err);
+          });
+        return updated;
+      });
+    };
+    reader.readAsDataURL(file);
+  };
 
   // References
   const leafFileInputRef = useRef<HTMLInputElement>(null);
@@ -619,9 +869,20 @@ export default function App() {
         }
       } catch (fallbackErr: any) {
         console.error("Camera access failed:", fallbackErr);
-        setCameraError(
-          "Could not access camera. Please check camera permission and ensure the connection is secure."
-        );
+        const errMsg = fallbackErr?.message || String(fallbackErr);
+        if (errMsg.includes("Requested device not found") || errMsg.includes("NotFoundError")) {
+          setCameraError(
+            "Camera hardware device not found. Please upload sample images/photos using the direct file selector or drag & drop area."
+          );
+        } else if (errMsg.includes("NotAllowedError") || errMsg.includes("Permission denied")) {
+          setCameraError(
+            "Camera permission denied. Please allow camera permissions in your browser or select 'Upload file' instead."
+          );
+        } else {
+          setCameraError(
+            `Could not access camera: ${errMsg}. Please ensure the connection is secure or browse/drag pictures instead.`
+          );
+        }
         setIsCameraActive(false);
       }
     }
@@ -690,22 +951,17 @@ export default function App() {
           setLeafClasses(fallbackLeafClasses);
         }
 
-        // Try load tfjs_leaf_model/model.json with absolute path
-        try {
-          const model = await tf.loadLayersModel('/tfjs_leaf_model/model.json');
-          setLeafModel(model);
-          setLeafModelStatus('active');
-          setIsSandboxMode(false); // Real model loaded!
-          logDiagnostic("Successfully loaded Leaf Disease Neural Network from /tfjs_leaf_model/model.json!");
-        } catch (loadErr) {
-          setLeafClasses(fallbackLeafClasses);
-          setLeafModelStatus('not_found');
-          logDiagnostic("Leaf model model.json not found on disk. Activating Sandbox Simulator engine.");
-        }
+        // Load Keras 3 leaf model dynamically
+        logDiagnostic("Initiating network load for tfjs_leaf_model/model.json...");
+        const model = await loadKeras3Model('/tfjs_leaf_model/', logDiagnostic);
+        setLeafModel(model);
+        setLeafModelStatus('active');
+        setIsSandboxMode(false); // Real model loaded!
+        logDiagnostic("Successfully loaded & compiled Leaf Disease Keras 3 Neural Network dynamically!");
       } catch (err: any) {
         setLeafClasses(fallbackLeafClasses);
-        setLeafModelStatus('error');
-        logDiagnostic(`Unexpected error during leaf model initialization: ${err.message}`);
+        setLeafModelStatus('not_found');
+        logDiagnostic(`Unexpected error during leaf model initialization: ${err.message}. Activating Sandbox Simulator engine.`);
       }
 
       // 2. Initialise Fruit Model & Classes
@@ -721,16 +977,17 @@ export default function App() {
           setFruitClasses(fallbackFruitClasses);
         }
 
-        // Try load tfjs_fruit_model/model.json with absolute path
-        const model = await tf.loadLayersModel('/tfjs_fruit_model/model.json');
+        // Load Keras 3 fruit model dynamically
+        logDiagnostic("Initiating network load for tfjs_fruit_model/model.json...");
+        const model = await loadKeras3Model('/tfjs_fruit_model/', logDiagnostic);
         setFruitModel(model);
         setFruitModelStatus('active');
         setIsSandboxMode(false); // Real model loaded!
-        logDiagnostic("Successfully loaded Fruit Disease Neural Network from /tfjs_fruit_model/model.json!");
+        logDiagnostic("Successfully loaded & compiled Fruit Disease Keras 3 Neural Network dynamically!");
       } catch (err: any) {
         setFruitClasses(fallbackFruitClasses);
         setFruitModelStatus('not_found');
-        logDiagnostic("Fruit model model.json not found on disk. Activating Sandbox Simulator engine.");
+        logDiagnostic(`Unexpected error during fruit model initialization: ${err.message}. Activating Sandbox Simulator engine.`);
       }
     }
 
@@ -1529,6 +1786,22 @@ export default function App() {
                   }
                 </p>
 
+                {cameraError && (
+                  <div className="mb-4 bg-rose-50 border border-rose-200/80 text-rose-800 text-[11px] p-3 rounded-lg flex justify-between items-center font-bold">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="w-4.5 h-4.5 text-rose-600 shrink-0" />
+                      <span>{cameraError}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setCameraError(null)}
+                      className="text-rose-500 hover:text-rose-700 text-xs font-black px-1.5 focus:outline-none cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+
                 {/* Drag and Drop Zone or Live Camera Container */}
                 {isCameraActive ? (
                   <div className="border border-slate-200 rounded-xl p-5 bg-slate-950 flex flex-col items-center justify-center relative shadow-inner overflow-hidden min-h-[300px]">
@@ -1703,11 +1976,65 @@ export default function App() {
                         </div>
                       )}
 
-                      <div className="absolute bottom-2 left-2 px-2 py-1 bg-slate-950/90 rounded-md text-[9px] text-slate-400 font-mono flex items-center gap-1.5">
+                      <div className="absolute bottom-2 left-2 px-2 py-1 bg-slate-950/90 rounded-md text-[9px] text-slate-400 font-mono flex items-center gap-1.5 border border-slate-800">
                         <span className={`inline-block w-1.5 h-1.5 rounded-full animate-pulse ${
                           activeTab === 'leaf' ? 'bg-emerald-400' : 'bg-rose-400'
                         }`}></span>
                         PREPROCESSED DIM: [224x224x3] • SHAPE MATCHED
+                      </div>
+                    </div>
+
+                    {/* Preprocessing Normalization Protocol Selectors */}
+                    <div className="mt-3 p-3 bg-slate-50 border border-slate-200/80 rounded-xl space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                          <Settings className="w-3.5 h-3.5 text-slate-500 animate-spin-slow" />
+                          <span>Tensor Normalization Preprocessing</span>
+                        </span>
+                        <span className="text-[9px] text-slate-500 font-mono bg-white px-2 py-0.5 rounded border border-slate-200 uppercase">
+                          {activeTab === 'leaf' ? leafNormalizationMode : fruitNormalizationMode}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 leading-relaxed">
+                        Specify the mathematical input normalization used when training this neural network:
+                      </p>
+                      
+                      <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+                        {[
+                          { id: 'keras_mobilenet', label: 'MobileNetV2 scale', math: '[-1.0 to 1.0]' },
+                          { id: 'div255', label: 'Rescaled standard', math: '[0.0 to 1.0]' },
+                          { id: 'imagenet', label: 'ImageNet Mean', math: 'Mean Subtraction' },
+                          { id: 'none', label: 'Raw RGB values', math: '[0.0 to 255.0]' }
+                        ].map((opt) => {
+                          const isActive = activeTab === 'leaf' 
+                            ? leafNormalizationMode === opt.id 
+                            : fruitNormalizationMode === opt.id;
+                          return (
+                            <button
+                              key={opt.id}
+                              type="button"
+                              onClick={() => {
+                                if (activeTab === 'leaf') {
+                                  setLeafNormalizationMode(opt.id);
+                                  logDiagnostic(`Changed leaf normalization protocol to: ${opt.id}`);
+                                } else {
+                                  setFruitNormalizationMode(opt.id);
+                                  logDiagnostic(`Changed fruit normalization protocol to: ${opt.id}`);
+                                }
+                              }}
+                              className={`p-2 text-left rounded-lg border transition-all cursor-pointer flex flex-col justify-between hover:bg-slate-50 ${
+                                isActive 
+                                  ? activeTab === 'leaf'
+                                    ? 'border-emerald-600 bg-emerald-50/40 text-emerald-900 shadow-xs ring-1 ring-emerald-500/10'
+                                    : 'border-rose-600 bg-rose-50/40 text-rose-900 shadow-xs ring-1 ring-rose-500/10'
+                                  : 'border-slate-200 bg-white text-slate-600'
+                              }`}
+                            >
+                              <span className="text-[10px] font-bold block">{opt.label}</span>
+                              <span className="text-[8px] text-slate-400 font-mono italic">{opt.math}</span>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
@@ -2129,7 +2456,7 @@ export default function App() {
                               {selectedEncycloGroup === 'leaf' ? 'STALK / LEAF PATHOLOGY PROFILE' : 'PEEL / FRUIT PATHOLOGY PROFILE'}
                             </span>
                             <h3 className={`text-xl font-black mt-1 ${activeBrandColor}`}>{activeDis.name}</h3>
-                            <p className="text-[10px] font-mono italic text-slate-400 uppercase font-bold">Phytopathological Strain: {activeDis.scientificName}</p>
+                            <p className="text-[11px] font-medium text-slate-500">Classification Category: Common Dragon Fruit Condition</p>
                           </div>
 
                           <div className="flex items-center gap-3">
@@ -2145,11 +2472,58 @@ export default function App() {
                         </div>
 
                         {/* Disease summary description */}
-                        <div className="space-y-1">
-                          <h4 className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">Symptomatic Pathology Overview</h4>
-                          <p className="text-xs text-slate-600 leading-normal bg-slate-50 border border-slate-200/50 rounded-lg p-3 text-justify">
-                            {activeDis.description}
-                          </p>
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                          <div className="md:col-span-8 space-y-1">
+                            <h4 className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">Symptomatic Pathology Overview</h4>
+                            <p className="text-xs text-slate-600 leading-normal bg-slate-50 border border-slate-200/50 rounded-lg p-3 text-justify h-[160px] overflow-y-auto">
+                              {activeDis.description}
+                            </p>
+                          </div>
+                          
+                          <div className="md:col-span-4 space-y-2">
+                            <h4 className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">Reference Specimen (নমুনা ছবি)</h4>
+                            <div className="relative rounded-lg overflow-hidden border border-slate-200 aspect-video md:aspect-square bg-slate-100 flex flex-col justify-end group h-[160px]">
+                              <img 
+                                src={customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] || activeDis.sampleImage} 
+                                alt={activeDis.name} 
+                                className="w-full h-full object-cover absolute inset-0"
+                                referrerPolicy="no-referrer"
+                              />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-2">
+                                <label className="p-1 px-2.5 bg-white text-[10px] font-black rounded shadow-sm text-slate-800 hover:bg-slate-50 transition-all cursor-pointer flex items-center gap-1">
+                                  <span>📷</span> Upload Image
+                                  <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    className="hidden" 
+                                    onChange={(e) => {
+                                      if (e.target.files && e.target.files[0]) {
+                                        handleCustomSampleImageUpload(`${selectedEncycloGroup}_${selectedEncycloDisease}`, e.target.files[0]);
+                                      }
+                                    }}
+                                  />
+                                </label>
+                              </div>
+                            </div>
+                            {customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] && (
+                              <button
+                                onClick={() => {
+                                  setCustomSampleImages(prev => {
+                                    const updated = { ...prev };
+                                    delete updated[`${selectedEncycloGroup}_${selectedEncycloDisease}`];
+                                    imageStore.delete(`${selectedEncycloGroup}_${selectedEncycloDisease}`)
+                                      .catch(err => {
+                                        console.error('Failed to delete custom image from IndexedDB:', err);
+                                      });
+                                    return updated;
+                                  });
+                                }}
+                                className="block w-full text-[9px] font-bold text-red-500 hover:text-red-700 hover:underline text-center cursor-pointer"
+                              >
+                                Reset to Default (পূর্বাবস্থায় ফিরে যান)
+                              </button>
+                            )}
+                          </div>
                         </div>
 
                         {/* Symptoms listing */}
@@ -2564,7 +2938,7 @@ export default function App() {
                           {selectedEncycloGroup === 'leaf' ? 'Stalk & Leaf Decays' : 'Fruit Skin & Peel Decays'}
                         </span>
                         <h2 className={`text-2xl sm:text-3xl font-black ${activeBrandColor} leading-tight`}>{activeDis.name}</h2>
-                        <p className="text-xs font-mono italic text-slate-500 font-bold">Phytopathological Strain: {activeDis.scientificName}</p>
+                        <p className="text-xs text-slate-500 font-semibold">Standard Classification: Dragon Fruit Pathology Guide</p>
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2">
@@ -2582,14 +2956,47 @@ export default function App() {
                     {/* Middle display block: Image + Description */}
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                       <div className="md:col-span-5 space-y-2">
-                        <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Reference Field Specimen</span>
-                        <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm aspect-video sm:aspect-square bg-slate-900 flex items-center justify-center">
+                        <span className="text-[10px] uppercase tracking-wider font-bold text-slate-455">Sample Image from Dataset (রোগের নমুনা ছবি)</span>
+                        <div className="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm aspect-video sm:aspect-square bg-slate-105 bg-slate-100 flex flex-col justify-end group min-h-[220px]">
                           <img 
-                            src={activeDis.sampleImage} 
+                            src={customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] || activeDis.sampleImage} 
                             alt={activeDis.name} 
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover absolute inset-0"
                             referrerPolicy="no-referrer"
                           />
+                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/90 via-slate-950/60 to-transparent p-3 pt-10 flex flex-col gap-2 z-10 opacity-90 group-hover:opacity-100 transition-opacity duration-300">
+                            <label className="w-full py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-lg text-[11px] font-black text-center cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1 shadow-sm border border-emerald-500/20">
+                              📷 Upload Dataset Image (আপনার ইমেজ দিন)
+                              <input 
+                                type="file" 
+                                accept="image/*" 
+                                className="hidden" 
+                                onChange={(e) => {
+                                  if (e.target.files && e.target.files[0]) {
+                                    handleCustomSampleImageUpload(`${selectedEncycloGroup}_${selectedEncycloDisease}`, e.target.files[0]);
+                                  }
+                                }}
+                              />
+                            </label>
+                            {customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] && (
+                              <button
+                                onClick={() => {
+                                  setCustomSampleImages(prev => {
+                                    const updated = { ...prev };
+                                    delete updated[`${selectedEncycloGroup}_${selectedEncycloDisease}`];
+                                    imageStore.delete(`${selectedEncycloGroup}_${selectedEncycloDisease}`)
+                                      .catch(err => {
+                                        console.error('Failed to delete custom image from IndexedDB:', err);
+                                      });
+                                    return updated;
+                                  });
+                                }}
+                                className="w-full text-[10px] font-bold text-red-300 hover:text-red-200 hover:underline text-center cursor-pointer"
+                              >
+                                Reset to Default (পূর্বাবস্থায় ফিরে যান)
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
 
