@@ -667,6 +667,47 @@ class ImageStore {
 
 const imageStore = new ImageStore();
 
+// Image compression and resize utility to prevent browser storage quota crashes
+const compressImage = (base64Str: string, maxWidth = 350, maxHeight = 350): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.src = base64Str;
+    img.onload = () => {
+      let width = img.width;
+      let height = img.height;
+
+      if (width > height) {
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width = Math.round((width * maxHeight) / height);
+          height = maxHeight;
+        }
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve(base64Str); // fallback if context fails
+        return;
+      }
+
+      ctx.drawImage(img, 0, 0, width, height);
+      // Export as jpeg with compressed quality factor
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+      resolve(compressedDataUrl);
+    };
+    img.onerror = () => {
+      resolve(base64Str); // Fallback to raw on failure
+    };
+  });
+};
+
 export default function App() {
   // Navigation Tabs
   const [activeTab, setActiveTab] = useState<'leaf' | 'fruit' | 'encyclopedia' | 'academy'>('leaf');
@@ -796,51 +837,102 @@ export default function App() {
   const [customSampleImages, setCustomSampleImages] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    // Hydrate saved custom sample images from IndexedDB safely on mount
-    imageStore.getAll()
-      .then(images => {
-        setCustomSampleImages(images);
-      })
-      .catch(err => {
-        console.error('Failed to load custom images from IndexedDB:', err);
-      });
+    // Safely hydrate from BOTH IndexedDB and localStorage (as backup), migrating older assets
+    const loadImages = async () => {
+      let loadedImages: Record<string, string> = {};
+      
+      // 1. Try reading from localStorage first to migrate/read backup
+      try {
+        const saved = localStorage.getItem('custom_sample_images');
+        if (saved) {
+          loadedImages = JSON.parse(saved);
+        }
+      } catch (e) {
+        console.warn('LocalStorage backup is empty or unparseable:', e);
+      }
+
+      // 2. Try loading and merging from IndexedDB
+      try {
+        const idbImages = await imageStore.getAll();
+        loadedImages = { ...loadedImages, ...idbImages };
+        
+        // 3. Proactively sync any localStorage images to IndexedDB if they are not already stored
+        const localKeys = Object.keys(loadedImages);
+        for (const k of localKeys) {
+          if (!idbImages[k]) {
+            await imageStore.set(k, loadedImages[k]).catch(() => {});
+          }
+        }
+      } catch (err) {
+        console.warn('IndexedDB read failed, relying solely on localStorage fallback:', err);
+      }
+
+      setCustomSampleImages(loadedImages);
+    };
+
+    loadImages();
   }, []);
 
   const handleCustomSampleImageUpload = (compositeKey: string, file: File) => {
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64data = reader.result as string;
-      imageStore.set(compositeKey, base64data)
-        .then(() => {
-          setCustomSampleImages(prev => ({ ...prev, [compositeKey]: base64data }));
-        })
-        .catch(err => {
-          console.error('Failed to store custom image to IndexedDB:', err);
-          // Fallback to updating local state
-          setCustomSampleImages(prev => ({ ...prev, [compositeKey]: base64data }));
+      
+      // Compress image first to be under 40-50KB before writing to database or localStorage
+      compressImage(base64data, 350, 350)
+        .then(async (compressedBase64) => {
+          // Dual sync: 1. Set in IndexedDB
+          try {
+            await imageStore.set(compositeKey, compressedBase64);
+          } catch (dbErr) {
+            console.error('Failed to store in IndexedDB:', dbErr);
+          }
+
+          // Dual sync: 2. Set in localStorage backup (safely size-guaranteed now)
+          try {
+            let localData: Record<string, string> = {};
+            const saved = localStorage.getItem('custom_sample_images');
+            if (saved) {
+              try {
+                localData = JSON.parse(saved);
+              } catch {}
+            }
+            localData[compositeKey] = compressedBase64;
+            localStorage.setItem('custom_sample_images', JSON.stringify(localData));
+          } catch (lsErr) {
+            console.error('Failed to write to localStorage fallback:', lsErr);
+          }
+
+          // Update parent state
+          setCustomSampleImages(prev => ({ ...prev, [compositeKey]: compressedBase64 }));
         });
     };
     reader.readAsDataURL(file);
   };
 
   const handleResetCustomSampleImage = (compositeKey: string) => {
+    // 1. Delete from IndexedDB
     imageStore.delete(compositeKey)
-      .then(() => {
-        setCustomSampleImages(prev => {
-          const updated = { ...prev };
-          delete updated[compositeKey];
-          return updated;
-        });
-      })
-      .catch(err => {
-        console.error('Failed to delete custom image from IndexedDB:', err);
-        // Fallback to local state reset
-        setCustomSampleImages(prev => {
-          const updated = { ...prev };
-          delete updated[compositeKey];
-          return updated;
-        });
-      });
+      .catch(err => console.error('Failed to delete custom image from IndexedDB:', err));
+
+    // 2. Delete from localStorage
+    try {
+      const saved = localStorage.getItem('custom_sample_images');
+      if (saved) {
+        const updated = JSON.parse(saved);
+        delete updated[compositeKey];
+        localStorage.setItem('custom_sample_images', JSON.stringify(updated));
+      }
+    } catch (e) {
+      console.error('Failed to clean up localStorage backup:', e);
+    }
+
+    // 3. Update parent state
+    setCustomSampleImages(prev => {
+      const updated = { ...prev };
+      delete updated[compositeKey];
+      return updated;
+    });
   };
 
   // References
