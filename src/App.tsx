@@ -810,16 +810,37 @@ export default function App() {
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64data = reader.result as string;
-      setCustomSampleImages(prev => {
-        const updated = { ...prev, [compositeKey]: base64data };
-        imageStore.set(compositeKey, base64data)
-          .catch(err => {
-            console.error('Failed to store custom image to IndexedDB:', err);
-          });
-        return updated;
-      });
+      imageStore.set(compositeKey, base64data)
+        .then(() => {
+          setCustomSampleImages(prev => ({ ...prev, [compositeKey]: base64data }));
+        })
+        .catch(err => {
+          console.error('Failed to store custom image to IndexedDB:', err);
+          // Fallback to updating local state
+          setCustomSampleImages(prev => ({ ...prev, [compositeKey]: base64data }));
+        });
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleResetCustomSampleImage = (compositeKey: string) => {
+    imageStore.delete(compositeKey)
+      .then(() => {
+        setCustomSampleImages(prev => {
+          const updated = { ...prev };
+          delete updated[compositeKey];
+          return updated;
+        });
+      })
+      .catch(err => {
+        console.error('Failed to delete custom image from IndexedDB:', err);
+        // Fallback to local state reset
+        setCustomSampleImages(prev => {
+          const updated = { ...prev };
+          delete updated[compositeKey];
+          return updated;
+        });
+      });
   };
 
   // References
@@ -2507,17 +2528,7 @@ export default function App() {
                             </div>
                             {customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] && (
                               <button
-                                onClick={() => {
-                                  setCustomSampleImages(prev => {
-                                    const updated = { ...prev };
-                                    delete updated[`${selectedEncycloGroup}_${selectedEncycloDisease}`];
-                                    imageStore.delete(`${selectedEncycloGroup}_${selectedEncycloDisease}`)
-                                      .catch(err => {
-                                        console.error('Failed to delete custom image from IndexedDB:', err);
-                                      });
-                                    return updated;
-                                  });
-                                }}
+                                onClick={() => handleResetCustomSampleImage(`${selectedEncycloGroup}_${selectedEncycloDisease}`)}
                                 className="block w-full text-[9px] font-bold text-red-500 hover:text-red-700 hover:underline text-center cursor-pointer"
                               >
                                 Reset to Default (পূর্বাবস্থায় ফিরে যান)
@@ -2980,17 +2991,7 @@ export default function App() {
                             </label>
                             {customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] && (
                               <button
-                                onClick={() => {
-                                  setCustomSampleImages(prev => {
-                                    const updated = { ...prev };
-                                    delete updated[`${selectedEncycloGroup}_${selectedEncycloDisease}`];
-                                    imageStore.delete(`${selectedEncycloGroup}_${selectedEncycloDisease}`)
-                                      .catch(err => {
-                                        console.error('Failed to delete custom image from IndexedDB:', err);
-                                      });
-                                    return updated;
-                                  });
-                                }}
+                                onClick={() => handleResetCustomSampleImage(`${selectedEncycloGroup}_${selectedEncycloDisease}`)}
                                 className="w-full text-[10px] font-bold text-red-300 hover:text-red-200 hover:underline text-center cursor-pointer"
                               >
                                 Reset to Default (পূর্বাবস্থায় ফিরে যান)
