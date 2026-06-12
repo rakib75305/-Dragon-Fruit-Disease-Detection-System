@@ -90,7 +90,7 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
         "Spray bio-fungicides based on Bacillus subtilis or Trichoderma viride to suppress active spore colonization. (অনুমোদিত ট্রাইকোডার্মা বা ব্যাসিলাস সাবটিলিস যুক্ত জৈব বালাইনাশক কান্ডে নিয়মিত ব্যবহার করুন।)"
       ]
     },
-    sampleImage: "https://images.unsplash.com/photo-1549417229-aa67d3263c09?auto=format&fit=crop&q=80&w=400"
+    sampleImage: "https://images.unsplash.com/photo-1628352081506-83c43123ed6d?auto=format&fit=crop&q=80&w=500"
   },
   "Black Spot": {
     name: "Black Spot",
@@ -111,7 +111,7 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
         "Spray protectant Mancozeb (e.g., Indofil M-45 @ 2g/L) or Chlorothalonil comprehensively every 14 days during warm rains. (আক্রান্ত গাছে ম্যানকোজেব বা ক্লোরোথ্যালোনিল গ্রূপের ছত্রাকনাশক প্রতি লিটার পানিতে ২ গ্রাম হারে মিশিয়ে স্প্রে করুন।)"
       ]
     },
-    sampleImage: "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&q=80&w=400"
+    sampleImage: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&q=80&w=500"
   },
   "Brown Spot": {
     name: "Brown Spot",
@@ -135,7 +135,7 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
         "Dust cut stems with dry sulfur powder or treat with Trichoderma harzianum paste to heal shears. (ছাঁটাইকৃত কান্ডে সালফার পাউডার বা ট্রাইকোডার্মা পাউডারের ঘন প্রলেপ দিয়ে রাখুন ক্ষত শুকানোর জন্য।)"
       ]
     },
-    sampleImage: "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&q=80&w=400"
+    sampleImage: "https://images.unsplash.com/photo-1599599810769-bcde5a160d32?auto=format&fit=crop&q=80&w=500"
   },
   "Healthy": {
     name: "Healthy Stem",
@@ -160,7 +160,7 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
         "Inoculate soil with mycorrhizae and Trichoderma to shield roots naturally. (মাটিতে উপকারী ট্রাইকোডার্মা বা মাইকোরাইজা মিশিয়ে রাখুন শিকড়কে নিরাপদ ও পুষ্টি শোষণে শক্তিশালী করতে।)"
       ]
     },
-    sampleImage: "https://images.unsplash.com/photo-1549417229-aa67d3263c09?auto=format&fit=crop&q=80&w=400"
+    sampleImage: "https://images.unsplash.com/photo-1578160112054-954a67602b88?auto=format&fit=crop&q=80&w=500"
   },
   "Root Rot": {
     name: "Root Rot",
@@ -185,7 +185,7 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
         "Treat soil with Trichoderma viride to target and suppress pathogenic Phytophthora spores."
       ]
     },
-    sampleImage: "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&q=80&w=400"
+    sampleImage: "https://images.unsplash.com/photo-1509789019225-d99b2a1a24d5?auto=format&fit=crop&q=80&w=500"
   },
   "Soft Rot": {
     name: "Soft Rot",
@@ -208,7 +208,7 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
         "In severe cases, spray systemic Kasugamycin or Streptomycin sulphate under expert supervision. (পচন বেশি হলে কাসুগামাইসিন বা স্ট্রেপ্টোমাইসিন সালফেট গ্রুপের ব্যাকটেরিয়া নাশক ব্যবহার করতে হবে।)"
       ]
     },
-    sampleImage: "https://images.unsplash.com/photo-1549417229-aa67d3263c09?auto=format&fit=crop&q=80&w=400"
+    sampleImage: "https://images.unsplash.com/photo-1550950158-d0d960dff51b?auto=format&fit=crop&q=80&w=500"
   },
   "Stem Rot": {
     name: "Stem Rot",
@@ -229,7 +229,7 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
         "Apply systemic fungicides like thiophanate-methyl or azoxystrobin directly to stems."
       ]
     },
-    sampleImage: "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&q=80&w=400"
+    sampleImage: "https://images.unsplash.com/photo-1502472545319-85141233f303?auto=format&fit=crop&q=80&w=500"
   },
   "Stem_Canker": {
     name: "Stem Canker",
@@ -255,7 +255,7 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
         "Inoculate soil with Bacillus strains and spray Endophytic antagonistic yeast formulas onto newly pruned nodes. (ছাঁটাইকৃত কান্ডে এবং গুড়ায় উপকারী ব্যাকটেরিয়া বা জৈব ব্যাসিলাস সাবটিলিস স্প্রে করুন।)"
       ]
     },
-    sampleImage: "https://images.unsplash.com/photo-1549417229-aa67d3263c09?auto=format&fit=crop&q=80&w=400"
+    sampleImage: "https://images.unsplash.com/photo-1517722014278-c256a91a6fba?auto=format&fit=crop&q=80&w=500"
   },
   "Twig Blight": {
     name: "Twig Blight",
@@ -276,7 +276,7 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
         "Spray protectant fungicides such as copper oxychloride or dithiocarbamates."
       ]
     },
-    sampleImage: "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&q=80&w=400"
+    sampleImage: "https://images.unsplash.com/photo-1463936575829-25148e1db1b8?auto=format&fit=crop&q=80&w=500"
   },
   "White Spot": {
     name: "White Spot",
@@ -297,7 +297,7 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
         "Apply light copper washes or sulfur sprays if the white spots cover massive surface areas."
       ]
     },
-    sampleImage: "https://images.unsplash.com/photo-1549417229-aa67d3263c09?auto=format&fit=crop&q=80&w=400"
+    sampleImage: "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?auto=format&fit=crop&q=80&w=500"
   }
 };
 
@@ -327,7 +327,7 @@ const fruitDiseasesData: Record<string, DiseaseDetail> = {
         "Coat ripening fruits with chitosan-containing bio-coatings to delay fungal germination. (ফলের উপর প্রাকৃতিক কাইটোসান বায়ো-কোটিং প্রলেপ দিন যা ছত্রাক থেকে ফলকে প্রাকৃতিকভাবে বাঁচায়।)"
       ]
     },
-    sampleImage: "https://images.unsplash.com/photo-1527325678964-54921661f988?auto=format&fit=crop&q=80&w=400"
+    sampleImage: "https://images.unsplash.com/photo-1603512215902-6413847fc212?auto=format&fit=crop&q=80&w=500"
   },
   "Brown Spot": {
     name: "Fruit Brown Spot",
@@ -348,7 +348,7 @@ const fruitDiseasesData: Record<string, DiseaseDetail> = {
         "Apply chlorothalonil or carbendazim at flower-bud-burst and repeat at petal drop."
       ]
     },
-    sampleImage: "https://images.unsplash.com/photo-1527325678964-54921661f988?auto=format&fit=crop&q=80&w=400"
+    sampleImage: "https://images.unsplash.com/photo-1563206767-5b18f218e8de?auto=format&fit=crop&q=80&w=500"
   },
   "Fruit Rot": {
     name: "Fruit Rot",
@@ -373,7 +373,7 @@ const fruitDiseasesData: Record<string, DiseaseDetail> = {
         "Apply botanical extracts such as clove oil or cinnamon oil diluted sprays as post-harvest preservatives. (সংরক্ষণের আয়ু বাড়াতে ফল প্যাক করার আগে দারুচিনির তেল বা লবঙ্গের পানির হালকা স্প্রে করুন যা প্রাকৃতিকভাবে পচন রোধ করে।)"
       ]
     },
-    sampleImage: "https://images.unsplash.com/photo-1527325678964-54921661f988?auto=format&fit=crop&q=80&w=400"
+    sampleImage: "https://images.unsplash.com/photo-1525385437877-c9d300b99f36?auto=format&fit=crop&q=80&w=500"
   },
   "Healthy": {
     name: "Healthy Fruit",
@@ -398,7 +398,7 @@ const fruitDiseasesData: Record<string, DiseaseDetail> = {
         "Incorporate natural bio-preservative chitosan coatings to preserve visual freshness during transit."
       ]
     },
-    sampleImage: "https://images.unsplash.com/photo-1527325678964-54921661f988?auto=format&fit=crop&q=80&w=400"
+    sampleImage: "https://images.unsplash.com/photo-1527325678964-54921661f988?auto=format&fit=crop&q=80&w=500"
   },
   "Soft Rot": {
     name: "Fruit Soft Rot",
@@ -420,7 +420,7 @@ const fruitDiseasesData: Record<string, DiseaseDetail> = {
         "Sanitize wash-water with controlled levels of active sodium hypochlorite (free chlorine)."
       ]
     },
-    sampleImage: "https://images.unsplash.com/photo-1527325678964-54921661f988?auto=format&fit=crop&q=80&w=400"
+    sampleImage: "https://images.unsplash.com/photo-1601493700631-2b16fe4b4afc?auto=format&fit=crop&q=80&w=500"
   },
   "White Spot": {
     name: "Fruit White Spot",
@@ -441,7 +441,7 @@ const fruitDiseasesData: Record<string, DiseaseDetail> = {
         "Apply organic copper soap inputs if white spot counts exceed commercial tolerance thresholds."
       ]
     },
-    sampleImage: "https://images.unsplash.com/photo-1527325678964-54921661f988?auto=format&fit=crop&q=80&w=400"
+    sampleImage: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&q=80&w=500"
   }
 };
 
@@ -570,6 +570,7 @@ export default function App() {
   // Active Selected Encyclopedia Disease State
   const [selectedEncycloGroup, setSelectedEncycloGroup] = useState<'leaf' | 'fruit'>('leaf');
   const [selectedEncycloDisease, setSelectedEncycloDisease] = useState<string>("Anthracnose");
+  const [showDetailsPage, setShowDetailsPage] = useState<boolean>(false);
 
   // References
   const leafFileInputRef = useRef<HTMLInputElement>(null);
@@ -2075,7 +2076,10 @@ export default function App() {
                       return (
                         <button
                           key={key}
-                          onClick={() => setSelectedEncycloDisease(key)}
+                          onClick={() => {
+                            setSelectedEncycloDisease(key);
+                            setShowDetailsPage(true);
+                          }}
                           className={`w-full text-left p-2.5 px-3 rounded-lg border transition-all flex justify-between items-center cursor-pointer ${
                             isActive 
                               ? (selectedEncycloGroup === 'leaf' 
@@ -2086,7 +2090,6 @@ export default function App() {
                         >
                           <div>
                             <div className="text-[11.5px] font-bold">{item.name}</div>
-                            <div className="text-[9px] italic text-slate-400 font-mono mt-0.5">{item.scientificName}</div>
                           </div>
                           
                           <div className="flex items-center gap-2">
@@ -2305,7 +2308,7 @@ export default function App() {
                 <div className="md:col-span-6 bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
                   <div className="flex items-center gap-2 border-b border-slate-100 pb-2.5">
                     <Award className="w-4 h-4 text-emerald-600 font-bold" />
-                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest">Thesis Committee & Guidance</h3>
+                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest">Supervisor</h3>
                   </div>
 
                   {isEditingAcademic ? (
@@ -2365,7 +2368,7 @@ export default function App() {
                         </div>
                         <div className="space-y-1.5">
                           <span className="text-[9px] font-black tracking-widest text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full uppercase leading-none inline-block">
-                            Principal Research Supervisor
+                            Supervisor
                           </span>
                           <h4 className="text-xs font-black text-slate-900 leading-snug">{supervisorName}</h4>
                           <p className="text-[11px] text-slate-600 font-semibold leading-normal">{supervisorDesignation}</p>
@@ -2515,6 +2518,169 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* Immersive Disease Detail "New Page" Modal Overlay */}
+      {showDetailsPage && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 sm:p-6 md:p-8 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-4xl w-full shadow-2xl overflow-hidden max-h-[92vh] flex flex-col border border-slate-100 transition-all transform scale-100 duration-300">
+            
+            {/* Header with Close */}
+            <div className="bg-slate-900 text-white p-4 px-6 flex justify-between items-center shrink-0">
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-emerald-400" />
+                <div>
+                  <h3 className="text-sm font-bold uppercase tracking-wider">Disease Detail Dossier / রোগ বিবরণী প্যানেল</h3>
+                  <p className="text-[10px] text-slate-300 font-mono">DRAGON FRUIT FIT DIAGNOSIS SERVICE</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowDetailsPage(false)}
+                className="p-1.5 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all cursor-pointer font-extrabold text-xs flex items-center gap-1.5"
+              >
+                Close (ফিরে যান) ×
+              </button>
+            </div>
+
+            {/* Content body with scrolling */}
+            <div className="p-6 overflow-y-auto space-y-6">
+              {(() => {
+                const dataObj = selectedEncycloGroup === 'leaf' ? leafDiseasesData : fruitDiseasesData;
+                const activeDis = dataObj[selectedEncycloDisease];
+                if (!activeDis) return <div className="text-slate-400 text-center py-12">No profile found.</div>;
+
+                const activeBrandColor = selectedEncycloGroup === 'leaf' ? 'text-dragon-green' : 'text-dragon-red';
+                const activeBgLight = selectedEncycloGroup === 'leaf' ? 'bg-emerald-50/50' : 'bg-rose-50/50';
+                const activeBorderColor = selectedEncycloGroup === 'leaf' ? 'border-emerald-100' : 'border-rose-100';
+
+                return (
+                  <div className="space-y-6">
+                    
+                    {/* Title block with badges */}
+                    <div className="flex flex-col md:flex-row gap-5 items-start justify-between border-b border-slate-100 pb-5">
+                      <div className="space-y-2">
+                        <span className={`p-1 px-3 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                          selectedEncycloGroup === 'leaf' ? 'bg-emerald-100 text-dragon-green' : 'bg-rose-100 text-dragon-red'
+                        }`}>
+                          {selectedEncycloGroup === 'leaf' ? 'Stalk & Leaf Decays' : 'Fruit Skin & Peel Decays'}
+                        </span>
+                        <h2 className={`text-2xl sm:text-3xl font-black ${activeBrandColor} leading-tight`}>{activeDis.name}</h2>
+                        <p className="text-xs font-mono italic text-slate-500 font-bold">Phytopathological Strain: {activeDis.scientificName}</p>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`p-1.5 px-3 rounded-lg text-xs font-black uppercase ${
+                          activeDis.severity === 'High' ? 'bg-rose-100 text-dragon-red' :
+                          activeDis.severity === 'Medium' ? 'bg-orange-100 text-orange-700' :
+                          activeDis.severity === 'Low' ? 'bg-amber-100 text-amber-800' :
+                          'bg-emerald-100 text-dragon-green'
+                        }`}>
+                          Severity: {activeDis.severity}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Middle display block: Image + Description */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                      <div className="md:col-span-5 space-y-2">
+                        <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Reference Field Specimen</span>
+                        <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm aspect-video sm:aspect-square bg-slate-900 flex items-center justify-center">
+                          <img 
+                            src={activeDis.sampleImage} 
+                            alt={activeDis.name} 
+                            className="w-full h-full object-cover"
+                            referrerPolicy="no-referrer"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="md:col-span-7 space-y-3">
+                        <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Symptomatic Description</span>
+                        <div className="bg-slate-50 border border-slate-150 p-4 rounded-xl text-xs text-slate-700 leading-relaxed text-justify space-y-3 font-semibold">
+                          {activeDis.description.split('\n\n').map((para, i) => (
+                            <p key={i}>{para}</p>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Symptoms listing */}
+                    <div className="space-y-3">
+                      <h4 className="text-xs font-bold text-rose-600 uppercase tracking-widest flex items-center gap-1.5 border-b border-rose-100 pb-1.5">
+                        <AlertTriangle className="w-4 h-4 text-rose-500" />
+                        Diagnosis Symptoms / রোগের প্রধান লক্ষণসমূহ:
+                      </h4>
+                      <ul className="text-xs text-slate-700 pl-6 space-y-2 list-disc leading-relaxed font-semibold">
+                        {activeDis.symptoms.map((s, index) => (
+                          <li key={index}>{s}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Controls / Treatments */}
+                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-5">
+                      {/* Cultural */}
+                      <div className="space-y-3">
+                        <h4 className="text-xs font-bold text-dragon-green uppercase tracking-wider flex items-center gap-1.5 border-b border-emerald-200 pb-1">
+                          <Shield className="w-4 h-4 text-emerald-600" />
+                          Cultural / Organic Controls
+                        </h4>
+                        <ul className="text-xs text-slate-600 pl-5 space-y-2 list-disc leading-normal bg-white p-3 rounded-xl border border-slate-100 font-semibold shadow-3xs">
+                          {activeDis.treatment.cultural.map((c, index) => (
+                            <li key={index}>{c}</li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {/* Chemical */}
+                      {activeDis.treatment.chemical.length > 0 && (
+                        <div className="space-y-3">
+                          <h4 className="text-xs font-bold text-orange-600 uppercase tracking-wider flex items-center gap-1.5 border-b border-orange-200 pb-1">
+                            <Settings className="w-4 h-4 text-orange-500" />
+                            Agronomic Chemical Response
+                          </h4>
+                          <ul className="text-xs text-slate-600 pl-5 space-y-2 list-disc leading-normal bg-white p-3 rounded-xl border border-slate-100 font-semibold shadow-3xs">
+                            {activeDis.treatment.chemical.map((chem, idx) => (
+                              <li key={idx}>{chem}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Biological (if available) */}
+                    {activeDis.treatment.biological && activeDis.treatment.biological.length > 0 && (
+                      <div className="p-4 bg-teal-50/50 border border-teal-100 rounded-xl space-y-2">
+                        <h4 className="text-xs font-black text-teal-800 uppercase tracking-wider flex items-center gap-1.5">
+                          <Heart className="w-4 h-4 text-teal-600" />
+                          Biological Antagonistic Inhibitors (জৈব বালাইনাশক)
+                        </h4>
+                        <ul className="text-xs text-slate-700 pl-5 space-y-1 list-disc font-semibold">
+                          {activeDis.treatment.biological.map((bio, idx) => (
+                            <li key={idx}>{bio}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Back Floating Button inside Content */}
+                    <div className="pt-4 flex justify-end">
+                      <button
+                        onClick={() => setShowDetailsPage(false)}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md p-3 px-6 rounded-xl flex items-center gap-2 cursor-pointer border border-emerald-500/20 duration-300 transition-all hover:scale-102"
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                        Acknowledge & Return (ফিরে যান)
+                      </button>
+                    </div>
+
+                  </div>
+                );
+              })()}
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }
