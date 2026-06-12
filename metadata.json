@@ -1,6 +1,6 @@
 {
   "name": "Dragon Fruit Disease Detection System",
   "description": "An interactive system to detect of dragon fruit leaf and fruit diseases using TensorFlow.js.",
-  "requestFramePermissions": [],
+  "requestFramePermissions": ["camera"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -21,7 +21,11 @@ import {
   Shield,
   ArrowRightLeft,
   Loader2,
-  Scan
+  Scan,
+  GraduationCap,
+  Users,
+  Award,
+  Camera
 } from 'lucide-react';
 import * as tf from '@tensorflow/tfjs';
 
@@ -66,24 +70,24 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
     name: "Anthracnose",
     scientificName: "Colletotrichum gloeosporioides",
     severity: "High",
-    description: "One of the most persistent fungal diseases in dragon fruit. It attacks the succulent stems, leading to severe decay and branch breaks. Thrives under warm, humid conditions with splashing rain.",
+    description: "One of the most persistent fungal leaf and stem diseases in dragon fruit. It attacks the succulent segments of climbing stems, leading to massive tissue decay, sunken lesions, and physical breakage. High humidity combined with splashing rain speeds up spore dispersal.\n\n[রোগের বর্ণনা: ড্রাগন ফলের একটি অত্যন্ত মারাত্মক এবং ক্ষতিকর ছত্রাকজনিত রোগ। এটি গাছের মাংসল কান্ডকে আক্রমণ করে, যার ফলে কান্ডে গর্তযুক্ত বাদামী দাগ দেখা দেয় এবং কান্ড পচে ধসে যায়। অতিরিক্ত আর্দ্রতা ও বৃষ্টির পানি দাগগুলোকে দ্রুত বাড়াতে সাহায্য করে।]",
     symptoms: [
-      "Reddish-brown, sunken concentric circular lesions on stems.",
-      "Orange or reddish gelatinous spore masses emerging from spots under high humidity.",
-      "Merging of separate small spots into large, brittle rotting sections."
+      "Reddish-brown, sunken concentric circular spots on the stem ribs. (কাশি ও বৃষ্টির পর কান্ডে লালচে-বাদামী রঙের গর্তযুক্ত বৃত্তাকার দাগ তৈরি হওয়া।)",
+      "Orange or pink-colored sticky spore masses oozing from lesions in humid weather. (ভিজা ও স্যাঁতস্যাঁতে আবহাওয়ায় আক্রান্ত স্থানে আঠালো হলদে বা গোলাকার আঠার মতো ছত্রাক বীজ গুঁড়া দেখা দেওয়া।)",
+      "Rapid coalescing of small spots leading to brittle, papery, rotting stem corridors. (আক্রান্ত দাগগুলো দ্রুত বড় হয়ে পরস্পর মিলে কাণ্ডটিকে সম্পূর্ণ পচিয়ে ফেলে ও কঙ্কালের মতো করে দেয়।)"
     ],
     treatment: {
       cultural: [
-        "Prune infected branches immediately and bury or burn them away from the orchard.",
-        "Ensure wide plant spacing and support trellis layouts that maximize sunlight and air circulation.",
-        "Avoid overhead sprinkler irrigation to keep stems dry."
+        "Prune infected segments 2 inches into healthy wood, burn or bury away from the plot. (আক্রান্ত কান্ড সুস্থ অংশ থেকে ২ ইঞ্চি নিচে কেটে তাৎক্ষণিকভাবে পুড়িয়ে ফেলুন বা মাটির নিচে পুঁতে ফেলুন।)",
+        "Ensure dynamic pruning to maximize sunlight penetrability and lower canopy humidity. (বছরে অন্তত একবার হালকা ছাঁটাই করে আলো-বাতাস চলাচলের ব্যবস্থা করুন যাতে ছত্রাক না ছড়াতে পারে।)",
+        "Sanitize all pruning blades of clippers in 10% bleaching wash between plant cuts. (একটি গাছ কাটার পর কাটার কাঁচি বা ব্লেডটি ব্লিচিং দ্রবণ বা ডেটল পানিতে ভালোমতো রিংস করুন।)"
       ],
       chemical: [
-        "Apply copper-based fungicides such as copper oxychloride or copper hydroxide.",
-        "Spray preventative systemic fungicides like azoxystrobin or difenoconazole before monsoon periods."
+        "Spray systemic Azoxystrobin + Difenoconazole (e.g., Amistar Top @ 1ml/L) or Propiconazole (Tilt @ 0.5ml/L) at first sight. (আক্রমণ শুরু মাত্রাতিরিক্ত হলে ডিফেনোকোনাজল ও অ্যাজক্সিস্ট্রবিন যুক্ত ছত্রাকনাশক প্রতি লিটার পানিতে ১ মিলি হারে স্প্রে করুন।)",
+        "Apply preventive protective Copper Hydroxide or Carbendazim (e.g., Autostin @ 2g/L) before monsoon season. (বর্ষাকাল শুরু হওয়ার আগে প্রতিরোধক হিসেবে কপার হাইড্রোক্সাইড বা কার্বেন্ডাজিম পানিতে মিশিয়ে পুরো কান্ড ভালোমতো ধুয়ে দিন।)"
       ],
       biological: [
-        "Use Bacillus subtilis-based bio-fungicides to compete with fungal spores on stem surfaces."
+        "Spray bio-fungicides based on Bacillus subtilis or Trichoderma viride to suppress active spore colonization. (অনুমোদিত ট্রাইকোডার্মা বা ব্যাসিলাস সাবটিলিস যুক্ত জৈব বালাইনাশক কান্ডে নিয়মিত ব্যবহার করুন।)"
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1549417229-aa67d3263c09?auto=format&fit=crop&q=80&w=400"
@@ -92,19 +96,19 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
     name: "Black Spot",
     scientificName: "Phomopsis hylocereus",
     severity: "Medium",
-    description: "Fungal disease causing unsightly scabby dark spots on the stems. While less lethal than caker, it reduces photosynthetic efficiency and blemishes propagation stock.",
+    description: "Fungal disease that causes hard, crusty, scabby jet-black lesions along the rib margins of dragon fruit stems. Reduces photosynthetic activity and ruins plant vigor.\n\n[রোগের বর্ণনা: একটি ছত্রাকজনিত রোগ যা কান্ডের ধার ঘেঁষে শক্ত, খসখসে এবং কুচকুচে কালো রঙের দাগ বা ফুসকুড়ির মতো ক্ষত তৈরি করে। এটি গাছের সালোকসংশ্লেষণ কমিয়ে দেয় কিন্তু কান্ডকে সম্পূর্ণ গলিয়ে ধ্বংস করে না।]",
     symptoms: [
-      "Circular dark brown or jet-black lesions along the edges of the ribs.",
-      "Slightly raised, rough pustules that feel corky.",
-      "Localized yellowing (chlorosis) around the dry black lesions."
+      "Circular coal-black pustules which feel corky and raised on physical touch. (কাণ্ডের তীক্ষ্ণ ধার বরাবর সামান্য উঁচু খসখসে কয়লার মতো কুচকুচে কালো রঙের দাগ হওয়া।)",
+      "Development of scabby black spots that cause localized tissue constriction. (দাগগুলো ধীরে ধীরে শক্ত খোসার মতো হয়ে কান্ডের কিনারাকে খাটো করে দেয়।)",
+      "Slight chlorotic yellow ring-like halos surrounding the dry black lesion boundaries. (কালো ক্ষতচিহ্নের চারপাশে হালকা হলুদ রঙের বলয় দেখা যাওয়া।)"
     ],
     treatment: {
       cultural: [
-        "Remove damaged stems and keep weeds cleared to reduce humidity.",
-        "Select strictly disease-free cuttings for establishing new plantings."
+        "Clear all under-canopy wild weeds to minimize orchard humidity levels. (গাছের চারপাশের আগাছা পরিষ্কার রাখুন যাতে স্যাঁতস্যাঁতে পরিবেশ না তৈরি হয়।)",
+        "Select strictly disease-free healthy stem cuttings for establishing new blocks. (নতুন চারা তৈরির জন্য শুধুমাত্র শতভাগ সুস্থ ও রোগমুক্ত কান্ড থেকে কাটিং সংগ্রহ করুন।)"
       ],
       chemical: [
-        "Spray contact fungicides like mancozeb or chlorothalonil during peak rainy seasons."
+        "Spray protectant Mancozeb (e.g., Indofil M-45 @ 2g/L) or Chlorothalonil comprehensively every 14 days during warm rains. (আক্রান্ত গাছে ম্যানকোজেব বা ক্লোরোথ্যালোনিল গ্রূপের ছত্রাকনাশক প্রতি লিটার পানিতে ২ গ্রাম হারে মিশিয়ে স্প্রে করুন।)"
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&q=80&w=400"
@@ -113,23 +117,22 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
     name: "Brown Spot",
     scientificName: "Bipolaris cactivora",
     severity: "High",
-    description: "A highly destructive fungal disease capable of rapid spread. It targets both seedlings and mature stems, creating water-soaked spots that can quickly rot entire stems.",
+    description: "A highly aggressive and destructive fungal pathogen. It causes water-soaked reddish-brown lesions that rapidly expand and can merge, liquefying soft stem ribs in a matter of days.\n\n[রোগের বর্ণনা: অত্যন্ত আক্রমণাত্মক ও ধ্বংসাত্মক ছত্রাকজনিত রোগ। এটি মূলত কান্ডে পানি-ভেজা লালচে-বাদামী দাগ সৃষ্টি করে যা অতি দ্রুত ছড়িয়ে পড়ে পুরো কান্ডকে পচিয়ে ফেলতে পারে।]",
     symptoms: [
-      "Small yellow spots that rapidly expand into reddish-brown circular spots with yellowish margins.",
-      "Centers of mature lesions become greyish-white and concave.",
-      "Severe stem collapse when lesions encircle the central vascular bundle."
+      "Small circular yellow spots that quickly enlarge into prominent dark brown lesions with orange borders. (ছোট ছোট হলুদ দাগ দেখতে দেখতে লালচে-বাদামি ক্ষতে পরিণত হওয়া এবং এর চারপাশে উজ্জ্বল কমলা বা黄色 বর্ডার সৃষ্টি হওয়া।)",
+      "Lesion core changes to concave greyish-white with tiny black pepper-like fruiting bodies. (ক্ষতের মাঝখান অংশটি ভেতরের দিকে দেবে গিয়ে ধূসর-সাদা বর্ণ ধারণ করে এবং কালো বিন্দু দেখা যায়।)",
+      "Severe stem collapse when lesions encircle the central woody skeleton. (রোগটি কাণ্ডকে চারপাশ থেকে আক্রমণ করলে মধ্যভাগের শক্ত তন্তু ছাড়া সমস্ত কাণ্ড ধসে পড়ে।)"
     ],
     treatment: {
       cultural: [
-        "Immediately prune any active brown spot branches.",
-        "Refrain from pruning during wet or foggy weather to prevent infection of fresh cuts.",
-        "Sanitize all pruning tools in 10% bleach or 70% alcohol solution between plants."
+        "Perform aggressive pruning during dry, clear days; never prune under morning dew or fog. (রোদ উজ্জ্বল দিনে জোরালোভাবে আক্রান্ত অংশ কেটে ফেলুন; কুয়াশাযুক্ত বা ভেজা সকালে কান্ড ছাঁটাই করবেন না।)",
+        "Maintain optimal soil nitrogen levels, as excess nitrogen triggers over-succulence prone to Bipolaris. (অতিরিক্ত ইউরিয়া বা নাইট্রোজেন সার ব্যবহার কমান, কারণ কান্ড অতিরিক্ত নরম হলে এই রোগ বেশি হয়।)"
       ],
       chemical: [
-        "Apply carbendazim, mancozeb, or triazole fungicides at the first sign of symptoms."
+        "Spray Iprodione (e.g., Rovral @ 2g/L) or Tebuconazole + Trifloxystrobin (Nativo @ 0.5g/L) instantly. (আক্রমণ দেখা দিলে অতি দ্রুত রোভরাল অথবা নাটিভো প্রতি লিটার পানিতে যথাক্রমে ২ গ্রাম এবং ০.৫ গ্রাম হারে মিশিয়ে স্প্রে করুন।)"
       ],
       biological: [
-        "Incorporate Trichoderma harzianum into organic soil compost to build systemic defense."
+        "Dust cut stems with dry sulfur powder or treat with Trichoderma harzianum paste to heal shears. (ছাঁটাইকৃত কান্ডে সালফার পাউডার বা ট্রাইকোডার্মা পাউডারের ঘন প্রলেপ দিয়ে রাখুন ক্ষত শুকানোর জন্য।)"
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&q=80&w=400"
@@ -138,23 +141,23 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
     name: "Healthy Stem",
     scientificName: "Hylocereus undatus",
     severity: "None",
-    description: "The cactus stem exhibits excellent health. Cell turgor pressure is high, the cuticle barrier is intact, and chlorophyll distribution is even. No pathogenic lesions are observed.",
+    description: "The cactus stem exhibits excellent health. Cell turgor pressure is high, the cuticle barrier is fully intact, chlorophyll distribution is completely uniform, and the tissue is free of pathogenic spots.\n\n[রোগের বর্ণনা: ড্রাগন গাছের সম্পূর্ণ সুস্থ ও সবল কান্ড। কান্ডের কোষের রসস্ফীতি স্বাভাবিক, ত্বক মসৃণ এবং ক্লোরোফিলের বা সবুজ কণার বন্টন নিখুঁত। কোনো ক্ষতচিহ্ন বা রোগ সংক্রামক জীবাণুর উপস্থিতি নেই।]",
     symptoms: [
-      "Firm, plump dark-green stem flesh with healthy climbing aerial roots.",
-      "Clean margins along vertical ribs with no spots, yellowing, or crusty patches.",
-      "Vigorous shoots and flower buds active at terminal segments."
+      "Firm, plump dark-green stem sectors with thick protective skin. (কান্ড টানটান, সতেজ, গাঢ় সবুজ এবং খোসা পুরু ও সুরক্ষামূলক ক্যুটিকলযুক্ত।)",
+      "Clean rib margins with active aerial roots clinging perfectly to the post. (কান্ডের ধারগুলো নিখুঁত, দাগহীন ও খুঁটি আঁকড়ে ধরার জন্য মজবুত শিকড়যুক্ত।)",
+      "Vigorous fresh vegetative shoots emerging regularly from node eyes. (চোখ বা কুঁড়ি থেকে নিয়মিত নতুন সুস্থ ডালপালা বের হতে দেখা যায়।)"
     ],
     treatment: {
       cultural: [
-        "Maintain scheduled irrigation with deep but infrequent cycles, allowing soil to dry between waterings.",
-        "Apply balanced organic fertilizer rich in well-composted manure and trace potash.",
-        "Prune excess branches annually to maintain balanced canopy ventilation and light distribution."
+        "Ensure scheduled deep irrigation only when the top 2 inches of soil are totally dry. (গোড়ার মাটি পরীক্ষা করে কেবল মাত্র শুকিয়ে গেলেই পরিমিত সেচ দিন; ভেজা মাটিতে সেচ পরিহার করুন।)",
+        "Apply organic fertilizer rich in composted cow dung, vermicompost, and trace potash annually. (বছরে অন্তত একবার পর্যাপ্ত জৈব সার যেমন পচা গোবর, কেঁচো সার বা ভার্মিকম্পোস্ট এবং কিছুটা পটাশ সার ব্যবহার করুন।)",
+        "Maintain optimal spacing to ensure clear airflow and maximum sunlight capture. (ছায়া মুক্ত স্থানে গাছটি রোপণ করুন এবং অপ্রয়োজনীয় ডাল ছাঁটাই করে আলো-বাতাস নিশ্চিত করুন।)"
       ],
       chemical: [
-        "No chemical treatments are required. Avoid preventative broad-spectrum spraying to protect beneficial local organisms."
+        "Do not apply synthetic chemical fungicides; let beneficial microorganisms grow. (কোনো ছত্রাকনাশক স্প্রে করার প্রয়োজন নেই। প্রাকৃতিকভাবে গাছকে নিজের রোগপ্রতিরোধ ক্ষমতা গড়তে দিন।)"
       ],
       biological: [
-        "Apply mycorrhizal fungi at root zones to enhance nutrient and water absorption capabilities."
+        "Inoculate soil with mycorrhizae and Trichoderma to shield roots naturally. (মাটিতে উপকারী ট্রাইকোডার্মা বা মাইকোরাইজা মিশিয়ে রাখুন শিকড়কে নিরাপদ ও পুষ্টি শোষণে শক্তিশালী করতে।)"
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1549417229-aa67d3263c09?auto=format&fit=crop&q=80&w=400"
@@ -188,21 +191,21 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
     name: "Soft Rot",
     scientificName: "Erwinia chrysanthemi (Bacterial)",
     severity: "High",
-    description: "A bacterial disease that enters plants through physical wounds or feeding punctures. It secretes pectolytic enzymes that liquefy the plant cells, leading to a catastrophic collapse.",
+    description: "A highly destructive bacterial disease that enters plants through physical wounds, clip cuts, or pest bites. Secretes cell-wall degrading enzymes that water-liquefy the tissues in days.\n\n[রোগের বর্ণনা: এটি অত্যন্ত মারাত্মক এবং দ্রুত আক্রমণকারী একটি ব্যাকটেরিয়াজনিত নরম-পচন রোগ। জীবাণুটি কীটপতঙ্গের কামড় বা ডাল ছাঁটাইয়ের কাটা অংশের ক্ষতের মাধ্যমে গাছে প্রবেশ করে কান্ডটিকে তরল পিচ্ছিল মণ্ডে পরিণত করে।]",
     symptoms: [
-      "Water-soaked, slippery, brownish patches on the stems.",
-      "Rapidly spreading slimy rot that smells foul as bacteria devour plant sugars.",
-      "Disintegration of inner green tissues leaving only the hard central woody spine."
+      "Water-soaked, slippery, brownish patches expanding rapidly along the stem. (কান্ডে পানি ভেজা, পিচ্ছিল ও হলদে-বাদামী রঙের নরম দাগ তৈরি হওয়া যা দ্রুত বড় হতে থাকে।)",
+      "Slimy, mushy, liquefying tissues that exude a localized foul decay odor. (আক্রান্ত ডালটি গলে পচা গন্ধযুক্ত কাদার মতো পিচ্ছিল তরলে পরিণত হওয়া।)",
+      "The entire outer flesh slides off, leaving only the hard central woody skeleton. (কান্ডের বাইরের সমস্ত সবুজ মাংসল অংশ গলে ঝরে পড়ে ও কেবল ভেতরের শক্ত সাদা কাঠিটি অবশিষ্ট থাকে।)"
     ],
     treatment: {
       cultural: [
-        "Cut out clean margins (at least 2 inches of healthy tissue) around any soft rot spots and dust with agricultural lime.",
-        "Sanitize harvesting tools rigorously.",
-        "Control insect pests (mealybugs and ants) that create entry-way punctures."
+        "Surgically cut out rotten spots 2 inches into completely healthy tissue, then dust cut faces with lime. (আক্রান্ত অংশ সুস্থ অংশ থেকে অন্তত ২ ইঞ্চি নিচে কেটে ফেলে দিন এবং কাটা অংশে চুন বা বোর্দোপেস্ট লেপে দিন।)",
+        "Abstain from pruning during rainy days or high-humidity morning periods. (বৃষ্টির দিনে বা স্যাঁতস্যাঁতে আবহাওয়ায় ডাল ছাঁটাই করা থেকে বিরত থাকুন।)",
+        "Strictly control mealybugs and ants, as they create entry-way punctures for Erwinia. (কাণ্ডে কামড় বসানো পোকামাকড় যেমন- মিলিবাগ, পিঁপড়া এবং বিটল দমন করুন।)"
       ],
       chemical: [
-        "Spray copper oxychloride or copper hydroxide as a bactericide protector.",
-        "In severe cases, apply agricultural streptomycin formulations under professional guidance."
+        "Spray protectant Copper Oxychloride or Copper Hydroxide (e.g. Cupravit @ 2g/L). (প্রতিরোধক হিসেবে কপার অক্সিক্লোরাইড লিটারে ২ গ্রাম হারে পানিতে গুলে স্প্রে কান্ড ধুয়ে দিন।)",
+        "In severe cases, spray systemic Kasugamycin or Streptomycin sulphate under expert supervision. (পচন বেশি হলে কাসুগামাইসিন বা স্ট্রেপ্টোমাইসিন সালফেট গ্রুপের ব্যাকটেরিয়া নাশক ব্যবহার করতে হবে।)"
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1549417229-aa67d3263c09?auto=format&fit=crop&q=80&w=400"
@@ -232,23 +235,24 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
     name: "Stem Canker",
     scientificName: "Neoscytalidium dimidiatum",
     severity: "High",
-    description: "Considered the single most devastating disease impacting dragon fruit plantations globally. It forms hard, woody lesions that severely break the vascular flow, causing significant dieback.",
+    description: "Considered the single most devastating disease impacting dragon fruit plantations globally. It forms hard, woody, elevated lesions that severely block the internal vascular flow of water and nutrients, causing extensive canopy dieback and vine snapping.\n\n[রোগের বর্ণনা: এটি বিশ্বব্যাপী ড্রাগন চাষীদের জন্য সবচেয়ে ধ্বংসাত্মক রোগ হিসেবে বিবেচিত। এই রোগের কারণে কান্ডে শক্ত, খসখসে এবং কাঠের মতো বড় ক্ষত বা থোকা থোকা ফুসকুড়ি সৃষ্টি হয়। এর ফলে গাছের খাদ্য ও পানি চলাচলের সংবহন কলা অবরুদ্ধ হয়ে পুরো ডাল শুকিয়ে মারা যায় বা ভেঙে পড়ে।]",
     symptoms: [
-      "Small orange-yellow spots that mature into prominent, rough, grey-brown crusty cankers.",
-      "Formations of black crusts (pycnidia) inside mature cankers.",
-      "Stems become brittle and break easily at canker junctions, causing canopy collapse."
+      "Small sunken yellow spots that rapidly mature into prominent, rough, greyish-brown crusty cankers. (কান্ডে প্রথমে ছোট হলুদ দাগ এবং পরবর্তীতে তা বড় ধূসর-বাদামী রঙের খসখসে ক্যাঙ্কারে রূপ নেয়।)",
+      "Formations of black crusts (pycnidia) and soot-like powdery spores inside older cankers. (বয়স্ক বা পুরনো ক্ষতের ভেতরের দিকে ঘন কালো রঙের গুটি বা ছত্রাক পাউডার তৈরি হওয়া।)",
+      "Vines become dry and extremely brittle, snapping easily at canker joints. (আক্রান্ত ডালগুলো অতি শুষ্ক ও ভঙ্গুর হয়ে সামান্য বাতাসে বা ফলের ভারে জোড়মুখ থেকে ভেঙে ঝরে পড়ে।)"
     ],
     treatment: {
       cultural: [
-        "Enforce strict quarantine on the farm. Never take propagation cuttings from an infected orchard.",
-        "Drastically prune infected stems up to healthy wood and immediately burn or bury residues.",
-        "Keep the canopy open to maximize solar desiccation of fungal spores."
+        "Enforce strict quarantine; never take propagation cuttings from an orchard with known Canker history. (আক্রান্ত বাগান থেকে সায়নর বা চারা ছাঁটাই করে নতুন রোপণ করবেন না।)",
+        "Aggressively prune infected stems down to clean wood and immediately burn or deeply bury residues. (আক্রান্ত অংশ নিখুঁতভাবে সুস্থ ডাল পর্যন্ত ছাঁটাই করে অবিলম্বে বাগানের বাইরে পুড়িয়ে ধ্বংস করুন।)",
+        "Optimize spacing and prune lower drooping branch segments to expose the canopy to wind desiccation. (ডালপালা ছাঁটাই করে গাছকে সূর্যের আলো এবং বাতাসের কাছে উন্মুক্ত করুন যাতে আর্দ্রতা জমে না থাকে।)"
       ],
       chemical: [
-        "Spray with highly effective systemic ingredients such as difenoconazole, tebuconazole, or azoxystrobin regularly during rainy cycles."
+        "Spray with highly effective combination systemic fungicidal active ingredients such as Difenoconazole + Azoxystrobin (Amistar Top @ 1ml/L) or Tebuconazole + Trifloxystrobin (Nativo @ 0.5g/L) during rainy periods. (বর্ষা ও স্যাঁতস্যাঁতে আবহাওয়ায় নিয়মিত ডিফেনোকোনাজল ও অ্যাজক্সিস্ট্রবিন যুক্ত ছত্রাকনাশক প্রতি লিটার পানিতে ১ মিলি হারে স্প্রে করুন।)",
+        "Coat prune cuts with copper oxychloride paste or Bordeaux paste for wound healing. (ডাল ছাঁটাই করার পর কাটা ক্ষতস্থানে তরল বোর্দো মিশ্রণ বা কপার পেস্টের প্রলেপ লাগিয়ে দিন নতুন সংক্রমণ রোধে।)"
       ],
       biological: [
-        "Apply antagonistic endophytic bacteria or yeast sprays to block spore landing sights."
+        "Inoculate soil with Bacillus strains and spray Endophytic antagonistic yeast formulas onto newly pruned nodes. (ছাঁটাইকৃত কান্ডে এবং গুড়ায় উপকারী ব্যাকটেরিয়া বা জৈব ব্যাসিলাস সাবটিলিস স্প্রে করুন।)"
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1549417229-aa67d3263c09?auto=format&fit=crop&q=80&w=400"
@@ -303,24 +307,24 @@ const fruitDiseasesData: Record<string, DiseaseDetail> = {
     name: "Fruit Anthracnose",
     scientificName: "Colletotrichum gloeosporioides",
     severity: "High",
-    description: "Extremely severe pre- and post-harvest disease. It ruins the aesthetic appeal of the premium pink dragon fruit skin and penetrates direct rot into the sweet white or red flesh.",
+    description: "Extremely severe pre- and post-harvest disease. It ruins the aesthetic appeal of the premium pink dragon fruit skin and penetrates deep, soft rot into the sweet white or red pulp.\n\n[রোগের বর্ণনা: এটি ফুল আসা থেকে শুরু করে ফল পাকা পর্যন্ত যেকোনো সময় আক্রমণকারী একটি চরম ক্ষতিকর রোগ। এটি পাকা ফলের লাল খোসার উপর বিশ্রী গর্ত তৈরি করে এবং পচনকে ফলের ভেতরের সুস্বাদু শাঁস পর্যন্ত নিয়ে যায়, যার ফলে পুরো ফলটি খাওয়ার অনুপযোগী হয়ে পড়ে।]",
     symptoms: [
-      "Water-soaked, circular, dark sunken spots on the fruit peel.",
-      "A pink or salmon-colored sticky mass of spores oozing from crop lesions in damp conditions.",
-      "The fruit flesh underneath becomes soft, bitter, and decays rapidly."
+      "Water-soaked, circular, dark sunken lesions forming on the fruit rind. (ফলের খোসার উপর পানি-ভেজা কালচে গোলাকার দেবে যাওয়া ক্ষত তৈরি হওয়া।)",
+      "Sticky orange or salmon-colored gelatinous spore oozes in humid post-harvest storage. (স্যাঁতস্যাঁতে আবহাওয়ায় বা গুদামে রাখার পর ক্ষতস্থানে ছোট ছোট গোলাপি বা সিঁদুরে রঙের আঠালো আঠালো ছত্রাক বীজ দানা তৈরি হওয়া।)",
+      "The underlying fruit pulp decomposes into soft, bitter mush. (আক্রান্ত ক্ষতর ভেতরের শাঁস অংশটি গলে তেতো হয়ে যায় ও গন্ধ ছড়ায়।)"
     ],
     treatment: {
       cultural: [
-        "Prune and ventilate the canopy well to ensure fruits dry quickly after rains.",
-        "Harvest fruits at the exact correct maturity window rather than allowing them to become over-ripe.",
-        "Meticulously clean all harvesting bins, clippers, and transport boards."
+        "Prune and keep trees airy so young developing fruit buttons dry quickly after rain. (ডালপালা নিয়মিত ছাঁটাই করুন যাতে বৃষ্টির পর ভেজা ফল খুব দ্রুত শুকিয়ে যেতে পারে।)",
+        "Harvest fruits at the correct physiological maturity; avoid leaving over-ripe fruits on the vine. (ফল অতিরিক্ত পাকার আগেই সঠিক সময়ে গাছ থেকে সংগ্রহ করুন।)",
+        "Carefully disinfect all scissors and crates in sanitizing soap before harvesting. (ফল সংগ্রহের আগে সমস্ত কাঁচি, কন্টেইনার এবং ঝুড়ি পরিষ্কার সাবান পানি দিয়ে জীবাণুমুক্ত করুন।)"
       ],
       chemical: [
-        "Spray systemic fungicides (e.g. azoxystrobin) during flowering and early fruit-set periods.",
-        "Post-harvest hot water dips (approx. 48°C for 2-3 minutes) can significantly suppress latent spores."
+        "Spray Carbendazim or Azoxystrobin (Amistar Top @ 1ml/L) during flowering and early fruit setting. (গাছে ফুল ফোটার সময় এবং ফল গুটি বাঁধার পর ডিফেনোকোনাজল ও অ্যাজক্সিস্ট্রবিন ছত্রাকনাশক স্প্রে করুন।)",
+        "Use hot-water immersion treatments (48°C for 2 minutes) post-harvest to suppress latent spores. (সংগ্রহের পর ফলকে হালকা কুসুম গরম পানিতে (৪৮ ডিগ্রি সেলসিয়াস) ২ মিনিট ডুবিয়ে রেখে বাতাসে শুকিয়ে সংরক্ষণ করুন latent spore মারার জন্য।)"
       ],
       biological: [
-        "Spray antagonist yeasts on maturing fruit coatings to protect against post-harvest storage rot."
+        "Coat ripening fruits with chitosan-containing bio-coatings to delay fungal germination. (ফলের উপর প্রাকৃতিক কাইটোসান বায়ো-কোটিং প্রলেপ দিন যা ছত্রাক থেকে ফলকে প্রাকৃতিকভাবে বাঁচায়।)"
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1527325678964-54921661f988?auto=format&fit=crop&q=80&w=400"
@@ -350,23 +354,23 @@ const fruitDiseasesData: Record<string, DiseaseDetail> = {
     name: "Fruit Rot",
     scientificName: "Fusarium / Alternaria spp.",
     severity: "High",
-    description: "Aggressive rotting of the mature fruit typically initiating at wounds from birds, bat claws, or intense sunburn. Spreads rapidly from fruit to fruit in storage crates.",
+    description: "Highly aggressive fungal decay of mature fruit typically initiating at wounds from birds, bat claws, or intense UV sunburn. Spreads rapidly across picked boxes.\n\n[রোগের বর্ণনা: পাকা ফলের একটি আগ্রাসী পচনশীল রোগ যা সাধারণত পাখি, বাদুড়ের নখের আঁচড় বা মাত্রাতিরিক্ত কড়া রোদ বা সানবার্নের ক্ষতের মাধ্যমে ছড়ায়। এটি এক ফল থেকে অন্য ফলে ঝুড়ির ভেতরেও ছড়াতে পারে।]",
     symptoms: [
-      "Fuzzy black, grey, or white mycelial mold covering portions of the fruit skin.",
-      "The peel turns blackish, collapsing under mild finger pressure.",
-      "Fruit pulp decomposes into a watery, fermented paste."
+      "Fuzzy black, grey, or white cotton-like mycelial mold covering the skin surface. (ফলের খোসার উপর কালো, ছাই বা সাদা তুলার মতো তুলতুলে ছত্রাক স্তর ছড়িয়ে পড়া।)",
+      "The outer rind turns dark brown, collapses easily under mild finger pressure. (ফলের খোসা কালচে রঙ হয়ে যায় এবং হালকা আঙুলের চাপে ভেতরে দেবে তরল বের হয়।)",
+      "Fruit interior decomposes into a watery, sour, fermented liquid pulp. (ফলের অভ্যন্তরীণ শাঁস ভেঙে পানি হয়ে যায় এবং টক গাঁজন গন্ধ বের হয়।)"
     ],
     treatment: {
       cultural: [
-        "Bag fruit developing clusters on the vine with protective bags.",
-        "Harvest carefully to prevent fingernail bruises or dropping.",
-        "Refrigerate harvested crops immediately at 10-14°C to stifle metabolic spore expansion."
+        "Bag developing fruit clusters on the trellis with protective breathable crop bags. (গাছে থাকা অবস্থায় ফলকে ছিদ্রযুক্ত ফ্রুট ব্যাগিং ক্যাপ দিয়ে ঢেকে রাখুন পাখি ও পোকামাকড় থেকে বাঁচাতে।)",
+        "Handle fruits with extreme gentleness during harvest to prevent nail scratches or mechanical drop impacts. (ফল কাটার সময় এবং হাতানোর সময় বিশেষ সতর্কতা অবলম্বন করুন যেন সামান্যতম আঁচড় না লাগে।)",
+        "Store and transport harvested fruits immediately under cool aeration at 10-14°C. (সংগ্রহের লাগামহীন পচন রোধে ফলগুলোকে ১০-১৪ ডিগ্রি সেলসিয়াস ঠাণ্ডা ও মৃদু বাতাসযুক্ত স্থানে রাখুন।)"
       ],
       chemical: [
-        "Apply food-grade organic sanitizers like peracetic acid or chlorine dioxide wash post-harvest."
+        "Wash fruits post-harvest in peracetic acid or lightly ozonated sanitizer. (ফল বাস্কেটে ভরার আগে ফলগুলোকে হালকা কুসুম জীবাণুনাশক কিংবা হাইড্রোজেন পারক্সাইড সমৃদ্ধ মৃদু পানিতে ধুয়ে সম্পূর্ণ শুকিয়ে নিন।)"
       ],
       biological: [
-        "Apply botanical extracts such as clove oil or cinnamon extract sprays to naturally retard molding."
+        "Apply botanical extracts such as clove oil or cinnamon oil diluted sprays as post-harvest preservatives. (সংরক্ষণের আয়ু বাড়াতে ফল প্যাক করার আগে দারুচিনির তেল বা লবঙ্গের পানির হালকা স্প্রে করুন যা প্রাকৃতিকভাবে পচন রোধ করে।)"
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1527325678964-54921661f988?auto=format&fit=crop&q=80&w=400"
@@ -443,7 +447,7 @@ const fruitDiseasesData: Record<string, DiseaseDetail> = {
 
 export default function App() {
   // Navigation Tabs
-  const [activeTab, setActiveTab] = useState<'leaf' | 'fruit' | 'encyclopedia' | 'diagnostics'>('leaf');
+  const [activeTab, setActiveTab] = useState<'leaf' | 'fruit' | 'encyclopedia' | 'academy'>('leaf');
   
   // Model & Classes States
   const [leafClasses, setLeafClasses] = useState<string[]>([]);
@@ -464,8 +468,89 @@ export default function App() {
   const [sandboxSelectedFruitClass, setSandboxSelectedFruitClass] = useState<string>("Anthracnose");
 
   // Model preprocessing & normalization modes
-  const [leafNormalizationMode, setLeafNormalizationMode] = useState<string>("div255");
-  const [fruitNormalizationMode, setFruitNormalizationMode] = useState<string>("div255");
+  const [leafNormalizationMode, setLeafNormalizationMode] = useState<string>("keras_mobilenet");
+  const [fruitNormalizationMode, setFruitNormalizationMode] = useState<string>("keras_mobilenet");
+
+  // Academic / Thesis Metadata States
+  const [thesisTitle, setThesisTitle] = useState<string>(() => 
+    localStorage.getItem('df_thesis_title') || "Deep Learning-Based Foliar and Carpoplane Phytopathology for Selenicereus undatus (Dragon Fruit)"
+  );
+  const [university, setUniversity] = useState<string>(() => {
+    const saved = localStorage.getItem('df_thesis_university');
+    if (!saved || saved === "Department of Phytopathology & AI Science • University Project" || saved === "Department of Digital Agronomy and AI") {
+      return "Department of Computer Science and Engineering";
+    }
+    return saved;
+  });
+  const [session, setSession] = useState<string>(() => 
+    localStorage.getItem('df_thesis_session') || "Session: 2022-2026"
+  );
+  const [supervisorName, setSupervisorName] = useState<string>(() => {
+    const saved = localStorage.getItem('df_thesis_supervisor');
+    if (!saved || saved === "Prof. Dr. Mohammad Masud") return "Zakia Sultana Eshita";
+    return saved;
+  });
+  const [supervisorDesignation, setSupervisorDesignation] = useState<string>(() => {
+    const saved = localStorage.getItem('df_thesis_supervisor_desig');
+    if (!saved || saved === "Professor & Head, Dept. of CSE") return "Lecturer, Department of CSE";
+    return saved;
+  });
+  const [cosupervisorName, setCosupervisorName] = useState<string>(() => 
+    localStorage.getItem('df_thesis_cosupervisor') || "Mr. Abdullah Al Mamun"
+  );
+  const [cosupervisorDesignation, setCosupervisorDesignation] = useState<string>(() => 
+    localStorage.getItem('df_thesis_cosupervisor_desig') || "Lecturer, Department of CSE"
+  );
+  const [isEditingAcademic, setIsEditingAcademic] = useState<boolean>(false);
+  
+  // Student Team Info
+  const [teamMembers, setTeamMembers] = useState<{name: string, id: string, role: string}[]>(() => {
+    const saved = localStorage.getItem('df_thesis_team');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.length > 1 || parsed[0]?.name === "Member 2" || parsed[0]?.id === "CSE-2022-014") {
+          return [{ name: "Ismail Hossain Rakib", id: "0242220005101128", role: "Team Leader / CSE" }];
+        }
+        return parsed;
+      } catch (e) {}
+    }
+    return [
+      { name: "Ismail Hossain Rakib", id: "0242220005101128", role: "Team Leader / CSE" }
+    ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('df_thesis_title', thesisTitle);
+  }, [thesisTitle]);
+
+  useEffect(() => {
+    localStorage.setItem('df_thesis_university', university);
+  }, [university]);
+
+  useEffect(() => {
+    localStorage.setItem('df_thesis_session', session);
+  }, [session]);
+
+  useEffect(() => {
+    localStorage.setItem('df_thesis_supervisor', supervisorName);
+  }, [supervisorName]);
+
+  useEffect(() => {
+    localStorage.setItem('df_thesis_supervisor_desig', supervisorDesignation);
+  }, [supervisorDesignation]);
+
+  useEffect(() => {
+    localStorage.setItem('df_thesis_cosupervisor', cosupervisorName);
+  }, [cosupervisorName]);
+
+  useEffect(() => {
+    localStorage.setItem('df_thesis_cosupervisor_desig', cosupervisorDesignation);
+  }, [cosupervisorDesignation]);
+
+  useEffect(() => {
+    localStorage.setItem('df_thesis_team', JSON.stringify(teamMembers));
+  }, [teamMembers]);
 
   // App States for Active Uploads
   const [leafImageSrc, setLeafImageSrc] = useState<string | null>(null);
@@ -491,6 +576,93 @@ export default function App() {
   const fruitFileInputRef = useRef<HTMLInputElement>(null);
   const leafPreviewImgRef = useRef<HTMLImageElement>(null);
   const fruitPreviewImgRef = useRef<HTMLImageElement>(null);
+
+  // Camera States & Refs
+  const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      const tracks = stream.getTracks();
+      if (tracks) {
+        tracks.forEach(track => track.stop());
+      }
+      videoRef.current.srcObject = null;
+    }
+    setIsCameraActive(false);
+    setCameraError(null);
+  };
+
+  const startCamera = async () => {
+    setCameraError(null);
+    setIsCameraActive(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } },
+        audio: false
+      });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (err: any) {
+      console.warn("Could not start environment camera, trying fallback constraint:", err);
+      try {
+        const fallbackStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false
+        });
+        if (videoRef.current) {
+          videoRef.current.srcObject = fallbackStream;
+        }
+      } catch (fallbackErr: any) {
+        console.error("Camera access failed:", fallbackErr);
+        setCameraError(
+          "Could not access camera. Please check camera permission and ensure the connection is secure."
+        );
+        setIsCameraActive(false);
+      }
+    }
+  };
+
+  const capturePhoto = () => {
+    if (!videoRef.current) return;
+    const video = videoRef.current;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/jpeg');
+      if (activeTab === 'leaf') {
+        setLeafImageSrc(dataUrl);
+        setLeafPrediction(null);
+        setLastPredictionProbabilities(null);
+      } else {
+        setFruitImageSrc(dataUrl);
+        setFruitPrediction(null);
+        setLastPredictionProbabilities(null);
+      }
+    }
+    stopCamera();
+  };
+
+  // Clean up camera on tab switch and on unmount
+  useEffect(() => {
+    stopCamera();
+    return () => {
+      // Direct cleanup inside unmount
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        const tracks = stream.getTracks();
+        if (tracks) {
+          tracks.forEach(track => track.stop());
+        }
+      }
+    };
+  }, [activeTab]);
 
   // Seed sample classes if loading is failed/placeholder is desired
   const fallbackLeafClasses = [
@@ -871,7 +1043,7 @@ export default function App() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dragon Fruit Disease Detection System</title>
+    <title>Dragon Fruit AND LEAF Disease Detection System</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- TensorFlow.js CDN -->
@@ -892,9 +1064,9 @@ export default function App() {
                 </div>
                 <div>
                     <h1 class="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-                        Dragon Fruit Disease Detection System
+                        Dragon Fruit AND LEAF Disease Detection System
                     </h1>
-                    <p class="text-xs text-slate-500 font-medium">Department of Phytopathology & AI Science • University Project</p>
+                    <p class="text-xs text-slate-500 font-medium font-sans">Department of Computer Science and Engineering</p>
                 </div>
             </div>
             
@@ -1251,24 +1423,15 @@ export default function App() {
             </div>
             <div>
               <h1 className="text-base font-extrabold leading-tight uppercase tracking-tight text-white flex items-center gap-2">
-                Dragon Fruit Disease Detection System
+                Dragon Fruit AND LEAF Disease Detection System
               </h1>
               <p className="text-[10px] text-emerald-200 uppercase tracking-wider font-semibold opacity-90">
-                Department of Phytopathology & AI Science • University Project
+                Department of Computer Science and Engineering
               </p>
             </div>
           </div>
           
-          {/* Status Panel - High Density layout requirements */}
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col items-end border-l border-emerald-700/50 pl-4">
-              <span className="text-[9px] opacity-80 uppercase font-bold tracking-widest text-emerald-300">System Pipeline</span>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span className="text-xs font-bold text-white font-mono">TFJS Model Loaded</span>
-              </div>
-            </div>
-          </div>
+          {/* Removed System Pipeline Status Panel for cleaner, non-technical UI */}
         </div>
       </header>
 
@@ -1312,16 +1475,16 @@ export default function App() {
             Disease Guide
           </button>
           <button 
-            id="nav-btn-diagnostics"
-            onClick={() => setActiveTab('diagnostics')}
+            id="nav-btn-academy"
+            onClick={() => setActiveTab('academy')}
             className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-all shrink-0 ${
-              activeTab === 'diagnostics' 
-                ? 'border-slate-800 text-slate-800 bg-slate-50' 
-                : 'border-transparent text-slate-600 hover:text-slate-800'
+              activeTab === 'academy' 
+                ? 'border-emerald-600 text-emerald-700 bg-emerald-50/30' 
+                : 'border-transparent text-slate-600 hover:text-emerald-600'
             }`}
           >
-            <Settings className="w-3.5 h-3.5" />
-            Technical Diagnostics
+            <GraduationCap className="w-3.5 h-3.5" />
+            Thesis & Academy Portal
           </button>
         </div>
       </nav>
@@ -1331,21 +1494,12 @@ export default function App() {
         
         {/* Model Status Strip / Sandbox Warning */}
         {isSandboxMode && (
-          <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div className="mb-6 bg-emerald-50 border border-emerald-150 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div className="flex gap-3">
-              <span className="p-1 px-2.5 bg-amber-100 text-amber-800 font-bold rounded-lg text-[10px] tracking-wider self-start shrink-0">STANDALONE SANDBOX</span>
-              <div className="text-xs text-amber-900">
-                <span className="font-bold">Information:</span> Running in standalone educational sandbox mode because TF.js model.json was not detected locally. Adjust the <strong>Inference Target Selection</strong> dropdown on each section to try any pathological classification, review confidence scales, and verify matching treatment guides!
+              <span className="p-1 px-2.5 bg-emerald-100 text-emerald-800 font-bold rounded-lg text-[10px] tracking-wider self-start shrink-0">DIAGNOSTIC WORKSPACE</span>
+              <div className="text-xs text-slate-700">
+                <span className="font-bold">Information:</span> Standard client-side diagnostic simulation with full symptom evaluation, confidence metering, and custom pathological treatment guidelines.
               </div>
-            </div>
-            <div className="flex gap-2 self-end sm:self-auto">
-              <button 
-                onClick={downloadStandaloneHTML}
-                className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[10.5px] font-bold p-1.5 px-3 rounded-lg shadow-sm transition-all"
-              >
-                <Download className="w-3.5 h-3.5" />
-                Get Standalone page
-              </button>
             </div>
           </div>
         )}
@@ -1359,147 +1513,124 @@ export default function App() {
               {/* Dynamic Analyser Card */}
               <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-xs relative">
                 
-                {/* Section title & mode indicator */}
-                <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
-                  <h2 className="text-xs font-bold text-slate-700 flex items-center gap-2 uppercase tracking-wider">
-                    {activeTab === 'leaf' ? 'Leaf & Stem Diagnostic Workstation' : 'Fruit Peel Diagnostic Workstation'}
-                    {isAnalyzing && <RefreshCw className="w-3 h-3 text-dragon-green animate-spin" />}
+                {/* Clean user-friendly section title */}
+                <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-150">
+                  <h2 id="scanning-panel-title" className="text-sm font-extrabold text-slate-800 flex items-center gap-2 uppercase tracking-wide">
+                    {activeTab === 'leaf' ? 'Leaf Disease Analysis (পাতার রোগ নির্ণয়)' : 'Fruit Disease Analysis (ফলের রোগ নির্ণয়)'}
+                    {isAnalyzing && <RefreshCw className="w-3.5 h-3.5 text-dragon-green animate-spin" />}
                   </h2>
-
-                  <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100">
-                    <span className={`inline-block w-2 h-2 rounded-full ${
-                      activeTab === 'leaf' 
-                        ? (leafModelStatus === 'active' ? 'bg-emerald-500' : 'bg-amber-400 animate-pulse')
-                        : (fruitModelStatus === 'active' ? 'bg-emerald-500' : 'bg-amber-400 animate-pulse')
-                    }`} />
-                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wide">
-                      {activeTab === 'leaf' 
-                        ? (leafModelStatus === 'active' ? 'Active Neural Pipe Space' : 'Standalone Emulator Active')
-                        : (fruitModelStatus === 'active' ? 'Active Neural Pipe Space' : 'Standalone Emulator Active')
-                      }
-                    </span>
-                  </div>
                 </div>
 
-                <p className="text-[11px] text-slate-500 mb-4 leading-normal">
+                <p className="text-xs text-slate-500 mb-5 leading-relaxed">
                   {activeTab === 'leaf' 
-                    ? "Upload high resolution photographs of dragon fruit vine nodes to extract diagnostic profiles of Anthracnose, Black Spot, Canker, or Stem/Root decays."
-                    : "Inspect dragon fruit skins to scan for Anthracnose spots, White spots, Soft fruits rot, or guarantee clean export grade specifications."
+                    ? "Upload or drag and drop a high-resolution photo of your Dragon Fruit stem or leaf. The system will automatically scan and analyze for common symptoms of diseases like Canker, Anthracnose, Spot, or Stem decays."
+                    : "Inspect your Dragon Fruit peel for infection spots. Upload a clear photograph of the fruit skin to detect signs of Anthracnose, Soft rot, Spot decay, or overall health."
                   }
                 </p>
 
-                {/* Live Model Status Header */}
-                <div className={`mb-4 p-3 rounded-lg border flex items-start gap-2.5 ${
-                  (activeTab === 'leaf' && leafModelStatus === 'active') || (activeTab === 'fruit' && fruitModelStatus === 'active')
-                    ? 'bg-emerald-50/40 border-emerald-100 text-emerald-950 font-sans' 
-                    : 'bg-amber-50/40 border-amber-100 text-amber-950 font-sans'
-                }`}>
-                  <div className={`p-1.5 rounded bg-white border shrink-0 ${
-                    (activeTab === 'leaf' && leafModelStatus === 'active') || (activeTab === 'fruit' && fruitModelStatus === 'active')
-                      ? 'border-emerald-100 text-dragon-green' 
-                      : 'border-amber-100 text-amber-600'
-                  }`}>
-                    <FileCheck className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5 leading-none mb-1">
-                      <span className="text-[11px] font-black uppercase tracking-wider">
-                        {(activeTab === 'leaf' && leafModelStatus === 'active') || (activeTab === 'fruit' && fruitModelStatus === 'active')
-                          ? "TensorFlow.js Model Active (মডেল সক্রিয়)" 
-                          : "AI Fallback Prediction Active (অফলাইন মোড)"
-                        }
-                      </span>
-                      <span className={`text-[8.5px] font-black uppercase px-1.5 py-0.5 rounded leading-none ${
-                        (activeTab === 'leaf' && leafModelStatus === 'active') || (activeTab === 'fruit' && fruitModelStatus === 'active')
-                          ? 'bg-dragon-green text-white' 
-                          : 'bg-amber-500 text-white'
-                      }`}>
-                        {(activeTab === 'leaf' && leafModelStatus === 'active') || (activeTab === 'fruit' && fruitModelStatus === 'active')
-                          ? 'Connected' 
-                          : 'Simulation'
-                      }
-                      </span>
+                {/* Drag and Drop Zone or Live Camera Container */}
+                {isCameraActive ? (
+                  <div className="border border-slate-200 rounded-xl p-5 bg-slate-950 flex flex-col items-center justify-center relative shadow-inner overflow-hidden min-h-[300px]">
+                    <span className="absolute top-2.5 left-2.5 p-1 px-2.5 bg-rose-600 text-white font-bold rounded text-[8px] uppercase tracking-wider animate-pulse flex items-center gap-1 z-10">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
+                      Live Camera Feed
+                    </span>
+                    
+                    <video 
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      className="w-full max-w-sm aspect-video object-cover rounded-lg border border-slate-800 bg-slate-900"
+                    />
+                    
+                    {cameraError && (
+                      <div className="mt-3 text-red-400 text-[10px] text-center font-bold px-4 max-w-xs bg-red-950/40 p-2 rounded border border-red-900/40">
+                        {cameraError}
+                      </div>
+                    )}
+                    
+                    <div className="mt-4 flex gap-2.5 z-10 w-full justify-center">
+                      <button
+                        type="button"
+                        onClick={capturePhoto}
+                        className={`flex items-center justify-center gap-1.5 px-4 py-2.5 text-white text-xs font-black rounded-lg transition-all border shadow-sm active:translate-y-0.5 cursor-pointer ${
+                          activeTab === 'leaf'
+                            ? 'bg-dragon-green hover:bg-dragon-green-hover border-emerald-600'
+                            : 'bg-dragon-red hover:bg-dragon-red-hover border-rose-600'
+                        }`}
+                      >
+                        <Camera className="w-3.5 h-3.5" />
+                        Capture Photo (ছবি তুলুন)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={stopCamera}
+                        className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white text-xs font-black rounded-lg transition-all active:translate-y-0.5 cursor-pointer"
+                      >
+                        Cancel (বন্ধ করুন)
+                      </button>
                     </div>
-                    <p className="text-[10.5px] text-slate-500 leading-normal">
-                      {(activeTab === 'leaf' && leafModelStatus === 'active') || (activeTab === 'fruit' && fruitModelStatus === 'active')
-                        ? "আপনার ট্রেইনকৃত TensorFlow.js নিউরাল মডেলটি সাকসেসফুলি ব্রাউজারে লোড হয়েছে। আপলোডকৃত প্রতিটি ড্রাগন ফলের পাতার ছবি থেকে এটি স্বয়ংক্রিয়ভাবে রোগ ও সুস্থতা নির্ভুলভাবে সনাক্ত করবে।"
-                        : "ড্রাগন ফলের ফল-পচা রোগ সনাক্তকরণের জন্য tfjs_fruit_model ফোল্ডারে আপনার ট্রেইনকৃত মডেলটি যুক্ত করুন। সাময়িকভাবে এটি একটি ডায়নামিক ক্লাসিফিকেশন অ্যালগরিদম দ্বারা রোগ বিশ্লেষণ করছে।"
-                      }
-                    </p>
                   </div>
-                </div>
+                ) : (
+                  <div 
+                    id="diagnose-dropzone"
+                    onDragOver={(e) => handleDragOver(e, activeTab)}
+                    onDragLeave={() => handleDragLeave(activeTab)}
+                    onDrop={(e) => handleDrop(e, activeTab)}
+                    onClick={() => {
+                      if (activeTab === 'leaf') leafFileInputRef.current?.click();
+                      else fruitFileInputRef.current?.click();
+                    }}
+                    className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-all duration-200 min-h-[220px] flex flex-col justify-center items-center ${
+                      activeTab === 'leaf'
+                        ? (isLeafDragOver ? 'border-dragon-green bg-emerald-50/10 shadow-inner' : 'border-slate-300 hover:border-dragon-green hover:bg-slate-50/40')
+                        : (isFruitDragOver ? 'border-dragon-red bg-rose-50/10 shadow-inner' : 'border-slate-300 hover:border-dragon-red hover:bg-slate-50/40')
+                    }`}
+                  >
+                    <label htmlFor="file-upload" className="sr-only">Choose file to upload</label>
+                    <input
+                      id="file-upload"
+                      type="file"
+                      ref={activeTab === 'leaf' ? leafFileInputRef : fruitFileInputRef}
+                      onChange={activeTab === 'leaf' ? handleLeafFileChange : handleFruitFileChange}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    
+                    <div className={`p-2.5 rounded-full border transition-all mb-2 ${
+                      activeTab === 'leaf' ? 'bg-emerald-50 border-emerald-100 text-dragon-green' : 'bg-rose-50 border-rose-100 text-dragon-red'
+                    }`}>
+                      <Upload className="w-5 h-5" />
+                    </div>
+                    
+                    <p className="text-[11.5px] font-bold text-slate-700">
+                      Drag & drop crop image here, or <span className={`${activeTab === 'leaf' ? 'text-dragon-green' : 'text-dragon-red'} font-extrabold hover:underline`}>browse files</span>
+                    </p>
+                    <p className="text-[9px] text-slate-400 mt-1 uppercase tracking-wide">Accepts PNG, JPG, or JPEG (Auto standardized to 224x224 input)</p>
+                    
+                    <div className="mt-4 flex items-center justify-center gap-2 w-full max-w-[200px]">
+                      <div className="h-[1px] bg-slate-200 grow"></div>
+                      <span className="text-[8px] text-slate-400 font-extrabold uppercase tracking-widest bg-white px-2 shrink-0">OR</span>
+                      <div className="h-[1px] bg-slate-200 grow"></div>
+                    </div>
 
-                {/* Model Preprocessing & Normalization Settings Panel */}
-                {((activeTab === 'leaf' && leafModelStatus === 'active') || (activeTab === 'fruit' && fruitModelStatus === 'active')) && (
-                  <div className="mb-4 p-3.5 bg-slate-50 border border-slate-200 rounded-lg shadow-2xs">
-                    <div className="flex items-center gap-1.5 mb-1.5 text-slate-700">
-                      <Settings className="w-3.5 h-3.5 text-slate-500 animate-spin" style={{ animationDuration: '6s' }} />
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-800">
-                        Model Pixel Normalization / পিক্সেল নরমালাইজেশন মোড
-                      </span>
-                    </div>
-                    <p className="text-[10px] text-slate-500 mb-2.5 leading-relaxed">
-                      মডেলটি ট্রেইন করার সময় যেই পিক্সেল প্রিপসেসিং পদ্ধতি ব্যবহার করেছেন সেটি সিলেক্ট করুন। ভুল স্কেলিং সিলেক্ট করলে মডেল সবসময় ভুল বা একই উত্তর দিতে পারে:
-                    </p>
-                    <select
-                      value={activeTab === 'leaf' ? leafNormalizationMode : fruitNormalizationMode}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (activeTab === 'leaf') {
-                          setLeafNormalizationMode(val);
-                          logDiagnostic(`Leaf normalization protocol switched to: [${val}]. Re-run scan to verify.`);
-                        } else {
-                          setFruitNormalizationMode(val);
-                          logDiagnostic(`Fruit normalization protocol switched to: [${val}]. Re-run scan to verify.`);
-                        }
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        startCamera();
                       }}
-                      className="w-full text-xs font-semibold rounded-md border border-slate-200 p-2 bg-white text-slate-800 focus:outline-none focus:border-dragon-green transition-colors"
+                      className={`mt-3 flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg border text-[11px] font-bold shadow-xs transition-all duration-150 cursor-pointer ${
+                        activeTab === 'leaf'
+                          ? 'border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-dragon-green'
+                          : 'border-rose-200 bg-rose-50 hover:bg-rose-100 text-dragon-red'
+                      }`}
                     >
-                      <option value="div255">Rescale 1./255.0 [0.0 to 1.0] (ডিফল্ট - কোলাব ও সাধারণ কে-রাস মডেল)</option>
-                      <option value="keras_mobilenet">MobileNetV2 Scale [-1.0 to 1.0] (মোবাইলনেট-২ ও ট্র্যান্সফার লার্নিং মডেল)</option>
-                      <option value="none">No Scaling [0 to 255] (কোন স্কেলিং ছাড়া র-পিক্সেল ভ্যালু)</option>
-                      <option value="imagenet">ImageNet Mean Subtraction (ইমেজনেট মিন বিয়োগ)</option>
-                    </select>
+                      <Camera className="w-3.5 h-3.5" />
+                      Take Photo with Camera (ক্যামেরা দিয়ে ছবি তুলুন)
+                    </button>
                   </div>
                 )}
-
-                {/* Drag and Drop Zone Container */}
-                <div 
-                  id="diagnose-dropzone"
-                  onDragOver={(e) => handleDragOver(e, activeTab)}
-                  onDragLeave={() => handleDragLeave(activeTab)}
-                  onDrop={(e) => handleDrop(e, activeTab)}
-                  onClick={() => {
-                    if (activeTab === 'leaf') leafFileInputRef.current?.click();
-                    else fruitFileInputRef.current?.click();
-                  }}
-                  className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-all duration-200 min-h-[170px] flex flex-col justify-center items-center ${
-                    activeTab === 'leaf'
-                      ? (isLeafDragOver ? 'border-dragon-green bg-emerald-50/10 shadow-inner' : 'border-slate-300 hover:border-dragon-green hover:bg-slate-50/40')
-                      : (isFruitDragOver ? 'border-dragon-red bg-rose-50/10 shadow-inner' : 'border-slate-300 hover:border-dragon-red hover:bg-slate-50/40')
-                  }`}
-                >
-                  <label htmlFor="file-upload" className="sr-only">Choose file to upload</label>
-                  <input
-                    id="file-upload"
-                    type="file"
-                    ref={activeTab === 'leaf' ? leafFileInputRef : fruitFileInputRef}
-                    onChange={activeTab === 'leaf' ? handleLeafFileChange : handleFruitFileChange}
-                    accept="image/*"
-                    className="hidden"
-                  />
-                  
-                  <div className={`p-2.5 rounded-full border transition-all mb-2 ${
-                    activeTab === 'leaf' ? 'bg-emerald-50 border-emerald-100 text-dragon-green' : 'bg-rose-50 border-rose-100 text-dragon-red'
-                  }`}>
-                    <Upload className="w-5 h-5" />
-                  </div>
-                  
-                  <p className="text-[11.5px] font-bold text-slate-700">
-                    Drag & drop crop image here, or <span className={`${activeTab === 'leaf' ? 'text-dragon-green' : 'text-dragon-red'} font-extrabold hover:underline`}>browse files</span>
-                  </p>
-                  <p className="text-[9px] text-slate-400 mt-1 uppercase tracking-wide">Accepts PNG, JPG, or JPEG (Auto standardized to 224x224 input)</p>
-                </div>
 
                 {/* Image Preprocessing Preview Grid */}
                 {((activeTab === 'leaf' && leafImageSrc) || (activeTab === 'fruit' && fruitImageSrc)) && (
@@ -1616,69 +1747,7 @@ export default function App() {
                 )}
               </div>
 
-              {/* Sample Preset Selector Cards */}
-              <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-xs">
-                <div className="flex items-center justify-between mb-2.5 border-b border-slate-100 pb-1.5">
-                  <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Scientific Demo Specimens</h3>
-                  <span className="text-[9.5px] text-slate-400 font-medium">Click to populate simulated data instantly</span>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {activeTab === 'leaf' ? (
-                    <>
-                      <button 
-                        onClick={() => loadLeafPreset("Healthy", "https://images.unsplash.com/photo-1549417229-aa67d3263c09?auto=format&fit=crop&q=80&w=400")}
-                        className="p-2 bg-slate-50 hover:bg-emerald-50 hover:border-dragon-green rounded-lg border border-slate-100 text-left transition-all group cursor-pointer"
-                      >
-                        <div className="text-[10.5px] font-bold text-slate-800">Healthy Stem</div>
-                        <div className="text-[9px] text-dragon-green font-semibold mt-0.5 group-hover:underline">Verify clean status →</div>
-                      </button>
-
-                      <button 
-                        onClick={() => loadLeafPreset("Stem_Canker", "https://images.unsplash.com/photo-1549417229-aa67d3263c09?auto=format&fit=crop&q=80&w=400")}
-                        className="p-2 bg-slate-50 hover:bg-rose-50 hover:border-dragon-red rounded-lg border border-slate-100 text-left transition-all group cursor-pointer"
-                      >
-                        <div className="text-[10.5px] font-bold text-slate-800">Stem Canker</div>
-                        <div className="text-[9px] text-dragon-red font-semibold mt-0.5 group-hover:underline">Heavy Canker study →</div>
-                      </button>
-
-                      <button 
-                        onClick={() => loadLeafPreset("Anthracnose", "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&q=80&w=400")}
-                        className="p-2 bg-slate-50 hover:bg-rose-50 hover:border-dragon-red rounded-lg border border-slate-100 text-left transition-all group cursor-pointer"
-                      >
-                        <div className="text-[10.5px] font-bold text-slate-800">Anthracnose</div>
-                        <div className="text-[9px] text-dragon-red font-semibold mt-0.5 group-hover:underline">Concentric spots →</div>
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button 
-                        onClick={() => loadFruitPreset("Healthy", "https://images.unsplash.com/photo-1527325678964-54921661f988?auto=format&fit=crop&q=80&w=400")}
-                        className="p-2 bg-slate-50 hover:bg-emerald-50 hover:border-dragon-green rounded-lg border border-slate-100 text-left transition-all group cursor-pointer"
-                      >
-                        <div className="text-[10.5px] font-bold text-slate-800">Healthy Peel</div>
-                        <div className="text-[9px] text-dragon-green font-semibold mt-0.5 group-hover:underline">Premium grade →</div>
-                      </button>
-
-                      <button 
-                        onClick={() => loadFruitPreset("Anthracnose", "https://images.unsplash.com/photo-1527325678964-54921661f988?auto=format&fit=crop&q=80&w=400")}
-                        className="p-2 bg-slate-50 hover:bg-rose-50 hover:border-dragon-red rounded-lg border border-slate-100 text-left transition-all group cursor-pointer"
-                      >
-                        <div className="text-[10.5px] font-bold text-slate-800">Anthracnose Pec</div>
-                        <div className="text-[9px] text-dragon-red font-semibold mt-0.5 group-hover:underline">Sunken decay study →</div>
-                      </button>
-
-                      <button 
-                        onClick={() => loadFruitPreset("Fruit Rot", "https://images.unsplash.com/photo-1527325678964-54921661f988?auto=format&fit=crop&q=80&w=400")}
-                        className="p-2 bg-slate-50 hover:bg-rose-50 hover:border-dragon-red rounded-lg border border-slate-100 text-left transition-all group cursor-pointer"
-                      >
-                        <div className="text-[10.5px] font-bold text-slate-800">Fruit Rot</div>
-                        <div className="text-[9px] text-dragon-red font-semibold mt-0.5 group-hover:underline">Fuzzy fungal molds →</div>
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
+              {/* Removed Scientific Demo Specimens per user instruction */}
             </div>
           )}
 
@@ -1948,35 +2017,7 @@ export default function App() {
                 </div>
               )}
 
-              {/* Real-time ML Pipeline Monitor Box */}
-              <div className="bg-slate-900 rounded-xl p-4 text-slate-100 border border-slate-800 shadow-md">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <Activity className="w-3.5 h-3.5 animate-pulse" />
-                    TensorFlow Real-Time Pipe Diagnostics
-                  </h3>
-                  <button 
-                    onClick={() => setMatrixLog([])}
-                    className="text-[9px] font-extrabold text-teal-300 hover:underline uppercase tracking-wide"
-                  >
-                    Clear Feed
-                  </button>
-                </div>
-
-                <div className="bg-slate-950/80 rounded-lg p-2.5 h-[140px] overflow-y-auto font-mono text-[9.5px] text-emerald-400/90 space-y-1.5 leading-relaxed scrollbar-thin scrollbar-thumb-slate-800">
-                  {matrixLog.length === 0 ? (
-                    <div className="text-slate-600 italic flex items-center justify-center h-full text-[9px]">
-                      * TensorFlow.js pipeline silent. Feed visual data to initialize diagnostics.
-                    </div>
-                  ) : (
-                    matrixLog.map((log, idx) => (
-                      <div key={idx} className="border-b border-slate-900/40 pb-1 hover:text-emerald-200 transition-colors">
-                        {log}
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
+              {/* Removed Real-time ML Pipeline Monitor per user request */}
 
             </div>
           )}
@@ -2175,114 +2216,289 @@ export default function App() {
             </div>
           )}
 
-          {/* Tab 4: Technical Diagnostics View */}
-          {activeTab === 'diagnostics' && (
-            <div className="lg:col-span-12 space-y-4 animate-fade-in text-slate-800">
+          {/* Tab 5: Thesis & Academic Portal */}
+          {activeTab === 'academy' && (
+            <div className="lg:col-span-12 space-y-6 animate-fade-in text-slate-800 animate-slide-up">
               
-              <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
-                <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 pb-2">
-                  <Settings className="w-4 h-4 text-dragon-green" />
-                  Engineering & Pipeline Configuration Manual
-                </h2>
-                <p className="text-[11px] text-slate-500 font-medium">Under-the-hood structural details explaining model architectures, image preprocessing steps, and deployment steps.</p>
+              {/* Main Thesis Jumbotron */}
+              <div className="bg-gradient-to-br from-emerald-900 to-slate-900 rounded-2xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden border border-emerald-800">
+                <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-y-1/4 translate-x-1/4">
+                  <GraduationCap className="w-96 h-96 text-white" />
+                </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                  
-                  {/* Preprocessing Guide */}
-                  <div className="space-y-3">
-                    <h3 className="text-xs font-bold text-dragon-green uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-1">
-                      <Layers className="w-3.5 h-3.5 text-emerald-600" />
-                      1. Image Preprocessing Standards (Crop Science)
-                    </h3>
-                    
-                    <p className="text-[11px] text-slate-600 leading-normal">
-                      Deep convolutional neural networks require fixed dimension layouts. Our model parses input graphics down using localized bilinear maps to protect spatial disease texture.
-                    </p>
-
-                    <div className="bg-slate-950 text-emerald-400 font-mono text-[9px] p-3 rounded-lg space-y-1 shadow-sm border border-slate-800">
-                      <div><span className="text-rose-400">// Preprocessing Pipeline</span></div>
-                      <div>const rawImage = tf.browser.fromPixels(imageDOM);</div>
-                      <div>const resizedImg = tf.image.resizeBilinear(rawImage, [224, 224]);</div>
-                      <div>const normalizedVal = resizedImg.cast('float32').div(255.0);</div>
-                      <div>const networkBatch = normalizedVal.expandDims(0);</div>
-                      <div><span className="text-slate-500">// Output: Tensor Shape [1, 224, 224, 3]</span></div>
-                    </div>
-
-                    <div className="space-y-1.5 mt-2">
-                      <div className="flex gap-2 items-start text-[11px] text-slate-600">
-                        <span className="p-0.5 px-1 bg-emerald-100 text-dragon-green text-[8px] font-black rounded shrink-0">STEP A</span>
-                        <span><strong>Bilinear Expansion:</strong> Rescales arbitrary images securely into a uniform [224 x 224] matrix context.</span>
-                      </div>
-                      <div className="flex gap-2 items-start text-[11px] text-slate-600">
-                        <span className="p-0.5 px-1 bg-emerald-100 text-dragon-green text-[8px] font-black rounded shrink-0">STEP B</span>
-                        <span><strong>Scaling Normalization:</strong> Raw pixels [0-255] are converted to float quotients [0.0 - 1.0] to align scale parameters.</span>
-                      </div>
-                    </div>
+                <div className="relative z-10 space-y-4 max-w-4xl">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-full text-[10px] font-bold uppercase tracking-wider border border-emerald-500/30">
+                    <Award className="w-3.5 h-3.5 text-emerald-400" />
+                    University Final Year Thesis Defense Project (বিশ্ববিদ্যালয় থিসিস প্রজেক্ট)
                   </div>
 
-                  {/* Standalone packaging */}
-                  <div className="space-y-3">
-                    <h3 className="text-xs font-bold text-dragon-green uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-1">
-                      <Download className="w-3.5 h-3.5 text-emerald-600" />
-                      2. Export Portable Application Package
-                    </h3>
-                    
-                    <p className="text-[11px] text-slate-600 leading-normal text-justify">
-                      Need a portable file to execute in the field directly from local laptops or tablets? Click the generator below to export our fully pre-styled agronomist disease detection application compiled into a single <strong>HTML</strong> file.
-                    </p>
-
-                    <div className="bg-emerald-50 border border-emerald-200/60 rounded-lg p-3 flex gap-2 text-emerald-900">
-                      <div className="p-1 text-dragon-green bg-white/70 border border-emerald-150 rounded-md shrink-0 self-start">
-                        <HelpCircle className="w-4 h-4" />
+                  {isEditingAcademic ? (
+                    <div className="space-y-3 bg-white/10 p-4 rounded-xl border border-white/20">
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-widest text-emerald-300 font-bold mb-1">Thesis Project Title</label>
+                        <input
+                          type="text"
+                          value={thesisTitle}
+                          onChange={(e) => setThesisTitle(e.target.value)}
+                          className="w-full text-xs font-bold bg-slate-950 border border-emerald-700 rounded-lg p-2 text-white focus:outline-none focus:border-emerald-400"
+                        />
                       </div>
-                      <div className="text-[10px] leading-snug">
-                        <strong>Works Offline:</strong> The generated package embeds the complete CSS stylesheet layouts, responsive layout components, and downloads the official client-side TensorFlow.js interpreter over secure cloud channels dynamically!
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[10px] uppercase tracking-widest text-emerald-300 font-bold mb-1">Department / Faculty / University</label>
+                          <input
+                            type="text"
+                            value={university}
+                            onChange={(e) => setUniversity(e.target.value)}
+                            className="w-full text-xs font-semibold bg-slate-950 border border-emerald-700 rounded-lg p-2 text-white focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] uppercase tracking-widest text-emerald-300 font-bold mb-1">Session / Term / Section</label>
+                          <input
+                            type="text"
+                            value={session}
+                            onChange={(e) => setSession(e.target.value)}
+                            className="w-full text-xs font-semibold bg-slate-950 border border-emerald-700 rounded-lg p-2 text-white focus:outline-none"
+                          />
+                        </div>
                       </div>
                     </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <h1 className="text-xl md:text-3xl font-black tracking-tight leading-tight">
+                        {thesisTitle}
+                      </h1>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-emerald-200">
+                        <span className="font-semibold bg-white/10 px-2 py-0.5 rounded border border-white/10">{university}</span>
+                        <span className="font-mono">{session}</span>
+                      </div>
+                    </div>
+                  )}
 
+                  <p className="text-xs text-slate-300 leading-relaxed text-justify max-w-3xl">
+                    <strong>Abstract (সারসংক্ষেপ):</strong> Selenicereus undatus (Dragon fruit) crops suffer extensively from pathological constraints like Stem Anthracnose, Spot, and Rot decays which affect crop quality and market yields. This research implements custom Deep Convolutional Neural Networks, leverage transfer learning via light-weight <strong>MobileNetV2</strong>, and compiles model parameters directly onto TensorFlow.js. This architecture executes real-time digital phytopathology scans securely in-client without server-side compute lag, securing immediate pathology remedial frameworks to aid agro-intelligence applications.
+                  </p>
+
+                  <div className="pt-2 flex gap-3">
                     <button
-                      onClick={downloadStandaloneHTML}
-                      className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-dragon-green to-dragon-green-hover hover:from-dragon-green-hover hover:to-emerald-900 text-white text-[11px] font-extrabold p-2.5 rounded-lg shadow-sm transition-all cursor-pointer"
+                      onClick={() => setIsEditingAcademic(!isEditingAcademic)}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 hover:shadow-md text-white text-xs font-black rounded-lg transition-all border border-emerald-500/20 active:translate-y-0.5 cursor-pointer flex items-center gap-1.5"
                     >
-                      <Download className="w-4 h-4" />
-                      Download Standalone index.html File
+                      <Settings className="w-3.5 h-3.5" />
+                      {isEditingAcademic ? "Exit Editing View" : "Edit Academic Credentials"}
                     </button>
-                    
-                    <span className="block text-center text-[9px] text-slate-400 font-medium">Compatible with Chrome, Safari, Edge, or Firefox.</span>
+                    {!isEditingAcademic && (
+                      <div className="text-xs text-emerald-300 bg-emerald-900/40 px-3 py-2 rounded-lg border border-emerald-500/20 flex items-center gap-1.5 select-none font-mono text-[9.5px]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span>Auto-saved to Browser LocalStorage</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* supervisor & members section */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                
+                {/* Supervisor & Co-Supervisor Details Card */}
+                <div className="md:col-span-6 bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
+                  <div className="flex items-center gap-2 border-b border-slate-100 pb-2.5">
+                    <Award className="w-4 h-4 text-emerald-600 font-bold" />
+                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest">Thesis Committee & Guidance</h3>
                   </div>
 
+                  {isEditingAcademic ? (
+                    <div className="space-y-4">
+                      {/* Principal Supervisor */}
+                      <div className="p-3 bg-slate-50/50 rounded-lg border border-slate-150 space-y-2">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Research Supervisor</span>
+                        <div>
+                          <label className="block text-[8px] uppercase tracking-widest text-slate-500 font-bold mb-1">Supervisor Name</label>
+                          <input
+                            type="text"
+                            value={supervisorName}
+                            onChange={(e) => setSupervisorName(e.target.value)}
+                            className="w-full text-xs font-semibold bg-white border border-slate-200 rounded p-1.5 focus:outline-none focus:border-emerald-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[8px] uppercase tracking-widest text-slate-500 font-bold mb-1">Designation</label>
+                          <input
+                            type="text"
+                            value={supervisorDesignation}
+                            onChange={(e) => setSupervisorDesignation(e.target.value)}
+                            className="w-full text-xs font-semibold bg-white border border-slate-200 rounded p-1.5 focus:outline-none focus:border-emerald-500"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Co-Supervisor */}
+                      <div className="p-3 bg-slate-50/50 rounded-lg border border-slate-150 space-y-2">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Co-Supervisor</span>
+                        <div>
+                          <label className="block text-[8px] uppercase tracking-widest text-slate-500 font-bold mb-1">Co-Supervisor Name</label>
+                          <input
+                            type="text"
+                            value={cosupervisorName}
+                            onChange={(e) => setCosupervisorName(e.target.value)}
+                            className="w-full text-xs font-semibold bg-white border border-slate-200 rounded p-1.5 focus:outline-none focus:border-emerald-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[8px] uppercase tracking-widest text-slate-500 font-bold mb-1">Designation</label>
+                          <input
+                            type="text"
+                            value={cosupervisorDesignation}
+                            onChange={(e) => setCosupervisorDesignation(e.target.value)}
+                            className="w-full text-xs font-semibold bg-white border border-slate-200 rounded p-1.5 focus:outline-none focus:border-emerald-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {/* Principal Supervisor Box */}
+                      <div className="bg-gradient-to-r from-emerald-50/40 to-teal-50/40 border border-emerald-100 rounded-xl p-4 shadow-3xs relative overflow-hidden flex gap-4 items-start">
+                        <div className="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 font-extrabold text-sm shadow-sm">
+                          {supervisorName.split(' ').pop()?.charAt(0) || "S"}
+                        </div>
+                        <div className="space-y-1.5">
+                          <span className="text-[9px] font-black tracking-widest text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full uppercase leading-none inline-block">
+                            Principal Research Supervisor
+                          </span>
+                          <h4 className="text-xs font-black text-slate-900 leading-snug">{supervisorName}</h4>
+                          <p className="text-[11px] text-slate-600 font-semibold leading-normal">{supervisorDesignation}</p>
+                          <p className="text-[10px] text-slate-400 font-medium font-mono">Department of Computer Science and Engineering</p>
+                        </div>
+                      </div>
+
+                      {/* Co-Supervisor Box */}
+                      <div className="bg-gradient-to-r from-emerald-50/10 to-slate-50/30 border border-slate-200 rounded-xl p-4 shadow-3xs flex gap-4 items-start">
+                        <div className="w-11 h-11 rounded-xl bg-emerald-550 bg-emerald-600 text-white flex items-center justify-center shrink-0 font-extrabold text-sm shadow-sm">
+                          {cosupervisorName.split(' ').pop()?.charAt(0) || "C"}
+                        </div>
+                        <div className="space-y-1.5">
+                          <span className="text-[9px] font-black tracking-widest text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full uppercase leading-none inline-block font-mono">
+                            Co-Supervisor
+                          </span>
+                          <h4 className="text-xs font-black text-slate-900 leading-snug">{cosupervisorName}</h4>
+                          <p className="text-[11px] text-slate-600 font-semibold leading-normal">{cosupervisorDesignation}</p>
+                          <p className="text-[10px] text-slate-400 font-medium font-mono">Department of Computer Science and Engineering</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="text-[10.5px] text-slate-500 leading-normal mt-2 p-3 bg-slate-50 rounded-lg border border-slate-100 italic">
+                    "This software system implements advanced Convolutional Neural Network modeling configured explicitly to enable lightweight deep learning runs in real field scenarios directly from web browsers."
+                  </div>
                 </div>
 
-                {/* Model Pathing Details */}
-                <div className="mt-6 pt-5 border-t border-slate-100">
-                  <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2.5">Model server-path architecture</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    
-                    <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200/80 text-slate-700">
-                      <div className="text-[9px] font-bold text-slate-400 uppercase">Leaf Neural Model Path</div>
-                      <div className="text-[11px] font-mono font-bold mt-0.5 text-slate-800">tfjs_leaf_model/model.json</div>
+                {/* Team Members details Card */}
+                <div className="md:col-span-6 bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
+                  <div className="flex items-center gap-2 border-b border-slate-100 pb-2.5 justify-between">
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-emerald-600 font-bold" />
+                      <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest">Research Team / Student Info</h3>
                     </div>
-
-                    <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200/80 text-slate-700">
-                      <div className="text-[9px] font-bold text-slate-400 uppercase">Leaf Labels Catalog</div>
-                      <div className="text-[11px] font-mono font-bold mt-0.5 text-slate-800">leaf_classes.json</div>
-                    </div>
-
-                    <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200/80 text-slate-700">
-                      <div className="text-[9px] font-bold text-slate-400 uppercase">Fruit Neural Model Path</div>
-                      <div className="text-[11px] font-mono font-bold mt-0.5 text-slate-800">tfjs_fruit_model/model.json</div>
-                    </div>
-
-                    <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200/80 text-slate-700">
-                      <div className="text-[9px] font-bold text-slate-400 uppercase">Fruit Labels Catalog</div>
-                      <div className="text-[11px] font-mono font-bold mt-0.5 text-slate-800">fruit_classes.json</div>
-                    </div>
-
+                    <span className="text-[10px] font-mono font-bold text-slate-400 bg-slate-100 p-1 px-2.5 rounded-md">
+                      {teamMembers.length === 1 ? "Sole Developer" : `${teamMembers.length} Member Team`}
+                    </span>
                   </div>
+
+                  {isEditingAcademic ? (
+                    <div className="space-y-3.5 max-h-[300px] overflow-y-auto pr-1">
+                      {teamMembers.map((member, index) => (
+                        <div key={index} className="grid grid-cols-1 sm:grid-cols-3 gap-2 border-b border-slate-100 pb-2">
+                          <div>
+                            <label className="block text-[8px] uppercase font-bold text-slate-500">Student Name</label>
+                            <input
+                              type="text"
+                              value={member.name}
+                              onChange={(e) => {
+                                const newMembers = [...teamMembers];
+                                newMembers[index].name = e.target.value;
+                                setTeamMembers(newMembers);
+                              }}
+                              className="w-full text-xs font-semibold bg-slate-50 border border-slate-200 rounded p-1"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[8px] uppercase font-bold text-slate-500">Student ID / Roll</label>
+                            <input
+                              type="text"
+                              value={member.id}
+                              onChange={(e) => {
+                                const newMembers = [...teamMembers];
+                                newMembers[index].id = e.target.value;
+                                setTeamMembers(newMembers);
+                              }}
+                              className="w-full text-xs font-semibold bg-slate-50 border border-slate-200 rounded p-1"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[8px] uppercase font-bold text-slate-500">Role & Dept</label>
+                            <input
+                              type="text"
+                              value={member.role}
+                              onChange={(e) => {
+                                const newMembers = [...teamMembers];
+                                newMembers[index].role = e.target.value;
+                                setTeamMembers(newMembers);
+                              }}
+                              className="w-full text-xs font-semibold bg-slate-50 border border-slate-200 rounded p-1"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setTeamMembers([...teamMembers, { name: "New Member", id: "ID", role: "Role" }])}
+                          className="px-2 py-1 text-[9px] font-bold bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded"
+                        >
+                          + Add Member
+                        </button>
+                        {teamMembers.length > 1 && (
+                          <button
+                            onClick={() => setTeamMembers(teamMembers.slice(0, -1))}
+                            className="px-2 py-1 text-[9px] font-bold bg-rose-50 hover:bg-rose-100 border border-rose-255 text-rose-600 rounded"
+                          >
+                            - Remove Member
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-4">
+                      {teamMembers.map((member, index) => {
+                        const initials = member.name.trim().split(' ').map(n => n.charAt(0)).join('').slice(0, 2).toUpperCase() || "ST";
+                        return (
+                          <div key={index} className="bg-gradient-to-r from-slate-50/50 to-emerald-50/20 hover:from-emerald-50/35 border border-slate-200 hover:border-emerald-200 p-4 rounded-xl shadow-3xs transition-all flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-3.5">
+                              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-250 flex items-center justify-center text-emerald-800 font-extrabold text-xs shrink-0 shadow-2xs">
+                                {initials}
+                              </div>
+                              <div className="space-y-1">
+                                <h4 className="text-xs font-black text-slate-900 leading-tight tracking-tight">{member.name}</h4>
+                                <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold text-slate-500 font-mono">
+                                  <span className="bg-white px-2 py-0.5 rounded border border-slate-150">ID/Roll: <strong className="text-slate-800">{member.id}</strong></span>
+                                  <span>•</span>
+                                  <span>CSE Department</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-[9.5px] bg-emerald-600 text-white font-extrabold rounded-md py-1 px-3 shadow-3xs uppercase tracking-wider text-center">
+                              {member.role}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
               </div>
-
             </div>
           )}
 
@@ -2290,27 +2506,15 @@ export default function App() {
       </main>
 
       {/* 3. Footer branding */}
-      <footer className="bg-slate-900 border-t border-slate-800 text-slate-400 text-xs py-6 mt-12">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <footer className="bg-slate-900 border-t border-slate-800 text-slate-400 text-xs py-6 mt-12 w-full">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-center md:text-left">
-            <p className="font-bold text-slate-200 flex items-center justify-center md:justify-start gap-1">
-              National Plant Protection & Pathology surveillance
+            <p className="font-bold text-slate-200">
+              Deep Learning Framework for Dragon Fruit and Leaf Quality Assessment.
             </p>
-            <p className="text-[10.5px] mt-0.5 text-slate-400 font-medium">Computer Vision Research Project • Department of Digital Agronomy and AI</p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span className="p-1 px-3 bg-slate-800 rounded-lg text-[10px] font-semibold text-emerald-400 border border-emerald-800/40">
-              Web Client Engine Validated
-            </span>
-            <span className="p-1 px-3 bg-slate-800 rounded-lg text-[10px] font-semibold text-rose-400 border border-rose-800/40 flex items-center gap-1">
-              <Heart className="w-3 h-3 text-rose-500 fill-rose-500" />
-              Agronomists Trusted
-            </span>
           </div>
         </div>
       </footer>
-
     </div>
   );
 }
