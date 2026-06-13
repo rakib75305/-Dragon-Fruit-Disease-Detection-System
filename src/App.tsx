@@ -25,7 +25,9 @@ import {
   GraduationCap,
   Users,
   Award,
-  Camera
+  Camera,
+  Database,
+  Lock
 } from 'lucide-react';
 import * as tf from '@tensorflow/tfjs';
 
@@ -958,29 +960,26 @@ export default function App() {
       // Compress image first to be under 40-50KB before writing to database or localStorage
       compressImage(base64data, 350, 350)
         .then(async (compressedBase64) => {
-          if (isAdmin) {
-            try {
-              const res = await fetch('/api/disease-images', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${adminPasscode}`
-                },
-                body: JSON.stringify({
-                  key: compositeKey,
-                  image_data: compressedBase64
-                })
-              });
-              
-              if (!res.ok) {
-                const data = await res.json().catch(() => ({}));
-                throw new Error(data.error || 'Failed to save changes on the server.');
-              }
-              console.log('Image saved centrally in the database.');
-            } catch (err: any) {
-              console.error('Database Sync Error:', err);
-              alert('Database Sync Error: ' + err.message);
+          try {
+            const res = await fetch('/api/disease-images', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                key: compositeKey,
+                image_data: compressedBase64
+              })
+            });
+            
+            if (!res.ok) {
+              const data = await res.json().catch(() => ({}));
+              throw new Error(data.error || 'Failed to save changes on the server.');
             }
+            console.log('Image saved centrally in the database.');
+          } catch (err: any) {
+            console.error('Database Sync Error:', err);
+            alert('Database Sync Error: ' + err.message);
           }
 
           // Update local component state
@@ -1006,27 +1005,24 @@ export default function App() {
   };
 
   const handleResetCustomSampleImage = async (compositeKey: string) => {
-    if (isAdmin) {
-      try {
-        const res = await fetch('/api/disease-images/delete', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${adminPasscode}`
-          },
-          body: JSON.stringify({ key: compositeKey })
-        });
-        
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(data.error || 'Failed to delete on the server.');
-        }
-        console.log('Image deleted centrally from Database.');
-      } catch (err: any) {
-        console.error('Database Delete Error:', err);
-        alert('Database Update Error: ' + err.message);
-        return;
+    try {
+      const res = await fetch('/api/disease-images/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ key: compositeKey })
+      });
+      
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to delete on the server.');
       }
+      console.log('Image deleted centrally from Database.');
+    } catch (err: any) {
+      console.error('Database Delete Error:', err);
+      alert('Database Update Error: ' + err.message);
+      return;
     }
 
     // Update local state
@@ -1972,16 +1968,16 @@ export default function App() {
             Thesis & Academy Portal
           </button>
           <button 
-            id="nav-btn-admin"
+            id="nav-btn-db-status"
             onClick={() => setIsShowingAdminModal(true)}
-            className={`ml-auto flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold rounded-lg transition-all shrink-0 border uppercase tracking-wider self-center my-1 ${
-              isAdmin 
-                ? 'border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100/60' 
-                : 'border-slate-300 text-slate-600 bg-slate-50 hover:bg-slate-100'
+            className={`ml-auto flex items-center gap-1.5 px-3.5 py-1.5 text-[10px] font-bold rounded-lg transition-all shrink-0 border uppercase tracking-wider self-center my-1 ${
+              dbConfig.supabaseConnected && dbConfig.tableExists
+                ? 'border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100' 
+                : 'border-yellow-200 text-yellow-700 bg-yellow-50 hover:bg-yellow-100'
             }`}
           >
-            <Shield className="w-3.5 h-3.5" />
-            {isAdmin ? 'Admin: Active' : 'Admin Panel'}
+            <Database className="w-3.5 h-3.5 shrink-0" />
+            {dbConfig.supabaseConnected && dbConfig.tableExists ? 'Database: Live (সংযুক্ত)' : 'Database: Local'}
           </button>
         </div>
       </nav>
@@ -2728,7 +2724,14 @@ export default function App() {
                                 className="w-full h-full object-cover absolute inset-0"
                                 referrerPolicy="no-referrer"
                               />
-                              {isAdmin && (
+                              {customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] && (
+                                <div className="absolute top-2 right-2 bg-slate-900/85 backdrop-blur-md px-2 py-0.5 rounded border border-amber-500/30 text-amber-400 text-[8px] font-bold flex items-center gap-1 select-none z-10 shadow-xs">
+                                  <Lock className="w-2.5 h-2.5" />
+                                  <span>Locked</span>
+                                </div>
+                              )}
+                              
+                              {!customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] ? (
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-2">
                                   <label className="p-1 px-2.5 bg-white text-[10px] font-black rounded shadow-sm text-slate-800 hover:bg-slate-50 transition-all cursor-pointer flex items-center gap-1">
                                     <span>📷</span> Upload Image
@@ -2744,15 +2747,22 @@ export default function App() {
                                     />
                                   </label>
                                 </div>
+                              ) : (
+                                <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-2 text-center text-white space-y-1">
+                                  <Lock className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                                  <span className="text-[9.5px] font-bold">Locked Specimen</span>
+                                  <span className="text-[8px] text-slate-300 px-1 leading-normal">This image was uploaded and cannot be replaced or deleted anymore.</span>
+                                </div>
                               )}
                             </div>
-                            {isAdmin && customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] && (
-                              <button
-                                onClick={() => handleResetCustomSampleImage(`${selectedEncycloGroup}_${selectedEncycloDisease}`)}
-                                className="block w-full text-[9px] font-bold text-red-500 hover:text-red-700 hover:underline text-center cursor-pointer"
-                              >
-                                Reset to Default (পূর্বাবস্থায় ফিরে যান)
-                              </button>
+                            {customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] ? (
+                              <p className="block w-full text-[9px] font-bold text-amber-600 text-center flex items-center justify-center gap-1">
+                                <Lock className="w-2.5 h-2.5" /> Specimen Lock Active (পরিবর্তন অক্ষম)
+                              </p>
+                            ) : (
+                              <p className="block w-full text-[9px] font-medium text-slate-400 text-center">
+                                💡 Hover to upload your custom specimen image
+                              </p>
                             )}
                           </div>
                         </div>
@@ -2972,7 +2982,7 @@ export default function App() {
                           {supervisorName.split(' ').pop()?.charAt(0) || "S"}
                         </div>
                         <div className="space-y-1.5">
-                          <span className="text-[9px] font-black tracking-widest text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full uppercase leading-none inline-block">
+                          <span className="text-[9px] font-black tracking-widest text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full uppercase leading-none inline-block font-mono">
                             Supervisor
                           </span>
                           <h4 className="text-xs font-black text-slate-900 leading-snug">{supervisorName}</h4>
@@ -2983,7 +2993,7 @@ export default function App() {
 
                       {/* Co-Supervisor Box */}
                       <div className="bg-gradient-to-r from-emerald-50/10 to-slate-50/30 border border-slate-200 rounded-xl p-4 shadow-3xs flex gap-4 items-start">
-                        <div className="w-11 h-11 rounded-xl bg-emerald-550 bg-emerald-600 text-white flex items-center justify-center shrink-0 font-extrabold text-sm shadow-sm">
+                        <div className="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 font-extrabold text-sm shadow-sm">
                           {cosupervisorName.split(' ').pop()?.charAt(0) || "C"}
                         </div>
                         <div className="space-y-1.5">
@@ -3113,7 +3123,7 @@ export default function App() {
         </div>
       </main>
 
-      {/* 3. Footer branding */}
+      {/* 4. Footer branding */}
       <footer className="bg-slate-900 border-t border-slate-800 text-slate-400 text-xs py-6 mt-12 w-full">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-center md:text-left">
@@ -3153,9 +3163,9 @@ export default function App() {
                 const activeDis = dataObj[selectedEncycloDisease];
                 if (!activeDis) return <div className="text-slate-400 text-center py-12">No profile found.</div>;
 
-                const activeBrandColor = selectedEncycloGroup === 'leaf' ? 'text-dragon-green' : 'text-dragon-red';
-                const activeBgLight = selectedEncycloGroup === 'leaf' ? 'bg-emerald-50/50' : 'bg-rose-50/50';
-                const activeBorderColor = selectedEncycloGroup === 'leaf' ? 'border-emerald-100' : 'border-rose-100';
+                 const activeBrandColor = selectedEncycloGroup === 'leaf' ? 'text-dragon-green' : 'text-dragon-red';
+                 const activeBgLight = selectedEncycloGroup === 'leaf' ? 'bg-emerald-50/50' : 'bg-rose-50/50';
+                 const activeBorderColor = selectedEncycloGroup === 'leaf' ? 'border-emerald-100' : 'border-rose-100';
 
                 return (
                   <div className="space-y-6">
@@ -3187,7 +3197,7 @@ export default function App() {
                     {/* Middle display block: Image + Description */}
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                       <div className="md:col-span-5 space-y-2">
-                        <span className="text-[10px] uppercase tracking-wider font-bold text-slate-455">Sample Image from Dataset (রোগের নমুনা ছবি)</span>
+                        <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Sample Image from Dataset (রোগের নমুনা ছবি)</span>
                         <div className="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm aspect-video sm:aspect-square bg-slate-105 bg-slate-100 flex flex-col justify-end group min-h-[220px]">
                           <img 
                             src={customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] || activeDis.sampleImage} 
@@ -3195,31 +3205,44 @@ export default function App() {
                             className="w-full h-full object-cover absolute inset-0"
                             referrerPolicy="no-referrer"
                           />
-                          {isAdmin && (
-                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/90 via-slate-950/60 to-transparent p-3 pt-10 flex flex-col gap-2 z-10 opacity-90 group-hover:opacity-100 transition-opacity duration-300">
-                              <label className="w-full py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-lg text-[11px] font-black text-center cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1 shadow-sm border border-emerald-500/20">
-                                📷 Upload Dataset Image (আপনার ইমেজ দিন)
-                                <input 
-                                  type="file" 
-                                  accept="image/*" 
-                                  className="hidden" 
-                                  onChange={(e) => {
-                                    if (e.target.files && e.target.files[0]) {
-                                      handleCustomSampleImageUpload(`${selectedEncycloGroup}_${selectedEncycloDisease}`, e.target.files[0]);
-                                    }
-                                  }}
-                                />
-                              </label>
-                              {customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] && (
-                                <button
-                                  onClick={() => handleResetCustomSampleImage(`${selectedEncycloGroup}_${selectedEncycloDisease}`)}
-                                  className="w-full text-[10px] font-bold text-red-300 hover:text-red-200 hover:underline text-center cursor-pointer"
-                                >
-                                  Reset to Default (পূর্বাবস্থায় ফিরে যান)
-                                </button>
-                              )}
+                          {customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] && (
+                            <div className="absolute top-2 right-2 bg-slate-900/85 backdrop-blur-md px-2.5 py-1 rounded border border-amber-500/30 text-amber-400 text-[10px] font-bold flex items-center gap-1 select-none z-10 shadow-sm">
+                              <Lock className="w-3.5 h-3.5" />
+                              <span>Locked / সংরক্ষিত</span>
                             </div>
                           )}
+                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/90 via-slate-950/60 to-transparent p-4 pt-10 flex flex-col gap-2 z-10 opacity-90 group-hover:opacity-100 transition-opacity duration-300">
+                            {customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] ? (
+                              <div className="text-center space-y-1">
+                                <div className="inline-flex items-center gap-1 text-amber-400 bg-amber-950/40 border border-amber-500/20 rounded px-2.5 py-0.5 text-[9px] font-bold mx-auto">
+                                  <Lock className="w-3 h-3" />
+                                  <span>Locked to Prevent Unauthorized Changes</span>
+                                </div>
+                                <p className="text-[10px] text-slate-300 font-semibold leading-normal">
+                                  This specimen image was custom-uploaded and is now permanently locked for public consistency.
+                                </p>
+                              </div>
+                            ) : (
+                              <>
+                                <label className="w-full py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-lg text-[11px] font-black text-center cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1 shadow-sm border border-emerald-500/20">
+                                  📷 Upload Dataset Image (আপনার ইমেজ দিন)
+                                  <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    className="hidden" 
+                                    onChange={(e) => {
+                                      if (e.target.files && e.target.files[0]) {
+                                        handleCustomSampleImageUpload(`${selectedEncycloGroup}_${selectedEncycloDisease}`, e.target.files[0]);
+                                      }
+                                    }}
+                                  />
+                                </label>
+                                <p className="text-[9px] text-slate-300 text-center font-bold">
+                                  💡 Note: Once uploaded, the custom image is locked and cannot be changed or reset.
+                                </p>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
 
@@ -3418,7 +3441,7 @@ CREATE POLICY "Allow service/anon write access" ON public.disease_images
                 </div>
 
                 <div className="text-center space-y-2">
-                  <p className="text-xs text-slate-500">You are logged in as administrator. You can now hover over disease encyclopedia images to upload or reset them for all users.</p>
+                  <p className="text-xs text-slate-500">You are logged in as administrator. You can hover over empty disease encyclopedia images to upload them. Note that once an image is uploaded, it is permanently locked and cannot be modified or reset to preserve website consistency.</p>
                   <button
                     type="button"
                     onClick={handleAdminLogout}

@@ -227,14 +227,18 @@ app.get("/api/disease-images", async (req, res) => {
   }
 });
 
-// Save or Update a disease image (Admin only)
-app.post("/api/disease-images", verifyAdminPasscode, async (req, res) => {
+// Save or Update a disease image (Public / Collaborative - One-time upload restriction)
+app.post("/api/disease-images", async (req, res) => {
   const { key, image_data } = req.body;
   if (!key || !image_data) {
     return res.status(400).json({ error: "Missing key or image_data parameter." });
   }
 
   try {
+    const existingImages = await getDiseaseImages();
+    if (existingImages[key]) {
+      return res.status(403).json({ error: "This image has already been uploaded once and is locked. It cannot be replaced or edited." });
+    }
     await saveDiseaseImage(key, image_data);
     res.json({ success: true, message: `Successfully updated image for key: ${key}` });
   } catch (err: any) {
@@ -242,14 +246,18 @@ app.post("/api/disease-images", verifyAdminPasscode, async (req, res) => {
   }
 });
 
-// Reset or Delete a disease image (Admin only)
-app.post("/api/disease-images/delete", verifyAdminPasscode, async (req, res) => {
+// Reset or Delete a disease image (Public / Collaborative - Prevent deletion of locked images)
+app.post("/api/disease-images/delete", async (req, res) => {
   const { key } = req.body;
   if (!key) {
     return res.status(400).json({ error: "Missing key parameter." });
   }
 
   try {
+    const existingImages = await getDiseaseImages();
+    if (existingImages[key]) {
+      return res.status(403).json({ error: "This image has been locked and cannot be deleted or reset." });
+    }
     await deleteDiseaseImage(key);
     res.json({ success: true, message: `Successfully reset image for key: ${key}` });
   } catch (err: any) {
