@@ -2732,21 +2732,23 @@ export default function App() {
                               )}
                               
                               {!customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] ? (
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-2">
-                                  <label className="p-1 px-2.5 bg-white text-[10px] font-black rounded shadow-sm text-slate-800 hover:bg-slate-50 transition-all cursor-pointer flex items-center gap-1">
-                                    <span>📷</span> Upload Image
-                                    <input 
-                                      type="file" 
-                                      accept="image/*" 
-                                      className="hidden" 
-                                      onChange={(e) => {
-                                        if (e.target.files && e.target.files[0]) {
-                                          handleCustomSampleImageUpload(`${selectedEncycloGroup}_${selectedEncycloDisease}`, e.target.files[0]);
-                                        }
-                                      }}
-                                    />
-                                  </label>
-                                </div>
+                                isAdmin ? (
+                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-2">
+                                    <label className="p-1 px-2.5 bg-white text-[10px] font-black rounded shadow-sm text-slate-800 hover:bg-slate-50 transition-all cursor-pointer flex items-center gap-1">
+                                      <span>📷</span> Upload Image
+                                      <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        className="hidden" 
+                                        onChange={(e) => {
+                                          if (e.target.files && e.target.files[0]) {
+                                            handleCustomSampleImageUpload(`${selectedEncycloGroup}_${selectedEncycloDisease}`, e.target.files[0]);
+                                          }
+                                        }}
+                                      />
+                                    </label>
+                                  </div>
+                                ) : null
                               ) : (
                                 <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-2 text-center text-white space-y-1">
                                   <Lock className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
@@ -2759,9 +2761,13 @@ export default function App() {
                               <p className="block w-full text-[9px] font-bold text-amber-600 text-center flex items-center justify-center gap-1">
                                 <Lock className="w-2.5 h-2.5" /> Specimen Lock Active (পরিবর্তন অক্ষম)
                               </p>
+                            ) : isAdmin ? (
+                              <p className="block w-full text-[9px] font-bold text-emerald-600 text-center">
+                                💡 Admin: Hover to upload your custom specimen image
+                              </p>
                             ) : (
                               <p className="block w-full text-[9px] font-medium text-slate-400 text-center">
-                                💡 Hover to upload your custom specimen image
+                                Standard reference specimen image
                               </p>
                             )}
                           </div>
@@ -3216,13 +3222,13 @@ export default function App() {
                               <div className="text-center space-y-1">
                                 <div className="inline-flex items-center gap-1 text-amber-400 bg-amber-950/40 border border-amber-500/20 rounded px-2.5 py-0.5 text-[9px] font-bold mx-auto">
                                   <Lock className="w-3 h-3" />
-                                  <span>Locked to Prevent Unauthorized Changes</span>
+                                  <span>Locked to Prevent Changes</span>
                                 </div>
                                 <p className="text-[10px] text-slate-300 font-semibold leading-normal">
-                                  This specimen image was custom-uploaded and is now permanently locked for public consistency.
+                                  This specimen image was custom-uploaded and is now permanently locked.
                                 </p>
                               </div>
-                            ) : (
+                            ) : isAdmin ? (
                               <>
                                 <label className="w-full py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-lg text-[11px] font-black text-center cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1 shadow-sm border border-emerald-500/20">
                                   📷 Upload Dataset Image (আপনার ইমেজ দিন)
@@ -3241,6 +3247,12 @@ export default function App() {
                                   💡 Note: Once uploaded, the custom image is locked and cannot be changed or reset.
                                 </p>
                               </>
+                            ) : (
+                              <div className="text-center pb-1">
+                                <p className="text-[10px] text-slate-300 font-bold">
+                                  ✓ Standard Reference Image
+                                </p>
+                              </div>
                             )}
                           </div>
                         </div>
