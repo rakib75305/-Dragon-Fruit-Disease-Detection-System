@@ -72,24 +72,24 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
     name: "Anthracnose",
     scientificName: "Colletotrichum gloeosporioides",
     severity: "High",
-    description: "One of the most persistent fungal leaf and stem diseases in dragon fruit. It attacks the succulent segments of climbing stems, leading to massive tissue decay, sunken lesions, and physical breakage. High humidity combined with splashing rain speeds up spore dispersal.\n\n[রোগের বর্ণনা: ড্রাগন ফলের একটি অত্যন্ত মারাত্মক এবং ক্ষতিকর ছত্রাকজনিত রোগ। এটি গাছের মাংসল কান্ডকে আক্রমণ করে, যার ফলে কান্ডে গর্তযুক্ত বাদামী দাগ দেখা দেয় এবং কান্ড পচে ধসে যায়। অতিরিক্ত আর্দ্রতা ও বৃষ্টির পানি দাগগুলোকে দ্রুত বাড়াতে সাহায্য করে।]",
+    description: "A common fungal disease that attacks the stems of dragon fruit. It causes deep, sunken spots, rotten stems, and tissue decay. It spreads quickly in warm, wet, and humid weather.\n\n[রোগের বর্ণনা: ড্রাগন ফলের একটি অত্যন্ত মারাত্মক এবং ক্ষতিকর ছত্রাকজনিত রোগ। এটি গাছের মাংসল কান্ডকে আক্রমণ করে, যার ফলে কান্ডে গর্তযুক্ত বাদামী দাগ দেখা দেয় এবং কান্ড পচে ধসে যায়। অতিরিক্ত আর্দ্রতা ও বৃষ্টির পানি দাগগুলোকে দ্রুত বাড়াতে সাহায্য করে।]",
     symptoms: [
-      "Reddish-brown, sunken concentric circular spots on the stem ribs. (কাশি ও বৃষ্টির পর কান্ডে লালচে-বাদামী রঙের গর্তযুক্ত বৃত্তাকার দাগ তৈরি হওয়া।)",
-      "Orange or pink-colored sticky spore masses oozing from lesions in humid weather. (ভিজা ও স্যাঁতস্যাঁতে আবহাওয়ায় আক্রান্ত স্থানে আঠালো হলদে বা গোলাকার আঠার মতো ছত্রাক বীজ গুঁড়া দেখা দেওয়া।)",
-      "Rapid coalescing of small spots leading to brittle, papery, rotting stem corridors. (আক্রান্ত দাগগুলো দ্রুত বড় হয়ে পরস্পর মিলে কাণ্ডটিকে সম্পূর্ণ পচিয়ে ফেলে ও কঙ্কালের মতো করে দেয়।)"
+      "Reddish-brown, sunken round spots on the stem. (কাশি ও বৃষ্টির পর কান্ডে লালচে-বাদামী রঙের গর্তযুক্ত বৃত্তাকার দাগ তৈরি হওয়া।)",
+      "Sticky orange or pink spots on the stem when the weather is rainy or humid. (ভিজা ও স্যাঁতস্যাঁতে আবহাওয়ায় আক্রান্ত স্থানে আঠালো হলদে বা গোলাকার আঠার মতো ছত্রাক বীজ গুঁড়া দেখা দেওয়া।)",
+      "Small spots grow and join together, causing the entire stem to rot and break. (আক্রান্ত দাগগুলো দ্রুত বড় হয়ে পরস্পর মিলে কাণ্ডটিকে সম্পূর্ণ পচিয়ে ফেলে ও কঙ্কালের মতো করে দেয়।)"
     ],
     treatment: {
       cultural: [
-        "Prune infected segments 2 inches into healthy wood, burn or bury away from the plot. (আক্রান্ত কান্ড সুস্থ অংশ থেকে ২ ইঞ্চি নিচে কেটে তাৎক্ষণিকভাবে পুড়িয়ে ফেলুন বা মাটির নিচে পুঁতে ফেলুন।)",
-        "Ensure dynamic pruning to maximize sunlight penetrability and lower canopy humidity. (বছরে অন্তত একবার হালকা ছাঁটাই করে আলো-বাতাস চলাচলের ব্যবস্থা করুন যাতে ছত্রাক না ছড়াতে পারে।)",
-        "Sanitize all pruning blades of clippers in 10% bleaching wash between plant cuts. (একটি গাছ কাটার পর কাটার কাঁচি বা ব্লেডটি ব্লিচিং দ্রবণ বা ডেটল পানিতে ভালোমতো রিংস করুন।)"
+        "Cut off infected stems below the diseased part, then burn or bury them far away. (আক্রান্ত কান্ড সুস্থ অংশ থেকে ২ ইঞ্চি নিচে কেটে তাৎক্ষণিকভাবে পুড়িয়ে ফেলুন বা মাটির নিচে পুঁতে ফেলুন।)",
+        "Prune excess branches regularly to let in sunlight and fresh air. (বছরে অন্তত একবার হালকা ছাঁটাই করে আলো-বাতাস চলাচলের ব্যবস্থা করুন যাতে ছত্রাক না ছড়াতে পারে।)",
+        "Clean pruning tools with disinfectant or soap water before using them on other plants. (একটি গাছ কাটার পর কাটার কাঁচি বা ব্লেডটি ব্লিচিং দ্রবণ বা ডেটল পানিতে ভালোমতো রিংস করুন।)"
       ],
       chemical: [
-        "Spray systemic Azoxystrobin + Difenoconazole (e.g., Amistar Top @ 1ml/L) or Propiconazole (Tilt @ 0.5ml/L) at first sight. (আক্রমণ শুরু মাত্রাতিরিক্ত হলে ডিফেনোকোনাজল ও অ্যাজক্সিস্ট্রবিন যুক্ত ছত্রাকনাশক প্রতি লিটার পানিতে ১ মিলি হারে স্প্রে করুন।)",
-        "Apply preventive protective Copper Hydroxide or Carbendazim (e.g., Autostin @ 2g/L) before monsoon season. (বর্ষাকাল শুরু হওয়ার আগে প্রতিরোধক হিসেবে কপার হাইড্রোক্সাইড বা কার্বেন্ডাজিম পানিতে মিশিয়ে পুরো কান্ড ভালোমতো ধুয়ে দিন।)"
+        "Spray systemic Azoxystrobin + Difenoconazole or Propiconazole at first sight. (আক্রমণ শুরু মাত্রাতিরিক্ত হলে ডিফেনোকোনাজল ও অ্যাজক্সিস্ট্রবিন যুক্ত ছত্রাকনাশক প্রতি লিটার পানিতে ১ মিলি হারে স্প্রে করুন।)",
+        "Apply protective Copper Hydroxide or Carbendazim fungicide before the monsoon season. (বর্ষাকাল শুরু হওয়ার আগে প্রতিরোধক হিসেবে কপার হাইড্রোক্সাইড বা কার্বেন্ডাজিম পানিতে মিশিয়ে পুরো কান্ড ভালোমতো ধুয়ে দিন।)"
       ],
       biological: [
-        "Spray bio-fungicides based on Bacillus subtilis or Trichoderma viride to suppress active spore colonization. (অনুমোদিত ট্রাইকোডার্মা বা ব্যাসিলাস সাবটিলিস যুক্ত জৈব বালাইনাশক কান্ডে নিয়মিত ব্যবহার করুন।)"
+        "Spray organic bio-fungicides regularly to protect stems from fungal growth. (অনুমোদিত ট্রাইকোডার্মা বা ব্যাসিলাস সাবটিলিস যুক্ত জৈব বালাইনাশক কান্ডে নিয়মিত ব্যবহার করুন।)"
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1628352081506-83c43123ed6d?auto=format&fit=crop&q=80&w=500"
@@ -98,19 +98,19 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
     name: "Black Spot",
     scientificName: "Phomopsis hylocereus",
     severity: "Medium",
-    description: "Fungal disease that causes hard, crusty, scabby jet-black lesions along the rib margins of dragon fruit stems. Reduces photosynthetic activity and ruins plant vigor.\n\n[রোগের বর্ণনা: একটি ছত্রাকজনিত রোগ যা কান্ডের ধার ঘেঁষে শক্ত, খসখসে এবং কুচকুচে কালো রঙের দাগ বা ফুসকুড়ির মতো ক্ষত তৈরি করে। এটি গাছের সালোকসংশ্লেষণ কমিয়ে দেয় কিন্তু কান্ডকে সম্পূর্ণ গলিয়ে ধ্বংস করে না।]",
+    description: "A fungal disease that causes hard, crusty, dark black spots on the edges of dragon fruit stems. It can slow down plant growth and reduce overall strength.\n\n[রোগের বর্ণনা: একটি ছত্রাকজনিত রোগ যা কান্ডের ধার ঘেঁষে শক্ত, খসখসে এবং কুচকুচে কালো রঙের দাগ বা ফুসকুড়ির মতো ক্ষত তৈরি করে। এটি গাছের সালোকসংশ্লেষণ কমিয়ে দেয় কিন্তু কান্ডকে সম্পূর্ণ গলিয়ে ধ্বংস করে না।]",
     symptoms: [
-      "Circular coal-black pustules which feel corky and raised on physical touch. (কাণ্ডের তীক্ষ্ণ ধার বরাবর সামান্য উঁচু খসখসে কয়লার মতো কুচকুচে কালো রঙের দাগ হওয়া।)",
-      "Development of scabby black spots that cause localized tissue constriction. (দাগগুলো ধীরে ধীরে শক্ত খোসার মতো হয়ে কান্ডের কিনারাকে খাটো করে দেয়।)",
-      "Slight chlorotic yellow ring-like halos surrounding the dry black lesion boundaries. (কালো ক্ষতচিহ্নের চারপাশে হালকা হলুদ রঙের বলয় দেখা যাওয়া।)"
+      "Rough, raised, black round spots along the edge of the stem. (কাণ্ডের তীক্ষ্ণ ধার বরাবর সামান্য উঁচু খসখসে কয়লার মতো কুচকুচে কালো রঙের দাগ হওয়া।)",
+      "Hard, scabby black spots that cause the stem tissue to shrink. (দাগগুলো ধীরে ধীরে শক্ত খোসার মতো হয়ে কান্ডের কিনারাকে খাটো করে দেয়।)",
+      "Slight yellow rings surrounding the black spots. (কালো ক্ষতচিহ্নের চারপাশে হালকা হলুদ রঙের বলয় দেখা যাওয়া।)"
     ],
     treatment: {
       cultural: [
-        "Clear all under-canopy wild weeds to minimize orchard humidity levels. (গাছের চারপাশের আগাছা পরিষ্কার রাখুন যাতে স্যাঁতস্যাঁতে পরিবেশ না তৈরি হয়।)",
-        "Select strictly disease-free healthy stem cuttings for establishing new blocks. (নতুন চারা তৈরির জন্য শুধুমাত্র শতভাগ সুস্থ ও রোগমুক্ত কান্ড থেকে কাটিং সংগ্রহ করুন।)"
+        "Remove weeds around the plant base to lower humidity and moisture. (গাছের চারপাশের আগাছা পরিষ্কার রাখুন যাতে স্যাঁতস্যাঁতে পরিবেশ না তৈরি হয়।)",
+        "Use only healthy, disease-free stems for growing new plants. (নতুন চারা তৈরির জন্য শুধুমাত্র শতভাগ সুস্থ ও রোগমুক্ত কান্ড থেকে কাটিং সংগ্রহ করুন।)"
       ],
       chemical: [
-        "Spray protectant Mancozeb (e.g., Indofil M-45 @ 2g/L) or Chlorothalonil comprehensively every 14 days during warm rains. (আক্রান্ত গাছে ম্যানকোজেব বা ক্লোরোথ্যালোনিল গ্রূপের ছত্রাকনাশক প্রতি লিটার পানিতে ২ গ্রাম হারে মিশিয়ে স্প্রে করুন।)"
+        "Spray protective fungicide every two weeks during warm, rainy weather. (আক্রান্ত গাছে ম্যানকোজেব বা ক্লোরোথ্যালোনিল গ্রূপের ছত্রাকনাশক প্রতি লিটার পানিতে ২ গ্রাম হারে মিশিয়ে স্প্রে করুন।)"
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&q=80&w=500"
@@ -119,22 +119,22 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
     name: "Brown Spot",
     scientificName: "Bipolaris cactivora",
     severity: "High",
-    description: "A highly aggressive and destructive fungal pathogen. It causes water-soaked reddish-brown lesions that rapidly expand and can merge, liquefying soft stem ribs in a matter of days.\n\n[রোগের বর্ণনা: অত্যন্ত আক্রমণাত্মক ও ধ্বংসাত্মক ছত্রাকজনিত রোগ। এটি মূলত কান্ডে পানি-ভেজা লালচে-বাদামী দাগ সৃষ্টি করে যা অতি দ্রুত ছড়িয়ে পড়ে পুরো কান্ডকে পচিয়ে ফেলতে পারে।]",
+    description: "A highly aggressive and destructive fungal disease. It causes rapid, reddish-brown water-soaked spots that spread quickly, turning soft stems into rot within days.\n\n[রোগের বর্ণনা: অত্যন্ত আক্রমণাত্মক ও ধ্বংসাত্মক ছত্রাকজনিত রোগ। এটি মূলত কান্ডে পানি-ভেজা লালচে-বাদামী দাগ সৃষ্টি করে যা অতি দ্রুত ছড়িয়ে পড়ে পুরো কান্ডকে পচিয়ে ফেলতে পারে।]",
     symptoms: [
-      "Small circular yellow spots that quickly enlarge into prominent dark brown lesions with orange borders. (ছোট ছোট হলুদ দাগ দেখতে দেখতে লালচে-বাদামি ক্ষতে পরিণত হওয়া এবং এর চারপাশে উজ্জ্বল কমলা বা黄色 বর্ডার সৃষ্টি হওয়া।)",
-      "Lesion core changes to concave greyish-white with tiny black pepper-like fruiting bodies. (ক্ষতের মাঝখান অংশটি ভেতরের দিকে দেবে গিয়ে ধূসর-সাদা বর্ণ ধারণ করে এবং কালো বিন্দু দেখা যায়।)",
-      "Severe stem collapse when lesions encircle the central woody skeleton. (রোগটি কাণ্ডকে চারপাশ থেকে আক্রমণ করলে মধ্যভাগের শক্ত তন্তু ছাড়া সমস্ত কাণ্ড ধসে পড়ে।)"
+      "Small yellow spots that quickly turn into large dark brown spots with orange borders. (ছোট ছোট হলুদ দাগ দেখতে দেখতে লালচে-বাদামি ক্ষতে পরিণত হওয়া এবং এর চারপাশে উজ্জ্বল কমলা বা黄色 বর্ডার সৃষ্টি হওয়া।)",
+      "The center of the spot turns sunken and grey-white with tiny black dots. (ক্ষতের মাঝখান অংশটি ভেতরের দিকে দেবে গিয়ে ধূসর-সাদা বর্ণ ধারণ করে এবং কালো বিন্দু দেখা যায়।)",
+      "Severe stem collapse when the spots encircle the central branch of the plant. (রোগটি কাণ্ডকে চারপাশ থেকে আক্রমণ করলে মধ্যভাগের শক্ত তন্তু ছাড়া সমস্ত কাণ্ড ধসে পড়ে।)"
     ],
     treatment: {
       cultural: [
-        "Perform aggressive pruning during dry, clear days; never prune under morning dew or fog. (রোদ উজ্জ্বল দিনে জোরালোভাবে আক্রান্ত অংশ কেটে ফেলুন; কুয়াশাযুক্ত বা ভেজা সকালে কান্ড ছাঁটাই করবেন না।)",
-        "Maintain optimal soil nitrogen levels, as excess nitrogen triggers over-succulence prone to Bipolaris. (অতিরিক্ত ইউরিয়া বা নাইট্রোজেন সার ব্যবহার কমান, কারণ কান্ড অতিরিক্ত নরম হলে এই রোগ বেশি হয়।)"
+        "Prune and clear stems on dry, sunny days. Avoid pruning in wet mornings or high humidity. (রোদ উজ্জ্বল দিনে জোরালোভাবে আক্রান্ত অংশ কেটে ফেলুন; কুয়াশাযুক্ত বা ভেজা সকালে কান্ড ছাঁটাই করবেন না।)",
+        "Avoid using too much nitrogen fertilizer, as soft stems are easily attacked by fungal diseases. (অতিরিক্ত ইউরিয়া বা নাইট্রোজেন সার ব্যবহার কমান, কারণ কান্ড অতিরিক্ত নরম হলে এই রোগ বেশি হয়।)"
       ],
       chemical: [
-        "Spray Iprodione (e.g., Rovral @ 2g/L) or Tebuconazole + Trifloxystrobin (Nativo @ 0.5g/L) instantly. (আক্রমণ দেখা দিলে অতি দ্রুত রোভরাল অথবা নাটিভো প্রতি লিটার পানিতে যথাক্রমে ২ গ্রাম এবং ০.৫ গ্রাম হারে মিশিয়ে স্প্রে করুন।)"
+        "Spray systemic fungicides immediately when spots appear. (আক্রমণ দেখা দিলে অতি দ্রুত রোভরাল অথবা নাটিভো প্রতি লিটার পানিতে যথাক্রমে ২ গ্রাম এবং ০.৫ গ্রাম হারে মিশিয়ে স্প্রে করুন।)"
       ],
       biological: [
-        "Dust cut stems with dry sulfur powder or treat with Trichoderma harzianum paste to heal shears. (ছাঁটাইকৃত কান্ডে সালফার পাউডার বা ট্রাইকোডার্মা পাউডারের ঘন প্রলেপ দিয়ে রাখুন ক্ষত শুকানোর জন্য।)"
+        "Coat pruned parts with organic paste or sulfur powder to heal cuts. (ছাঁটাইকৃত কান্ডে সালফার পাউডার বা ট্রাইকোডার্মা পাউডারের ঘন প্রলেপ দিয়ে রাখুন ক্ষত শুকানোর জন্য।)"
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1599599810769-bcde5a160d32?auto=format&fit=crop&q=80&w=500"
@@ -143,7 +143,7 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
     name: "Healthy Stem",
     scientificName: "Hylocereus undatus",
     severity: "None",
-    description: "The cactus stem exhibits excellent health. Cell turgor pressure is high, the cuticle barrier is fully intact, chlorophyll distribution is completely uniform, and the tissue is free of pathogenic spots.\n\n[রোগের বর্ণনা: ড্রাগন গাছের সম্পূর্ণ সুস্থ ও সবল কান্ড। কান্ডের কোষের রসস্ফীতি স্বাভাবিক, ত্বক মসৃণ এবং ক্লোরোফিলের বা সবুজ কণার বন্টন নিখুঁত। কোনো ক্ষতচিহ্ন বা রোগ সংক্রামক জীবাণুর উপস্থিতি নেই।]",
+    description: "The cactus stem is fully healthy, green, and completely free of spots or diseases.\n\n[রোগের বর্ণনা: ড্রাগন গাছের সম্পূর্ণ সুস্থ ও সবল কান্ড। কান্ডের কোষের রসস্ফীতি স্বাভাবিক, ত্বক মসৃণ এবং ক্লোরোফিলের বা সবুজ কণার বন্টন নিখুঁত। কোনো ক্ষতচিহ্ন বা রোগ সংক্রামক জীবাণুর উপস্থিতি নেই।]",
     symptoms: [
       "Firm, plump dark-green stem sectors with thick protective skin. (কান্ড টানটান, সতেজ, গাঢ় সবুজ এবং খোসা পুরু ও সুরক্ষামূলক ক্যুটিকলযুক্ত।)",
       "Clean rib margins with active aerial roots clinging perfectly to the post. (কান্ডের ধারগুলো নিখুঁত, দাগহীন ও খুঁটি আঁকড়ে ধরার জন্য মজবুত শিকড়যুক্ত।)",
@@ -151,15 +151,15 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
     ],
     treatment: {
       cultural: [
-        "Ensure scheduled deep irrigation only when the top 2 inches of soil are totally dry. (গোড়ার মাটি পরীক্ষা করে কেবল মাত্র শুকিয়ে গেলেই পরিমিত সেচ দিন; ভেজা মাটিতে সেচ পরিহার করুন।)",
-        "Apply organic fertilizer rich in composted cow dung, vermicompost, and trace potash annually. (বছরে অন্তত একবার পর্যাপ্ত জৈব সার যেমন পচা গোবর, কেঁচো সার বা ভার্মিকম্পোস্ট এবং কিছুটা পটাশ সার ব্যবহার করুন।)",
-        "Maintain optimal spacing to ensure clear airflow and maximum sunlight capture. (ছায়া মুক্ত স্থানে গাছটি রোপণ করুন এবং অপ্রয়োজনীয় ডাল ছাঁটাই করে আলো-বাতাস নিশ্চিত করুন।)"
+        "Water only when the soil is dry to prevent root rot. (গোড়ার মাটি পরীক্ষা করে কেবল মাত্র শুকিয়ে গেলেই পরিমিত সেচ দিন; ভেজা মাটিতে সেচ পরিহার করুন।)",
+        "Use healthy organic compost and potash fertilizer annually. (বছরে অন্তত একবার পর্যাপ্ত জৈব সার যেমন পচা গোবর, কেঁচো সার বা ভার্মিকম্পোস্ট এবং কিছুটা পটাশ সার ব্যবহার করুন।)",
+        "Space the plants properly to ensure fresh airflow and maximum sunlight. (ছায়া মুক্ত স্থানে গাছটি রোপণ করুন এবং অপ্রয়োজনীয় ডাল ছাঁটাই করে আলো-বাতাস নিশ্চিত করুন।)"
       ],
       chemical: [
-        "Do not apply synthetic chemical fungicides; let beneficial microorganisms grow. (কোনো ছত্রাকনাশক স্প্রে করার প্রয়োজন নেই। প্রাকৃতিকভাবে গাছকে নিজের রোগপ্রতিরোধ ক্ষমতা গড়তে দিন।)"
+        "No chemical fungicides are needed for healthy plants. (কোনো ছত্রাকনাশক স্প্রে করার প্রয়োজন নেই। প্রাকৃতিকভাবে গাছকে নিজের রোগপ্রতিরোধ ক্ষমতা গড়তে দিন।)"
       ],
       biological: [
-        "Inoculate soil with mycorrhizae and Trichoderma to shield roots naturally. (মাটিতে উপকারী ট্রাইকোডার্মা বা মাইকোরাইজা মিশিয়ে রাখুন শিকড়কে নিরাপদ ও পুষ্টি শোষণে শক্তিশালী করতে।)"
+        "Use organic bio-agents inside the soil to protect roots naturally. (মাটিতে উপকারী ট্রাইকোডার্মা বা মাইকোরাইজা মিশিয়ে রাখুন শিকড়কে নিরাপদ ও পুষ্টি শোষণে শক্তিশালী করতে।)"
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1578160112054-954a67602b88?auto=format&fit=crop&q=80&w=500"
@@ -168,23 +168,23 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
     name: "Root Rot",
     scientificName: "Phytophthora & Fusarium spp.",
     severity: "High",
-    description: "A subterranean fungal infection usually triggered by excessive watering, poor drainage, or compacted clay soils. Leads to the complete decay of the feed roots, starving the overhead stem.",
+    description: "A disease affecting underground roots, usually caused by overwatering or poor drainage. It causes the roots to decay, starving the stems.",
     symptoms: [
-      "Stems display a general pale yellowing and look wrinkled or dehydrated despite heavy soil moisture.",
-      "Secondary stem tissues feel limp, soft, and thin.",
-      "Roots turn dark brown, mushy, and the outer skin layers slide off easily."
+      "Stems turn pale yellow, wrinkled, and look dry even when the soil is wet.",
+      "Green stem parts feel soft, thin, and limp.",
+      "Roots turn dark brown, mushy, and lose their outer skin easily."
     ],
     treatment: {
       cultural: [
-        "Immediately suspend watering and expose the root zone to promote drying if early.",
-        "Re-plant in raised beds with sandy, fast-draining soil mixes.",
-        "Prune back top-heavy canopies to match the reduced root absorption capacity."
+        "Stop watering immediately and let the root soil dry out.",
+        "Grow plants in raised beds with sandy, well-draining soil mixes.",
+        "Prune heavy branches to reduce stress on the damaged root system."
       ],
       chemical: [
-        "Apply metalaxyl or fosetyl-aluminium soil drench around the base of the infected plant."
+        "Apply protective fungicide or soil drench around the base of the infected plant."
       ],
       biological: [
-        "Treat soil with Trichoderma viride to target and suppress pathogenic Phytophthora spores."
+        "Treat the soil with organic bio-protective formulas to suppress bad spores."
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1509789019225-d99b2a1a24d5?auto=format&fit=crop&q=80&w=500"
@@ -193,21 +193,21 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
     name: "Soft Rot",
     scientificName: "Erwinia chrysanthemi (Bacterial)",
     severity: "High",
-    description: "A highly destructive bacterial disease that enters plants through physical wounds, clip cuts, or pest bites. Secretes cell-wall degrading enzymes that water-liquefy the tissues in days.\n\n[রোগের বর্ণনা: এটি অত্যন্ত মারাত্মক এবং দ্রুত আক্রমণকারী একটি ব্যাকটেরিয়াজনিত নরম-পচন রোগ। জীবাণুটি কীটপতঙ্গের কামড় বা ডাল ছাঁটাইয়ের কাটা অংশের ক্ষতের মাধ্যমে গাছে প্রবেশ করে কান্ডটিকে তরল পিচ্ছিল মণ্ডে পরিণত করে।]",
+    description: "A highly destructive bacterial disease that enters the plant through cuts, insect bites, or wounds. It liquefies the stem into a soft, mushy, smelly paste within days.\n\n[রোগের বর্ণনা: এটি অত্যন্ত মারাত্মক এবং দ্রুত আক্রমণকারী একটি ব্যাকটেরিয়াজনিত নরম-পচন রোগ। জীবাণুটি কীটপতঙ্গের কামড় বা ডাল ছাঁটাইয়ের কাটা অংশের ক্ষতের মাধ্যমে গাছে প্রবেশ করে কান্ডটিকে তরল পিচ্ছিল মণ্ডে পরিণত করে।]",
     symptoms: [
-      "Water-soaked, slippery, brownish patches expanding rapidly along the stem. (কান্ডে পানি ভেজা, পিচ্ছিল ও হলদে-বাদামী রঙের নরম দাগ তৈরি হওয়া যা দ্রুত বড় হতে থাকে।)",
-      "Slimy, mushy, liquefying tissues that exude a localized foul decay odor. (আক্রান্ত ডালটি গলে পচা গন্ধযুক্ত কাদার মতো পিচ্ছিল তরলে পরিণত হওয়া।)",
-      "The entire outer flesh slides off, leaving only the hard central woody skeleton. (কান্ডের বাইরের সমস্ত সবুজ মাংসল অংশ গলে ঝরে পড়ে ও কেবল ভেতরের শক্ত সাদা কাঠিটি অবশিষ্ট থাকে।)"
+      "Water-soaked, slippery, brown spots that spread very fast on the stem. (কান্ডে পানি ভেজা, পিচ্ছিল ও হলদে-বাদামী রঙের নরম দাগ তৈরি হওয়া যা দ্রুত বড় হতে থাকে।)",
+      "Slimy, soft, rotting areas that release a bad smell. (আক্রান্ত ডালটি গলে পচা গন্ধযুক্ত কাদার মতো পিচ্ছিল তরলে পরিণত হওয়া।)",
+      "The outer flesh melts and falls off, leaving only the white wooden column of the stem. (কান্ডের বাইরের সমস্ত সবুজ মাংসল অংশ গলে ঝরে পড়ে ও কেবল ভেতরের শক্ত সাদা কাঠিটি অবশিষ্ট থাকে।)"
     ],
     treatment: {
       cultural: [
-        "Surgically cut out rotten spots 2 inches into completely healthy tissue, then dust cut faces with lime. (আক্রান্ত অংশ সুস্থ অংশ থেকে অন্তত ২ ইঞ্চি নিচে কেটে ফেলে দিন এবং কাটা অংশে চুন বা বোর্দোপেস্ট লেপে দিন।)",
-        "Abstain from pruning during rainy days or high-humidity morning periods. (বৃষ্টির দিনে বা স্যাঁতস্যাঁতে আবহাওয়ায় ডাল ছাঁটাই করা থেকে বিরত থাকুন।)",
-        "Strictly control mealybugs and ants, as they create entry-way punctures for Erwinia. (কাণ্ডে কামড় বসানো পোকামাকড় যেমন- মিলিবাগ, পিঁপড়া এবং বিটল দমন করুন।)"
+        "Cut out rotten spots cleanly below the infected part, then apply lime or copper paste. (আক্রান্ত অংশ সুস্থ অংশ থেকে অন্তত ২ ইঞ্চি নিচে কেটে ফেলে দিন এবং কাটা অংশে চুন বা বোর্দোপেস্ট লেপে দিন।)",
+        "Never prune or cut stems during humid mornings or rainy days. (বৃষ্টির দিনে বা স্যাঁতস্যাঁতে আবহাওয়ায় ডাল ছাঁটাই করা থেকে বিরত থাকুন।)",
+        "Control insects and ants, as they make punctures where bacteria enter the plant. (কাণ্ডে কামড় বসানো পোকামাকড় যেমন- মিলিবাগ, পিঁপড়া এবং বিটল দমন করুন।)"
       ],
       chemical: [
-        "Spray protectant Copper Oxychloride or Copper Hydroxide (e.g. Cupravit @ 2g/L). (প্রতিরোধক হিসেবে কপার অক্সিক্লোরাইড লিটারে ২ গ্রাম হারে পানিতে গুলে স্প্রে কান্ড ধুয়ে দিন।)",
-        "In severe cases, spray systemic Kasugamycin or Streptomycin sulphate under expert supervision. (পচন বেশি হলে কাসুগামাইসিন বা স্ট্রেপ্টোমাইসিন সালফেট গ্রুপের ব্যাকটেরিয়া নাশক ব্যবহার করতে হবে।)"
+        "Spray protective copper-based fungicide to wash the stems. (প্রতিরোধক হিসেবে কপার অক্সিক্লোরাইড লিটারে ২ গ্রাম হারে পানিতে গুলে স্প্রে কান্ড ধুয়ে দিন।)",
+        "Apply suitable antibacterial sprays under severe infection. (পচন বেশি হলে কাসুগামাইসিন বা স্ট্রেপ্টোমাইসিন সালফেট গ্রুপের ব্যাকটেরিয়া নাশক ব্যবহার করতে হবে।)"
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1550950158-d0d960dff51b?auto=format&fit=crop&q=80&w=500"
@@ -216,19 +216,19 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
     name: "Stem Rot",
     scientificName: "Fusarium oxysporum",
     severity: "Medium",
-    description: "Vascular fungal infection that slowly destroys the structural tissue of the stem ribs. Often progresses over several weeks, especially during cool, wet microclimatic patterns.",
+    description: "A fungal infection that slowly destroys the structure of the stems. It grows during cool, wet seasons.",
     symptoms: [
-      "Dry, corky brown rot developing inward from stem margins.",
-      "Flesh turns brittle and yellowish with occasional pinkish-white powdery mold.",
-      "Stunting of the climbing vine and failure to initiate flowers."
+      "Dry, corky brown rot spreading inward from stem edges.",
+      "Flesh turns dry, fragile, and yellowish with occasional white mold.",
+      "The plant stops growing and fails to develop flowers."
     ],
     treatment: {
       cultural: [
-        "Perform tactical cuts to remove localized rot and discard immediately.",
-        "Avoid wounding stems during fertilizer application or weeding."
+        "Cut off localized dry rot parts and discard immediately.",
+        "Avoid wounding stems when applying fertilizer or weeding."
       ],
       chemical: [
-        "Apply systemic fungicides like thiophanate-methyl or azoxystrobin directly to stems."
+        "Apply suitable systemic fungicides directly to the infected stems."
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1502472545319-85141233f303?auto=format&fit=crop&q=80&w=500"
@@ -237,24 +237,24 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
     name: "Stem Canker",
     scientificName: "Neoscytalidium dimidiatum",
     severity: "High",
-    description: "Considered the single most devastating disease impacting dragon fruit plantations globally. It forms hard, woody, elevated lesions that severely block the internal vascular flow of water and nutrients, causing extensive canopy dieback and vine snapping.\n\n[রোগের বর্ণনা: এটি বিশ্বব্যাপী ড্রাগন চাষীদের জন্য সবচেয়ে ধ্বংসাত্মক রোগ হিসেবে বিবেচিত। এই রোগের কারণে কান্ডে শক্ত, খসখসে এবং কাঠের মতো বড় ক্ষত বা থোকা থোকা ফুসকুড়ি সৃষ্টি হয়। এর ফলে গাছের খাদ্য ও পানি চলাচলের সংবহন কলা অবরুদ্ধ হয়ে পুরো ডাল শুকিয়ে মারা যায় বা ভেঙে পড়ে।]",
+    description: "One of the most destructive diseases in dragon fruit farming. It creates hard, rough, woody spots that block the flow of food and water, drying out branches and causing them to snap easily.\n\n[রোগের বর্ণনা: এটি বিশ্বব্যাপী ড্রাগন চাষীদের জন্য সবচেয়ে ধ্বংসাত্মক রোগ হিসেবে বিবেচিত। এই রোগের কারণে কান্ডে শক্ত, খসখসে এবং কাঠের মতো বড় ক্ষত বা থোকা থোকা ফুসকুড়ি সৃষ্টি হয়। এর ফলে গাছের খাদ্য ও পানি চলাচলের সংবহন কলা অবরুদ্ধ হয়ে পুরো ডাল শুকিয়ে মারা যায় বা ভেঙে পড়ে।]",
     symptoms: [
-      "Small sunken yellow spots that rapidly mature into prominent, rough, greyish-brown crusty cankers. (কান্ডে প্রথমে ছোট হলুদ দাগ এবং পরবর্তীতে তা বড় ধূসর-বাদামী রঙের খসখসে ক্যাঙ্কারে রূপ নেয়।)",
-      "Formations of black crusts (pycnidia) and soot-like powdery spores inside older cankers. (বয়স্ক বা পুরনো ক্ষতের ভেতরের দিকে ঘন কালো রঙের গুটি বা ছত্রাক পাউডার তৈরি হওয়া।)",
-      "Vines become dry and extremely brittle, snapping easily at canker joints. (আক্রান্ত ডালগুলো অতি শুষ্ক ও ভঙ্গুর হয়ে সামান্য বাতাসে বা ফলের ভারে জোড়মুখ থেকে ভেঙে ঝরে পড়ে।)"
+      "Small yellow spots that quickly turn into large, rough, grey-brown crusty cankers. (কান্ডে প্রথমে ছোট হলুদ দাগ এবং পরবর্তীতে তা বড় ধূসর-বাদামী রঙের খসখসে ক্যাঙ্কারে রূপ নেয়।)",
+      "Black crusts and soot-like dark powder forming inside older cankers. (বয়স্ক বা পুরনো ক্ষতের ভেতরের দিকে ঘন কালো রঙের গুটি বা ছত্রাক পাউডার তৈরি হওয়া।)",
+      "Stems become dry, extremely fragile, and snap easily when windy or heavy with fruits. (আক্রান্ত ডালগুলো অতি শুষ্ক ও ভঙ্গুর হয়ে সামান্য বাতাসে বা ফলের ভারে জোড়মুখ থেকে ভেঙে ঝরে পড়ে।)"
     ],
     treatment: {
       cultural: [
-        "Enforce strict quarantine; never take propagation cuttings from an orchard with known Canker history. (আক্রান্ত বাগান থেকে সায়নর বা চারা ছাঁটাই করে নতুন রোপণ করবেন না।)",
-        "Aggressively prune infected stems down to clean wood and immediately burn or deeply bury residues. (আক্রান্ত অংশ নিখুঁতভাবে সুস্থ ডাল পর্যন্ত ছাঁটাই করে অবিলম্বে বাগানের বাইরে পুড়িয়ে ধ্বংস করুন।)",
-        "Optimize spacing and prune lower drooping branch segments to expose the canopy to wind desiccation. (ডালপালা ছাঁটাই করে গাছকে সূর্যের আলো এবং বাতাসের কাছে উন্মুক্ত করুন যাতে আর্দ্রতা জমে না থাকে।)"
+        "Never use cutting pieces from stems of infected orchards. (আক্রান্ত বাগান থেকে সায়নর বা চারা ছাঁটাই করে নতুন রোপণ করবেন না।)",
+        "Prune infected stems aggressively down to clean, healthy wood, then burn or bury them. (আক্রান্ত অংশ নিখুঁতভাবে সুস্থ ডাল পর্যন্ত ছাঁটাই করে অবিলম্বে বাগানের বাইরে পুড়িয়ে ধ্বংস করুন।)",
+        "Keep the branches well-spaced to allow proper wind and sunlight penetration. (ডালপালা ছাঁটাই করে গাছকে সূর্যের আলো এবং বাতাসের কাছে উন্মুক্ত করুন যাতে আর্দ্রতা জমে না থাকে।)"
       ],
       chemical: [
-        "Spray with highly effective combination systemic fungicidal active ingredients such as Difenoconazole + Azoxystrobin (Amistar Top @ 1ml/L) or Tebuconazole + Trifloxystrobin (Nativo @ 0.5g/L) during rainy periods. (বর্ষা ও স্যাঁতস্যাঁতে আবহাওয়ায় নিয়মিত ডিফেনোকোনাজল ও অ্যাজক্সিস্ট্রবিন যুক্ত ছত্রাকনাশক প্রতি লিটার পানিতে ১ মিলি হারে স্প্রে করুন।)",
-        "Coat prune cuts with copper oxychloride paste or Bordeaux paste for wound healing. (ডাল ছাঁটাই করার পর কাটা ক্ষতস্থানে তরল বোর্দো মিশ্রণ বা কপার পেস্টের প্রলেপ লাগিয়ে দিন নতুন সংক্রমণ রোধে।)"
+        "Spray highly effective systemic fungicides during rainy seasons. (বর্ষা ও স্যাঁতস্যাঁতে আবহাওয়ায় নিয়মিত ডিফেনোকোনাজল ও অ্যাজক্সিস্ট্রবিন যুক্ত ছত্রাকনাশক প্রতি লিটার পানিতে ১ মিলি হারে স্প্রে করুন।)",
+        "Coat pruned cuts with copper paste or protective paste to prevent new infections. (ডাল ছাঁটাই করার পর কাটা ক্ষতস্থানে তরল বোর্দো মিশ্রণ বা কপার পেস্টের প্রলেপ লাগিয়ে দিন নতুন সংক্রমণ রোধে।)"
       ],
       biological: [
-        "Inoculate soil with Bacillus strains and spray Endophytic antagonistic yeast formulas onto newly pruned nodes. (ছাঁটাইকৃত কান্ডে এবং গুড়ায় উপকারী ব্যাকটেরিয়া বা জৈব ব্যাসিলাস সাবটিলিস স্প্রে করুন।)"
+        "Spray organic biocontrol yeast or beneficial bacteria onto freshly pruned nodes. (ছাঁটাইকৃত কান্ডে এবং গুড়ায় উপকারী ব্যাকটেরিয়া বা জৈব ব্যাসিলাস সাবটিলিস স্প্রে করুন।)"
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1517722014278-c256a91a6fba?auto=format&fit=crop&q=80&w=500"
@@ -263,19 +263,19 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
     name: "Twig Blight",
     scientificName: "Phomopsis species",
     severity: "Medium",
-    description: "This fungus focuses on the growing terminals or tips of climbing stems, typically drying them out and preventing the vegetative extension of the vines.",
+    description: "A fungal disease that attacks the growing tips of dragon fruit stems, drying them out and stopping growth.",
     symptoms: [
-      "Yellowing of the youngest climbing vine tips.",
-      "Progression into a paper-thin, dry, light-brown necrosis creeping down from the terminal nodes.",
-      "Clear demarcation lines between the live green tissue and the dead twig tip."
+      "Yellowing of the youngest growing vine tips.",
+      "The tips turn into paper-thin, dry, light-brown areas.",
+      "Clear lines visible between the green healthy parts and the dried dead tips."
     ],
     treatment: {
       cultural: [
-        "Snip off dry tips at least 3 inches below the yellow transition line.",
-        "Optimize nitrogen nutrition to prevent abnormally soft, over-succulent tip development."
+        "Cut off dry tips below the yellow part.",
+        "Use moderate nitrogen fertilizer to avoid making the tips too soft."
       ],
       chemical: [
-        "Spray protectant fungicides such as copper oxychloride or dithiocarbamates."
+        "Spray protective copper-based or general fungicides."
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1463936575829-25148e1db1b8?auto=format&fit=crop&q=80&w=500"
@@ -284,19 +284,19 @@ const leafDiseasesData: Record<string, DiseaseDetail> = {
     name: "White Spot",
     scientificName: "Fusarium semitectum",
     severity: "Low",
-    description: "Superficial spots usually triggered by minor pest bites or sunburn stress. It causes cosmetic blemishes but rarely impacts long-term vine health if properly managed.",
+    description: "Light spots on the stem, often caused by small insect bites or mild sunburn. It does not hurt overall stem health.",
     symptoms: [
-      "Small, chalky white or cream-colored circular spots on the outer skin.",
-      "Centered around mini blemishes or physical stem punctures.",
-      "Spots remain isolated and do not lead to deep-tissue soft liquification."
+      "Small, chalky white or cream-colored circular spots on the green skin.",
+      "Centered around small insect bites or tiny physical punctures.",
+      "Spots remain isolated and do not lead to deep-tissue rotting."
     ],
     treatment: {
       cultural: [
-        "Deploy organic pest control methods to keep scale insects and spider mites within thresholds.",
-        "Ensure trees have slight shade screens if planted in extreme desert climates to prevent UV sunburn."
+        "Keep insect pests like scale insects or mites under control.",
+        "Provide slight shading in extremely hot sun to prevent sunburn."
       ],
       chemical: [
-        "Apply light copper washes or sulfur sprays if the white spots cover massive surface areas."
+        "Apply light copper wash or sulfur sprays if spots are covering large areas."
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?auto=format&fit=crop&q=80&w=500"
@@ -309,24 +309,24 @@ const fruitDiseasesData: Record<string, DiseaseDetail> = {
     name: "Fruit Anthracnose",
     scientificName: "Colletotrichum gloeosporioides",
     severity: "High",
-    description: "Extremely severe pre- and post-harvest disease. It ruins the aesthetic appeal of the premium pink dragon fruit skin and penetrates deep, soft rot into the sweet white or red pulp.\n\n[রোগের বর্ণনা: এটি ফুল আসা থেকে শুরু করে ফল পাকা পর্যন্ত যেকোনো সময় আক্রমণকারী একটি চরম ক্ষতিকর রোগ। এটি পাকা ফলের লাল খোসার উপর বিশ্রী গর্ত তৈরি করে এবং পচনকে ফলের ভেতরের সুস্বাদু শাঁস পর্যন্ত নিয়ে যায়, যার ফলে পুরো ফলটি খাওয়ার অনুপযোগী হয়ে পড়ে।]",
+    description: "A common and severe disease affecting dragon fruit before and after harvest. It causes soft, rotting spots on the skin which can grow deep into the sweet flesh.\n\n[রোগের বর্ণনা: এটি ফুল আসা থেকে শুরু করে ফল পাকা পর্যন্ত যেকোনো সময় আক্রমণকারী একটি চরম ক্ষতিকর রোগ। এটি পাকা ফলের লাল খোসার উপর বিশ্রী গর্ত তৈরি করে এবং পচনকে ফলের ভেতরের সুস্বাদু শাঁস পর্যন্ত নিয়ে যায়, যার ফলে পুরো ফলটি খাওয়ার অনুপযোগী হয়ে পড়ে।]",
     symptoms: [
-      "Water-soaked, circular, dark sunken lesions forming on the fruit rind. (ফলের খোসার উপর পানি-ভেজা কালচে গোলাকার দেবে যাওয়া ক্ষত তৈরি হওয়া।)",
-      "Sticky orange or salmon-colored gelatinous spore oozes in humid post-harvest storage. (স্যাঁতস্যাঁতে আবহাওয়ায় বা গুদামে রাখার পর ক্ষতস্থানে ছোট ছোট গোলাপি বা সিঁদুরে রঙের আঠালো আঠালো ছত্রাক বীজ দানা তৈরি হওয়া।)",
+      "Water-soaked, dark sunken spots on the fruit skin. (ফলের খোসার উপর পানি-ভেজা কালচে গোলাকার দেবে যাওয়া ক্ষত তৈরি হওয়া।)",
+      "Sticky orange or pink spots opening on the skin in humid storage rooms. (স্যাঁতস্যাঁতে আবহাওয়ায় বা গুদামে রাখার পর ক্ষতস্থানে ছোট ছোট গোলাপি বা সিঁদুরে রঙের আঠালো আঠালো ছত্রাক বীজ দানা তৈরি হওয়া।)",
       "The underlying fruit pulp decomposes into soft, bitter mush. (আক্রান্ত ক্ষতর ভেতরের শাঁস অংশটি গলে তেতো হয়ে যায় ও গন্ধ ছড়ায়।)"
     ],
     treatment: {
       cultural: [
-        "Prune and keep trees airy so young developing fruit buttons dry quickly after rain. (ডালপালা নিয়মিত ছাঁটাই করুন যাতে বৃষ্টির পর ভেজা ফল খুব দ্রুত শুকিয়ে যেতে পারে।)",
-        "Harvest fruits at the correct physiological maturity; avoid leaving over-ripe fruits on the vine. (ফল অতিরিক্ত পাকার আগেই সঠিক সময়ে গাছ থেকে সংগ্রহ করুন।)",
-        "Carefully disinfect all scissors and crates in sanitizing soap before harvesting. (ফল সংগ্রহের আগে সমস্ত কাঁচি, কন্টেইনার এবং ঝুড়ি পরিষ্কার সাবান পানি দিয়ে জীবাণুমুক্ত করুন।)"
+        "Prune branch sections so the growing fruits dry quickly after rainfall. (ডালপালা নিয়মিত ছাঁটাই করুন যাতে বৃষ্টির পর ভেজা ফল খুব দ্রুত শুকিয়ে যেতে পারে।)",
+        "Harvest fruits at the correct timing; do not leave over-ripe fruits on the branches. (ফল অতিরিক্ত পাকার আগেই সঠিক সময়ে গাছ থেকে সংগ্রহ করুন।)",
+        "Carefully clean and sanitize all cutting tools and baskets before harvest. (ফল সংগ্রহের আগে সমস্ত কাঁচি, কন্টেইনার এবং ঝুড়ি পরিষ্কার সাবান পানি দিয়ে জীবাণুমুক্ত করুন।)"
       ],
       chemical: [
-        "Spray Carbendazim or Azoxystrobin (Amistar Top @ 1ml/L) during flowering and early fruit setting. (গাছে ফুল ফোটার সময় এবং ফল গুটি বাঁধার পর ডিফেনোকোনাজল ও অ্যাজক্সিস্ট্রবিন ছত্রাকনাশক স্প্রে করুন।)",
-        "Use hot-water immersion treatments (48°C for 2 minutes) post-harvest to suppress latent spores. (সংগ্রহের পর ফলকে হালকা কুসুম গরম পানিতে (৪৮ ডিগ্রি সেলসিয়াস) ২ মিনিট ডুবিয়ে রেখে বাতাসে শুকিয়ে সংরক্ষণ করুন latent spore মারার জন্য।)"
+        "Spray protective fungicide during flowering and early fruit setting. (গাছে ফুল ফোটার সময় এবং ফল গুটি বাঁধার পর ডিফেনোকোনাজল ও অ্যাজক্সিস্ট্রবিন ছত্রাকনাশক স্প্রে করুন।)",
+        "Use clean hot water treatment after harvesting to store fruits safely. (সংগ্রহের পর ফলকে হালকা কুসুম গরম পানিতে (৪৮ ডিগ্রি সেলসিয়াস) ২ মিনিট ডুবিয়ে রেখে বাতাসে শুকিয়ে সংরক্ষণ করুন latent spore মারার জন্য।)"
       ],
       biological: [
-        "Coat ripening fruits with chitosan-containing bio-coatings to delay fungal germination. (ফলের উপর প্রাকৃতিক কাইটোসান বায়ো-কোটিং প্রলেপ দিন যা ছত্রাক থেকে ফলকে প্রাকৃতিকভাবে বাঁচায়।)"
+        "Apply organic protective coatings on ripening fruits to delay decay. (ফলের উপর প্রাকৃতিক কাইটোসান বায়ো-কোটিং প্রলেপ দিন যা ছত্রাক থেকে ফলকে প্রাকৃতিকভাবে বাঁচায়।)"
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1603512215902-6413847fc212?auto=format&fit=crop&q=80&w=500"
@@ -335,19 +335,19 @@ const fruitDiseasesData: Record<string, DiseaseDetail> = {
     name: "Fruit Brown Spot",
     scientificName: "Bipolaris cactivora",
     severity: "Medium",
-    description: "Affects the external scales and rind of the fruit. While the internal flesh often remains perfectly sweet, the heavily blemished exterior destroys any commercial export grade.",
+    description: "Affects the external skin and rind of the fruit. While the internal sweet flesh is usually safe, the marked exterior ruins the fruit quality and appearance.",
     symptoms: [
-      "Small circular brown specks developing on safety scales and fruit peel.",
-      "Spots form hard, crusty, dark scab centers with bright yellow outer margins.",
-      "Dry, leather-like texture of the skin surrounding the spots."
+      "Small circular brown specks developing on fruit skin.",
+      "Spots form hard, dark scab centers with bright yellow margins.",
+      "The skin around the spots becomes dry and rough."
     ],
     treatment: {
       cultural: [
-        "Protect maturing fruits by draping paper or specialized mesh crop bags during wet window development.",
-        "Maintain clean field rows by destroying diseased stems."
+        "Protect growing fruits by wrapping them with paper or mesh bags during wet seasons.",
+        "Keep the orchard floor clean by gathering and destroying any fallen, infected stems."
       ],
       chemical: [
-        "Apply chlorothalonil or carbendazim at flower-bud-burst and repeat at petal drop."
+        "Apply a protective spray when flowers start budding and opening."
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1563206767-5b18f218e8de?auto=format&fit=crop&q=80&w=500"
@@ -356,23 +356,23 @@ const fruitDiseasesData: Record<string, DiseaseDetail> = {
     name: "Fruit Rot",
     scientificName: "Fusarium / Alternaria spp.",
     severity: "High",
-    description: "Highly aggressive fungal decay of mature fruit typically initiating at wounds from birds, bat claws, or intense UV sunburn. Spreads rapidly across picked boxes.\n\n[রোগের বর্ণনা: পাকা ফলের একটি আগ্রাসী পচনশীল রোগ যা সাধারণত পাখি, বাদুড়ের নখের আঁচড় বা মাত্রাতিরিক্ত কড়া রোদ বা সানবার্নের ক্ষতের মাধ্যমে ছড়ায়। এটি এক ফল থেকে অন্য ফলে ঝুড়ির ভেতরেও ছড়াতে পারে।]",
+    description: "An aggressive fungal decay of ripe fruit. It usually starts from wounds caused by birds, pests, or sunburn and spreads rapidly during storage.\n\n[রোগের বর্ণনা: পাকা ফলের একটি আগ্রাসী পচনশীল রোগ যা সাধারণত পাখি, বাদুড়ের নখের আঁচড় বা মাত্রাতিরিক্ত কড়া রোদ বা সানবার্নের ক্ষতের মাধ্যমে ছড়ায়। এটি এক ফল থেকে অন্য ফলে ঝুড়ির ভেতরেও ছড়াতে পারে।]",
     symptoms: [
-      "Fuzzy black, grey, or white cotton-like mycelial mold covering the skin surface. (ফলের খোসার উপর কালো, ছাই বা সাদা তুলার মতো তুলতুলে ছত্রাক স্তর ছড়িয়ে পড়া।)",
-      "The outer rind turns dark brown, collapses easily under mild finger pressure. (ফলের খোসা কালচে রঙ হয়ে যায় এবং হালকা আঙুলের চাপে ভেতরে দেবে তরল বের হয়।)",
-      "Fruit interior decomposes into a watery, sour, fermented liquid pulp. (ফলের অভ্যন্তরীণ শাঁস ভেঙে পানি হয়ে যায় এবং টক গাঁজন গন্ধ বের হয়।)"
+      "Soft, fuzzy white, grey, or black mold cover on the skin surface. (ফলের খোসার উপর কালো, ছাই বা সাদা তুলার মতো তুলতুলে ছত্রাক স্তর ছড়িয়ে পড়া।)",
+      "The outer rind turns dark brown and sinks easily when touched. (ফলের খোসা কালচে রঙ হয়ে যায় এবং হালকা আঙুলের চাপে ভেতরে দেবে তরল বের হয়।)",
+      "The inside of the fruit turns into a sour, fermented, liquid pulp. (ফলের অভ্যন্তরীণ শাঁস ভেঙে পানি হয়ে যায় এবং টক গাঁজন গন্ধ বের হয়।)"
     ],
     treatment: {
       cultural: [
-        "Bag developing fruit clusters on the trellis with protective breathable crop bags. (গাছে থাকা অবস্থায় ফলকে ছিদ্রযুক্ত ফ্রুট ব্যাগিং ক্যাপ দিয়ে ঢেকে রাখুন পাখি ও পোকামাকড় থেকে বাঁচাতে।)",
-        "Handle fruits with extreme gentleness during harvest to prevent nail scratches or mechanical drop impacts. (ফল কাটার সময় এবং হাতানোর সময় বিশেষ সতর্কতা অবলম্বন করুন যেন সামান্যতম আঁচড় না লাগে।)",
-        "Store and transport harvested fruits immediately under cool aeration at 10-14°C. (সংগ্রহের লাগামহীন পচন রোধে ফলগুলোকে ১০-১৪ ডিগ্রি সেলসিয়াস ঠাণ্ডা ও মৃদু বাতাসযুক্ত স্থানে রাখুন।)"
+        "Protect ripening fruits with breathable bags or covers. (গাছে থাকা অবস্থায় ফলকে ছিদ্রযুক্ত ফ্রুট ব্যাগিং ক্যাপ দিয়ে ঢেকে রাখুন পাখি ও পোকামাকড় থেকে বাঁচাতে।)",
+        "Handle fruits with extreme care during harvest to avoid scratches or drop damage. (ফল কাটার সময় এবং হাতানোর সময় বিশেষ সতর্কতা অবলম্বন করুন যেন সামান্যতম আঁচড় না লাগে।)",
+        "Store and transport harvested fruits in cool, well-ventilated areas. (সংগ্রহের লাগামহীন পচন রোধে ফলগুলোকে ১০-১৪ ডিগ্রি সেলসিয়াস ঠাণ্ডা ও মৃদু বাতাসযুক্ত স্থানে রাখুন।)"
       ],
       chemical: [
-        "Wash fruits post-harvest in peracetic acid or lightly ozonated sanitizer. (ফল বাস্কেটে ভরার আগে ফলগুলোকে হালকা কুসুম জীবাণুনাশক কিংবা হাইড্রোজেন পারক্সাইড সমৃদ্ধ মৃদু পানিতে ধুয়ে সম্পূর্ণ শুকিয়ে নিন।)"
+        "Wash harvested fruits with mild sanitized water and dry them completely. (ফল বাস্কেটে ভরার আগে ফলগুলোকে হালকা কুসুম জীবাণুনাশক কিংবা হাইড্রোজেন পারক্সাইড সমৃদ্ধ মৃদু পানিতে ধুয়ে সম্পূর্ণ শুকিয়ে নিন।)"
       ],
       biological: [
-        "Apply botanical extracts such as clove oil or cinnamon oil diluted sprays as post-harvest preservatives. (সংরক্ষণের আয়ু বাড়াতে ফল প্যাক করার আগে দারুচিনির তেল বা লবঙ্গের পানির হালকা স্প্রে করুন যা প্রাকৃতিকভাবে পচন রোধ করে।)"
+        "Use natural organic extracts, such as cinnamon or clove solutions, to extend storage life. (সংরক্ষণের আয়ু বাড়াতে ফল প্যাক করার আগে দারুচিনির তেল বা লবঙ্গের পানির হালকা স্প্রে করুন যা প্রাকৃতিকভাবে পচন রোধ করে।)"
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1525385437877-c9d300b99f36?auto=format&fit=crop&q=80&w=500"
@@ -381,23 +381,23 @@ const fruitDiseasesData: Record<string, DiseaseDetail> = {
     name: "Healthy Fruit",
     scientificName: "Hylocereus undatus",
     severity: "None",
-    description: "Premium, top-export grade dragon fruit. The rind shows fantastic color saturation, turgid scales, and no lesions of pathogenic origin. The flesh is dense, sweet, and highly rich in betalains.",
+    description: "Premium, healthy dragon fruit. The skin looks bright and fresh, with strong scales and no spots. The inside is sweet and juicy.",
     symptoms: [
-      "Crisp, vibrant crimson-pink skin with bright lime-green scale tips.",
-      "Extremely firm skin to the hand with a plump, symmetric shape and clean stem scars.",
-      "No spots, fuzzy molds, cuts, or wrinkly skin patches."
+      "Vibrant bright-pink skin with healthy lime-green scale tips.",
+      "Extremely firm and heavy fruit with a neat, symmetric shape.",
+      "Completely free of spots, mold, cuts, or wrinkles."
     ],
     treatment: {
       cultural: [
-        "Harvest early in the cool morning hours to maximize storage life.",
-        "Cut cleanly at the base of the fruit stalk leaving about 1 to 2 cm of joint attached.",
-        "Store in well-ventilated boxes with soft pulp liners to avoid transit bruises."
+        "Harvest early in the cool morning to keep fruits fresh longer.",
+        "Cut cleanly at the base of the stalk, leaving about 1 cm attached.",
+        "Pack in soft boxes to avoid bruises during travel."
       ],
       chemical: [
-        "No chemical sprays required. Enjoy organic, healthy, premium antioxidant-rich dragon fruit!"
+        "No chemical sprays are needed. Enjoy clean, healthy, organic fruits!"
       ],
       biological: [
-        "Incorporate natural bio-preservative chitosan coatings to preserve visual freshness during transit."
+        "Use natural organic coatings to keep the fruits looking fresh."
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1527325678964-54921661f988?auto=format&fit=crop&q=80&w=500"
@@ -406,20 +406,20 @@ const fruitDiseasesData: Record<string, DiseaseDetail> = {
     name: "Fruit Soft Rot",
     scientificName: "Erwinia carotovora (Bacterial)",
     severity: "High",
-    description: "Very aggressive post-harvest bacterial disease that liquifies fruit tissues. One leaking rotted fruit in a crate can rapidly dissolve entire shipping pallets under humid conditions.",
+    description: "An aggressive post-harvest bacterial disease that turns fruit into watery rot. One damaged fruit can quickly ruin other fruits in the same basket.",
     symptoms: [
-      "The fruit skin becomes soft, watery, and semi-translucent.",
-      "Watery fluid rich in bacterial spores drips under gravity when held.",
-      "Complete collapse of internal white/red pulp structure accompanied by gas bubbles and sour stench."
+      "The fruit skin turns soft, wet, and holds watery patches.",
+      "Watery liquid drips easily when picking up the rotting fruit.",
+      "The inner pulp collapses completely with bad odors."
     ],
     treatment: {
       cultural: [
-        "Discard any fruit displaying even pin-sized soft spots immediately.",
+        "Discard any fruit displaying even tiny soft spots immediately.",
         "Avoid harvesting fruits during heavy monsoonal rain events.",
-        "Perfect crop hygiene by washing sorting lines daily."
+        "Maintain clean harvesting baskets and washing lines."
       ],
       chemical: [
-        "Sanitize wash-water with controlled levels of active sodium hypochlorite (free chlorine)."
+        "Sanitize wash-water with protective cleaning solution."
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1601493700631-2b16fe4b4afc?auto=format&fit=crop&q=80&w=500"
@@ -428,19 +428,19 @@ const fruitDiseasesData: Record<string, DiseaseDetail> = {
     name: "Fruit White Spot",
     scientificName: "Fusarium semitectum",
     severity: "Low",
-    description: "Mild fungal surface speckling that limits itself to the outer epidermal cells of the pink rind. Does not degrade internal meat or taste qualities.",
+    description: "Mild superficial white spots that are limited only to the outer skin. Does not affect the sweet taste or internal flesh of the fruit.",
     symptoms: [
-      "Scattered chalky white spots localized on the fruit peel.",
-      "Slightly powdery dry texture on the spots.",
-      "Underlying fruit pulp is completely unaffected and healthy."
+      "Scattered dry white spots on the outer fruit peel.",
+      "Slightly powdery or dry texture on the white spots.",
+      "The underlying pulp remains completely sweet and healthy."
     ],
     treatment: {
       cultural: [
-        "Improve farm air-flow by pruning lower branches to prevent moisture trap areas.",
-        "Avoid packing fruits into crates while they are still wet from field dew."
+        "Improve airflow through the branches by pruning excess foliage.",
+        "Do not store or pack fruits while they are still wet with morning dew."
       ],
       chemical: [
-        "Apply organic copper soap inputs if white spot counts exceed commercial tolerance thresholds."
+        "Apply organic copper-based sprays if white spots crop up over large areas."
       ]
     },
     sampleImage: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&q=80&w=500"
@@ -1981,18 +1981,6 @@ export default function App() {
             <GraduationCap className="w-3.5 h-3.5" />
             Thesis & Academy Portal
           </button>
-          <button 
-            id="nav-btn-db-status"
-            onClick={() => setIsShowingAdminModal(true)}
-            className={`ml-auto flex items-center gap-1.5 px-3.5 py-1.5 text-[10px] font-bold rounded-lg transition-all shrink-0 border uppercase tracking-wider self-center my-1 ${
-              dbConfig.supabaseConnected && dbConfig.tableExists
-                ? 'border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100' 
-                : 'border-yellow-200 text-yellow-700 bg-yellow-50 hover:bg-yellow-100'
-            }`}
-          >
-            <Database className="w-3.5 h-3.5 shrink-0" />
-            {dbConfig.supabaseConnected && dbConfig.tableExists ? 'Database: Live (সংযুক্ত)' : 'Database: Local'}
-          </button>
         </div>
       </nav>
 
@@ -2363,6 +2351,24 @@ export default function App() {
               ) : ((activeTab === 'leaf' && leafPrediction) || (activeTab === 'fruit' && fruitPrediction)) ? (
                 (() => {
                   const activePrediction = activeTab === 'leaf' ? leafPrediction : fruitPrediction;
+                  
+                  if (activePrediction && activePrediction.confidence < 60) {
+                    return (
+                      <div id="results-panel-box" className="bg-amber-50/60 rounded-xl border border-amber-300 p-6 shadow-sm text-center relative font-sans">
+                        <div className="p-4 bg-amber-100 rounded-full inline-block mb-3 border border-amber-250">
+                          <AlertTriangle className="w-10 h-10 text-amber-600" />
+                        </div>
+                        <h3 className="text-base font-black text-amber-800 uppercase tracking-wider mb-2">Low Confidence Alert (কম নির্ভুলতা সতর্কতা)</h3>
+                        <p className="text-sm font-bold text-slate-800 leading-relaxed max-w-sm mx-auto p-1.5 bg-white/80 rounded border border-amber-200/50 shadow-3xs">
+                          ⚠️ This image does not appear to be a dragon fruit leaf or fruit. Please upload a clear photo of dragon fruit leaf or fruit.
+                        </p>
+                        <p className="text-[10.5px] font-semibold text-slate-500 mt-3 italic leading-normal">
+                          (মডেলের নির্ভুলতা মাত্র {activePrediction.confidence}% সনাক্ত হয়েছে, যা ৬০% এর নিচে। অনুগ্রহ করে ড্রাগন ফলের পাতা বা ফলের স্পষ্ট ছবি দিন।)
+                        </p>
+                      </div>
+                    );
+                  }
+
                   const dataMap = activeTab === 'leaf' ? leafDiseasesData : fruitDiseasesData;
                   const detail = dataMap[activePrediction!.className] || {
                     name: activePrediction!.className,
@@ -2884,12 +2890,6 @@ export default function App() {
                       <Settings className="w-3.5 h-3.5" />
                       {isEditingAcademic ? "Exit Editing View" : "Edit Academic Credentials"}
                     </button>
-                    {!isEditingAcademic && (
-                      <div className="text-xs text-emerald-300 bg-emerald-900/40 px-3 py-2 rounded-lg border border-emerald-500/20 flex items-center gap-1.5 select-none font-mono text-[9.5px]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span>Auto-saved to Browser LocalStorage</span>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -2986,9 +2986,6 @@ export default function App() {
                     </div>
                   )}
 
-                  <div className="text-[10.5px] text-slate-500 leading-normal mt-2 p-3 bg-slate-50 rounded-lg border border-slate-100 italic">
-                    "This software system implements advanced Convolutional Neural Network modeling configured explicitly to enable lightweight deep learning runs in real field scenarios directly from web browsers."
-                  </div>
                 </div>
 
                 {/* Team Members details Card */}
@@ -3021,7 +3018,7 @@ export default function App() {
                             />
                           </div>
                           <div>
-                            <label className="block text-[8px] uppercase font-bold text-slate-500">Student ID / Roll</label>
+                            <label className="block text-[8px] uppercase font-bold text-slate-500">Student ID</label>
                             <input
                               type="text"
                               value={member.id}
@@ -3070,22 +3067,17 @@ export default function App() {
                       {teamMembers.map((member, index) => {
                         const initials = member.name.trim().split(' ').map(n => n.charAt(0)).join('').slice(0, 2).toUpperCase() || "ST";
                         return (
-                          <div key={index} className="bg-gradient-to-r from-slate-50/50 to-emerald-50/20 hover:from-emerald-50/35 border border-slate-200 hover:border-emerald-200 p-4 rounded-xl shadow-3xs transition-all flex items-center justify-between gap-4">
-                            <div className="flex items-center gap-3.5">
-                              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-250 flex items-center justify-center text-emerald-800 font-extrabold text-xs shrink-0 shadow-2xs">
-                                {initials}
-                              </div>
-                              <div className="space-y-1">
-                                <h4 className="text-xs font-black text-slate-900 leading-tight tracking-tight">{member.name}</h4>
-                                <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold text-slate-500 font-mono">
-                                  <span className="bg-white px-2 py-0.5 rounded border border-slate-150">ID/Roll: <strong className="text-slate-800">{member.id}</strong></span>
-                                  <span>•</span>
-                                  <span>CSE Department</span>
-                                </div>
-                              </div>
+                          <div key={index} className="bg-gradient-to-r from-emerald-50/10 to-slate-50/30 border border-slate-200 rounded-xl p-4 shadow-3xs flex gap-4 items-start relative overflow-hidden">
+                            <div className="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 font-extrabold text-sm shadow-sm">
+                              {initials}
                             </div>
-                            <div className="text-[9.5px] bg-emerald-600 text-white font-extrabold rounded-md py-1 px-3 shadow-3xs uppercase tracking-wider text-center">
-                              {member.role}
+                            <div className="space-y-1.5 flex-1">
+                              <span className="text-[9px] font-black tracking-widest text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full uppercase leading-none inline-block font-mono">
+                                {member.role}
+                              </span>
+                              <h4 className="text-xs font-black text-slate-900 leading-snug">{member.name}</h4>
+                              <p className="text-[11px] text-slate-600 font-semibold leading-normal font-mono">ID: {member.id}</p>
+                              <p className="text-[10px] text-slate-400 font-medium font-mono">Computer Science And Engineering</p>
                             </div>
                           </div>
                         );
@@ -3151,11 +3143,6 @@ export default function App() {
                     {/* Title block with badges */}
                     <div className="flex flex-col md:flex-row gap-5 items-start justify-between border-b border-slate-100 pb-5">
                       <div className="space-y-2">
-                        <span className={`p-1 px-3 rounded-full text-[9px] font-black uppercase tracking-widest ${
-                          selectedEncycloGroup === 'leaf' ? 'bg-emerald-100 text-dragon-green' : 'bg-rose-100 text-dragon-red'
-                        }`}>
-                          {selectedEncycloGroup === 'leaf' ? 'Stalk & Leaf Decays' : 'Fruit Skin & Peel Decays'}
-                        </span>
                         <h2 className={`text-2xl sm:text-3xl font-black ${activeBrandColor} leading-tight`}>{activeDis.name}</h2>
                         <p className="text-xs text-slate-500 font-semibold">Standard Classification: Dragon Fruit Pathology Guide</p>
                       </div>
@@ -3175,7 +3162,7 @@ export default function App() {
                     {/* Middle display block: Image + Description */}
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                       <div className="md:col-span-5 space-y-2">
-                        <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Sample Image from Dataset (রোগের নমুনা ছবি)</span>
+                        <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Sample Image</span>
                         <div className="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm aspect-video sm:aspect-square bg-slate-105 bg-slate-100 flex flex-col justify-end group min-h-[220px]">
                           <img 
                             src={customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] || activeDis.sampleImage} 
@@ -3215,7 +3202,7 @@ export default function App() {
                       <div className="space-y-3">
                         <h4 className="text-xs font-bold text-dragon-green uppercase tracking-wider flex items-center gap-1.5 border-b border-emerald-200 pb-1">
                           <Shield className="w-4 h-4 text-emerald-600" />
-                          Cultural / Organic Controls
+                          Cultural / Organic Controls (সাংস্কৃতিক ও জৈব নিয়ন্ত্রণ)
                         </h4>
                         <ul className="text-xs text-slate-600 pl-5 space-y-2 list-disc leading-normal bg-white p-3 rounded-xl border border-slate-100 font-semibold shadow-3xs">
                           {activeDis.treatment.cultural.map((c, index) => (
@@ -3229,7 +3216,7 @@ export default function App() {
                         <div className="space-y-3">
                           <h4 className="text-xs font-bold text-orange-600 uppercase tracking-wider flex items-center gap-1.5 border-b border-orange-200 pb-1">
                             <Settings className="w-4 h-4 text-orange-500" />
-                            Agronomic Chemical Response
+                            Agronomic Chemical Response (কৃষি রাসায়নিক প্রতিকার)
                           </h4>
                           <ul className="text-xs text-slate-600 pl-5 space-y-2 list-disc leading-normal bg-white p-3 rounded-xl border border-slate-100 font-semibold shadow-3xs">
                             {activeDis.treatment.chemical.map((chem, idx) => (
@@ -3275,138 +3262,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Admin Panel Login and Status Modal */}
-      {isShowingAdminModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-100 p-6 space-y-4">
-            <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                <Shield className="w-5 h-5 text-rose-500" />
-                Administrative Control Panel
-              </h3>
-              <button 
-                onClick={() => {
-                  setIsShowingAdminModal(false);
-                  setAuthError(null);
-                  setAuthPasscodeInput("");
-                }}
-                className="text-slate-400 hover:text-slate-600 font-extrabold text-xs cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            {!isAdmin ? (
-              <form onSubmit={handleAdminLoginSubmit} className="space-y-4">
-                <p className="text-xs text-slate-600 leading-normal">
-                  Enter the administrative passcode to unlock disease reference specimen custom uploads. Normal users cannot modify these reference images.
-                </p>
-                <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Passcode (পাসকোড)</label>
-                  <input 
-                    type="password"
-                    value={authPasscodeInput}
-                    onChange={(e) => setAuthPasscodeInput(e.target.value)}
-                    placeholder="e.g. admin123"
-                    className="w-full p-2.5 rounded-lg border border-slate-200 text-xs focus:ring-1 focus:ring-rose-500 outline-none"
-                    required
-                  />
-                  {authError && (
-                    <p className="text-[10px] text-red-500 font-bold">{authError}</p>
-                  )}
-                </div>
-                <button
-                  type="submit"
-                  disabled={isAuthenticating}
-                  className="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-black text-xs rounded-lg uppercase tracking-wider flex items-center justify-center gap-1 disabled:opacity-50 transition-all cursor-pointer"
-                >
-                  {isAuthenticating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Verify and Login"}
-                </button>
-              </form>
-            ) : (
-              <div className="space-y-4">
-                <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Database Status (ডাটাবেজ সংযোগ স্ট্যাটাস)</span>
-                  
-                  {dbConfig.supabaseConnected ? (
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2 text-emerald-700 bg-emerald-50 p-2 rounded-lg border border-emerald-100 text-xs font-semibold">
-                        <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                        <span>Supabase Cloud Connected (লাইভ ক্লাউড ডাটাবেজ কনেক্টেড)</span>
-                      </div>
-                      
-                      {!dbConfig.tableExists && (
-                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-800 space-y-2 text-left">
-                          <div className="flex items-center gap-1.5 font-bold text-red-700">
-                            <AlertTriangle className="w-4 h-4 text-red-550 shrink-0 animate-pulse" />
-                            <span>Table 'public.disease_images' is missing!</span>
-                          </div>
-                          <p className="text-[10px] text-red-700 leading-normal font-semibold">
-                            আপনার Supabase ডাটাবেজে <code className="bg-red-100 px-1 py-0.5 rounded font-mono">disease_images</code> টেবিলটি পাওয়া যায়নি। এটি তৈরি করার জন্য নিচের SQL কোডটি কপি করে আপনার Supabase SQL Editor-এ রান (Run) করুন:
-                          </p>
-                          <pre className="p-2 bg-slate-900 text-[9px] text-slate-100 font-mono rounded overflow-x-auto select-all max-h-36 border border-slate-800 leading-normal">
-{`CREATE TABLE IF NOT EXISTS public.disease_images (
-    key TEXT PRIMARY KEY,
-    image_data TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
-ALTER TABLE public.disease_images ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Allow public read access" ON public.disease_images 
-    FOR SELECT USING (true);
-
-CREATE POLICY "Allow service/anon write access" ON public.disease_images 
-    FOR ALL USING (true) WITH CHECK (true);`}
-                          </pre>
-                          <div className="text-[9px] text-red-600 font-bold italic text-center">
-                            ক্লিক বা সিলেক্ট করে সম্পূর্ণ কোডটি কপি করুন এবং Supabase SQL-এ Run করুন!
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-100 text-xs font-bold font-semibold">
-                        <AlertTriangle className="w-4 h-4 text-amber-500" />
-                        Using Container Fallback File (লোকাল কন্টেইনার ফাইলে সেভ হচ্ছে)
-                      </div>
-                      <p className="text-[10px] text-slate-500 leading-relaxed font-semibold">
-                        To connect permanently to <strong>Supabase</strong> and prevent image loss when the container resets, set the environment variables in your Settings panel:
-                        <code className="block mt-1 bg-slate-100 p-1 rounded font-mono text-[9px]">SUPABASE_URL</code>
-                        <code className="block mt-0.5 bg-slate-100 p-1 rounded font-mono text-[9px]">SUPABASE_ANON_KEY</code>
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="text-center space-y-2">
-                  <p className="text-xs text-slate-500">You are logged in as administrator. You can hover over empty disease encyclopedia images to upload them. Note that once an image is uploaded, it is permanently locked and cannot be modified or reset to preserve website consistency.</p>
-                  <button
-                    type="button"
-                    onClick={handleAdminLogout}
-                    className="w-full py-2 bg-slate-100 hover:bg-slate-200 border border-slate-350 text-slate-700 text-xs font-bold rounded-lg cursor-pointer transition-all"
-                  >
-                    Logout Admin Mode (অ্যাডমিন মোড থেকে বের হন)
-                  </button>
-                </div>
-              </div>
-            )}
-            
-            <button
-              type="button"
-              onClick={() => {
-                setIsShowingAdminModal(false);
-                setAuthError(null);
-                setAuthPasscodeInput("");
-              }}
-              className="w-full py-2 bg-slate-900 text-white hover:bg-slate-800 rounded-lg text-xs font-black uppercase tracking-wider cursor-pointer transition-all"
-            >
-              Close Panel
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
