@@ -227,8 +227,8 @@ app.get("/api/disease-images", async (req, res) => {
   }
 });
 
-// Save or Update a disease image (Public / Collaborative - One-time upload restriction)
-app.post("/api/disease-images", async (req, res) => {
+// Save or Update a disease image (Admin Only - One-time upload restriction)
+app.post("/api/disease-images", verifyAdminPasscode, async (req, res) => {
   const { key, image_data } = req.body;
   if (!key || !image_data) {
     return res.status(400).json({ error: "Missing key or image_data parameter." });
@@ -246,8 +246,8 @@ app.post("/api/disease-images", async (req, res) => {
   }
 });
 
-// Reset or Delete a disease image (Public / Collaborative - Prevent deletion of locked images)
-app.post("/api/disease-images/delete", async (req, res) => {
+// Reset or Delete a disease image (Admin Only - Prevent deletion of locked images)
+app.post("/api/disease-images/delete", verifyAdminPasscode, async (req, res) => {
   const { key } = req.body;
   if (!key) {
     return res.status(400).json({ error: "Missing key parameter." });

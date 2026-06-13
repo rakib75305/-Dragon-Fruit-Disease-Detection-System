@@ -964,7 +964,8 @@ export default function App() {
             const res = await fetch('/api/disease-images', {
               method: 'POST',
               headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${adminPasscode}`
               },
               body: JSON.stringify({
                 key: compositeKey,
@@ -1009,7 +1010,8 @@ export default function App() {
       const res = await fetch('/api/disease-images/delete', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminPasscode}`
         },
         body: JSON.stringify({ key: compositeKey })
       });
