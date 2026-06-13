@@ -2236,12 +2236,9 @@ export default function App() {
                         Specify the mathematical input normalization used when training this neural network:
                       </p>
                       
-                      <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+                      <div className="grid grid-cols-1 gap-1.5 pt-0.5">
                         {[
-                          { id: 'keras_mobilenet', label: 'MobileNetV2 scale', math: '[-1.0 to 1.0]' },
-                          { id: 'div255', label: 'Rescaled standard', math: '[0.0 to 1.0]' },
-                          { id: 'imagenet', label: 'ImageNet Mean', math: 'Mean Subtraction' },
-                          { id: 'none', label: 'Raw RGB values', math: '[0.0 to 255.0]' }
+                          { id: 'keras_mobilenet', label: 'MobileNetV2 scale', math: '[-1.0 to 1.0]' }
                         ].map((opt) => {
                           const isActive = activeTab === 'leaf' 
                             ? leafNormalizationMode === opt.id 
@@ -2269,6 +2266,7 @@ export default function App() {
                             >
                               <span className="text-[10px] font-bold block">{opt.label}</span>
                               <span className="text-[8px] text-slate-400 font-mono italic">{opt.math}</span>
+                              <span className="text-[9px] text-emerald-600 font-bold mt-1">✓ Active Protocol</span>
                             </button>
                           );
                         })}
@@ -2360,10 +2358,16 @@ export default function App() {
                         </div>
                         <h3 className="text-base font-black text-amber-800 uppercase tracking-wider mb-2">Low Confidence Alert (কম নির্ভুলতা সতর্কতা)</h3>
                         <p className="text-sm font-bold text-slate-800 leading-relaxed max-w-sm mx-auto p-1.5 bg-white/80 rounded border border-amber-200/50 shadow-3xs">
-                          ⚠️ This image does not appear to be a dragon fruit leaf or fruit. Please upload a clear photo of dragon fruit leaf or fruit.
+                          {activeTab === 'leaf' 
+                            ? "⚠️ This image does not appear to be a dragon fruit leaf. Please upload a clear photo of dragon fruit leaf."
+                            : "⚠️ This image does not appear to be a dragon fruit. Please upload a clear photo of dragon fruit."
+                          }
                         </p>
                         <p className="text-[10.5px] font-semibold text-slate-500 mt-3 italic leading-normal">
-                          (মডেলের নির্ভুলতা মাত্র {activePrediction.confidence}% সনাক্ত হয়েছে, যা ৬০% এর নিচে। অনুগ্রহ করে ড্রাগন ফলের পাতা বা ফলের স্পষ্ট ছবি দিন।)
+                          {activeTab === 'leaf'
+                            ? "(অনুগ্ৰহ করে ড্রাগন ফলের পাতার স্পষ্ট ছবি দিন।)"
+                            : "(অনুগ্ৰহ করে ড্রাগন ফলের স্পষ্ট ছবি দিন।)"
+                          }
                         </p>
                       </div>
                     );
