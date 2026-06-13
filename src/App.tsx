@@ -733,8 +733,8 @@ export default function App() {
   const [sandboxSelectedFruitClass, setSandboxSelectedFruitClass] = useState<string>("Anthracnose");
 
   // Model preprocessing & normalization modes
-  const [leafNormalizationMode, setLeafNormalizationMode] = useState<string>("keras_mobilenet");
-  const [fruitNormalizationMode, setFruitNormalizationMode] = useState<string>("keras_mobilenet");
+  const [leafNormalizationMode, setLeafNormalizationMode] = useState<string>("div255");
+  const [fruitNormalizationMode, setFruitNormalizationMode] = useState<string>("div255");
 
   // Academic / Thesis Metadata States
   const [thesisTitle, setThesisTitle] = useState<string>(() => 
@@ -1270,7 +1270,7 @@ export default function App() {
         logDiagnostic(`Feeding batch into neural layers... running forward propagation...`);
         
         const mode = type === 'leaf' ? leafNormalizationMode : fruitNormalizationMode;
-        logDiagnostic(`Applying active normalization protocol: [${mode}]`);
+        logDiagnostic(`Applying active normalization protocol: [${mode}] (Dividing by 255.0 Only)`);
 
         // Real model inference
         const tensor = tf.tidy(() => {
@@ -1278,20 +1278,8 @@ export default function App() {
           const resized = tf.image.resizeBilinear(raw, [targetH, targetW]);
           const casted = resized.cast('float32');
           
-          if (mode === 'keras_mobilenet') {
-            // (x / 127.5) - 1.0
-            return casted.div(tf.scalar(127.5)).sub(tf.scalar(1.0)).expandDims(0);
-          } else if (mode === 'imagenet') {
-            // ImageNet mean subtraction: R:123.68, G:116.779, B:103.939
-            const mean = tf.tensor1d([123.68, 116.779, 103.939]);
-            return casted.sub(mean).expandDims(0);
-          } else if (mode === 'none') {
-            // No normalization (scale range 0-255)
-            return casted.expandDims(0);
-          } else {
-            // Standard 'div255' (scale range 0.0-1.0)
-            return casted.div(tf.scalar(255.0)).expandDims(0);
-          }
+          // Image pixels are divided by 255.0 only
+          return casted.div(tf.scalar(255.0)).expandDims(0);
         });
 
         const predictionsTensor = model.predict(tensor) as tf.Tensor;
@@ -2221,57 +2209,7 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* Preprocessing Normalization Protocol Selectors */}
-                    <div className="mt-3 p-3 bg-slate-50 border border-slate-200/80 rounded-xl space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[10px] font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                          <Settings className="w-3.5 h-3.5 text-slate-500 animate-spin-slow" />
-                          <span>Tensor Normalization Preprocessing</span>
-                        </span>
-                        <span className="text-[9px] text-slate-500 font-mono bg-white px-2 py-0.5 rounded border border-slate-200 uppercase">
-                          {activeTab === 'leaf' ? leafNormalizationMode : fruitNormalizationMode}
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-slate-500 leading-relaxed">
-                        Specify the mathematical input normalization used when training this neural network:
-                      </p>
-                      
-                      <div className="grid grid-cols-1 gap-1.5 pt-0.5">
-                        {[
-                          { id: 'keras_mobilenet', label: 'MobileNetV2 scale', math: '[-1.0 to 1.0]' }
-                        ].map((opt) => {
-                          const isActive = activeTab === 'leaf' 
-                            ? leafNormalizationMode === opt.id 
-                            : fruitNormalizationMode === opt.id;
-                          return (
-                            <button
-                              key={opt.id}
-                              type="button"
-                              onClick={() => {
-                                if (activeTab === 'leaf') {
-                                  setLeafNormalizationMode(opt.id);
-                                  logDiagnostic(`Changed leaf normalization protocol to: ${opt.id}`);
-                                } else {
-                                  setFruitNormalizationMode(opt.id);
-                                  logDiagnostic(`Changed fruit normalization protocol to: ${opt.id}`);
-                                }
-                              }}
-                              className={`p-2 text-left rounded-lg border transition-all cursor-pointer flex flex-col justify-between hover:bg-slate-50 ${
-                                isActive 
-                                  ? activeTab === 'leaf'
-                                    ? 'border-emerald-600 bg-emerald-50/40 text-emerald-900 shadow-xs ring-1 ring-emerald-500/10'
-                                    : 'border-rose-600 bg-rose-50/40 text-rose-900 shadow-xs ring-1 ring-rose-500/10'
-                                  : 'border-slate-200 bg-white text-slate-600'
-                              }`}
-                            >
-                              <span className="text-[10px] font-bold block">{opt.label}</span>
-                              <span className="text-[8px] text-slate-400 font-mono italic">{opt.math}</span>
-                              <span className="text-[9px] text-emerald-600 font-bold mt-1">✓ Active Protocol</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
+                    {/* Preprocessing Normalization Protocol Selectors are hidden */}
 
                     {/* Manual scan trigger button */}
                     <div className="mt-3">
