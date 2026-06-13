@@ -1248,22 +1248,21 @@ export default function App() {
     logDiagnostic(`Initializing image analyzer pipeline for ${type}...`);
     
     // Dynamically retrieve target dimensions expected by model, defaulting to 224x224
-    const inputShape = model?.inputs[0]?.shape;
-    const targetH = (inputShape && inputShape[1] && inputShape[1] > 0) ? inputShape[1] : 224;
-    const targetW = (inputShape && inputShape[2] && inputShape[2] > 0) ? inputShape[2] : 224;
+    const targetH = 224;
+    const targetW = 224;
 
     // Simulate tensor creation steps in the logs for the educational panel
     await new Promise(resolve => setTimeout(resolve, 300));
     logDiagnostic(`Decoding pixel matrix from DOM Element into tf.Tensor3D...`);
     
     await new Promise(resolve => setTimeout(resolve, 300));
-    logDiagnostic(`Resizing tensor from [${imageElement.naturalWidth} x ${imageElement.naturalHeight}] to standardized input [${targetW} x ${targetH}]...`);
+    logDiagnostic(`Resizing tensor from [${imageElement.naturalWidth} x ${imageElement.naturalHeight}] to standardized input [224 x 224] (with center-cropping if not square)...`);
     
     await new Promise(resolve => setTimeout(resolve, 300));
-    logDiagnostic(`Normalizing tensor values to [0.0 - 1.0] range (float32 conversion)...`);
+    logDiagnostic(`Converting tensor to RGB channel format and normalizing values to [0.0 - 1.0]...`);
 
     await new Promise(resolve => setTimeout(resolve, 300));
-    logDiagnostic(`Expanding tensor dimensions to [1, ${targetH}, ${targetW}, 3] for network batch loading...`);
+    logDiagnostic(`Expanding tensor dimensions to [1, 224, 224, 3] for network batch loading...`);
 
     if (model) {
       try {
@@ -1275,10 +1274,38 @@ export default function App() {
         // Real model inference
         const tensor = tf.tidy(() => {
           const raw = tf.browser.fromPixels(imageElement);
-          const resized = tf.image.resizeBilinear(raw, [targetH, targetW]);
+          
+          // Apply center crop if image is not square before resizing
+          const [h, w] = [raw.shape[0], raw.shape[1]];
+          let cropped: tf.Tensor3D = raw;
+          if (h !== w) {
+            const minDim = Math.min(h, w);
+            const startY = Math.floor((h - minDim) / 2);
+            const startX = Math.floor((w - minDim) / 2);
+            cropped = tf.slice(raw, [startY, startX, 0], [minDim, minDim, raw.shape[2]]);
+          }
+          
+          // Convert to RGB if not already RGB
+          let rgb: tf.Tensor3D = cropped;
+          if (cropped.shape[2] === 4) {
+            rgb = tf.slice(cropped, [0, 0, 0], [-1, -1, 3]);
+          } else if (cropped.shape[2] === 1) {
+            rgb = tf.tile(cropped, [1, 1, 3]);
+          } else if (cropped.shape[2] !== 3) {
+            const channels = cropped.shape[2];
+            if (channels > 3) {
+              rgb = tf.slice(cropped, [0, 0, 0], [-1, -1, 3]);
+            } else if (channels < 3) {
+              rgb = tf.tile(cropped, [1, 1, 3]);
+              rgb = tf.slice(rgb, [0, 0, 0], [-1, -1, 3]);
+            }
+          }
+          
+          // Resize image to exactly 224x224 using bilinear interpolation
+          const resized = tf.image.resizeBilinear(rgb, [224, 224]);
           const casted = resized.cast('float32');
           
-          // Image pixels are divided by 255.0 only
+          // Normalize pixel values by dividing by 255.0 only, expand dims for batching
           return casted.div(tf.scalar(255.0)).expandDims(0);
         });
 
