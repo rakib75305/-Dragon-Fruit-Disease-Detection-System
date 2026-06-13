@@ -28,12 +28,6 @@ import {
   Camera
 } from 'lucide-react';
 import * as tf from '@tensorflow/tfjs';
-import { 
-  initAuth, 
-  uploadCustomImageToCloud, 
-  deleteCustomImageFromCloud, 
-  fetchCustomImagesFromCloud 
-} from './lib/firebase';
 
 // Define the comprehensive disease metadata structure
 interface DiseaseDetail {
@@ -842,70 +836,118 @@ export default function App() {
   const [showDetailsPage, setShowDetailsPage] = useState<boolean>(false);
   const [customSampleImages, setCustomSampleImages] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    // Safely hydrate from BOTH IndexedDB/local backup and Firestore Cloud Database
-    const loadImages = async () => {
-      let loadedImages: Record<string, string> = {};
-      
-      // 1. Try reading from localStorage first to migrate/read backup
-      try {
-        const saved = localStorage.getItem('custom_sample_images');
-        if (saved) {
-          loadedImages = JSON.parse(saved);
-        }
-      } catch (e) {
-        console.warn('LocalStorage backup is empty or unparseable:', e);
-      }
+  // Admin Portal & Database Synchronizer states
+  const [isAdmin, setIsAdmin] = useState<boolean>(() => {
+    return localStorage.getItem('is_admin_active_df') === 'true';
+  });
+  const [adminPasscode, setAdminPasscode] = useState<string>(() => {
+    return localStorage.getItem('admin_passcode_df') || '';
+  });
+  const [isShowingAdminModal, setIsShowingAdminModal] = useState<boolean>(false);
+  const [authPasscodeInput, setAuthPasscodeInput] = useState<string>('');
+  const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
-      // 2. Try loading and merging from IndexedDB
-      try {
-        const idbImages = await imageStore.getAll();
-        loadedImages = { ...loadedImages, ...idbImages };
+  const [dbConfig, setDbConfig] = useState<{
+    supabaseConnected: boolean;
+    supabaseUrlConfigured: boolean;
+    hasLocalDb: boolean;
+    tableExists?: boolean;
+  }>({
+    supabaseConnected: false,
+    supabaseUrlConfigured: false,
+    hasLocalDb: false,
+    tableExists: false
+  });
+  const [isCheckingConfig, setIsCheckingConfig] = useState<boolean>(false);
+
+  const fetchConfig = async () => {
+    try {
+      const res = await fetch('/api/config');
+      if (res.ok) {
+        const val = await res.json();
+        setDbConfig(val);
+      }
+    } catch (err) {
+      console.warn('Could not read backend DB status config:', err);
+    }
+  };
+
+  const handleAdminLogout = () => {
+    setIsAdmin(false);
+    setAdminPasscode('');
+    localStorage.removeItem('is_admin_active_df');
+    localStorage.removeItem('admin_passcode_df');
+    setIsShowingAdminModal(false);
+  };
+
+  const handleAdminLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!authPasscodeInput) return;
+
+    setIsAuthenticating(true);
+    setAuthError(null);
+
+    try {
+      const res = await fetch('/api/admin/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ passcode: authPasscodeInput })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setIsAdmin(true);
+        setAdminPasscode(authPasscodeInput);
+        localStorage.setItem('is_admin_active_df', 'true');
+        localStorage.setItem('admin_passcode_df', authPasscodeInput);
+        setIsShowingAdminModal(false);
+        setAuthPasscodeInput('');
         
-        // 3. Proactively sync any localStorage images to IndexedDB if they are not already stored
-        const localKeys = Object.keys(loadedImages);
-        for (const k of localKeys) {
-          if (!idbImages[k]) {
-            await imageStore.set(k, loadedImages[k]).catch(() => {});
-          }
+        // Reload settings and synchronizers
+        await fetchConfig();
+      } else {
+        setAuthError(data.error || 'Incorrect passcode. Please try again.');
+      }
+    } catch (err) {
+      setAuthError('Failed to communicate with the verification server.');
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchConfigAndImages = async () => {
+      setIsCheckingConfig(true);
+      
+      // 1. Fetch server database status
+      await fetchConfig();
+      setIsCheckingConfig(false);
+
+      // 2. Fetch all central disease custom images
+      try {
+        const imagesRes = await fetch('/api/disease-images');
+        if (imagesRes.ok) {
+          const imagesData = await imagesRes.json();
+          setCustomSampleImages(imagesData);
+          console.log('Successfully synchronized custom disease images with the database.');
+        } else {
+          throw new Error('Server returned non-ok status');
         }
       } catch (err) {
-        console.warn('IndexedDB read failed, relying solely on localStorage fallback:', err);
-      }
-
-      // Render local assets instantly for instant visual feedback on slow networks
-      setCustomSampleImages(loadedImages);
-
-      // 4. Safely authenticate and sync with Cloud Firestore
-      try {
-        await initAuth();
-        const cloudImages = await fetchCustomImagesFromCloud();
-        
-        // Merge cloud images into state
-        const mergedImages = { ...loadedImages, ...cloudImages };
-        setCustomSampleImages(mergedImages);
-
-        // Backup new cloud images to local IndexedDB and localStorage safely
-        for (const [key, b64] of Object.entries(cloudImages)) {
-          await imageStore.set(key, b64).catch(() => {});
-          try {
-            let localData: Record<string, string> = {};
-            const saved = localStorage.getItem('custom_sample_images');
-            if (saved) {
-              try { localData = JSON.parse(saved); } catch {}
-            }
-            if (localData[key] !== b64) {
-              localData[key] = b64;
-              localStorage.setItem('custom_sample_images', JSON.stringify(localData));
-            }
-          } catch {}
-        }
-      } catch (cloudErr) {
-        console.error("Cloud database synchronization deferred or failed:", cloudErr);
+        console.warn('Error fetching unified disease images from server, using local storage cache fallback:', err);
+        try {
+          const saved = localStorage.getItem('custom_sample_images');
+          if (saved) {
+            setCustomSampleImages(JSON.parse(saved));
+          }
+        } catch {}
       }
     };
 
-    loadImages();
+    fetchConfigAndImages();
   }, []);
 
   const handleCustomSampleImageUpload = (compositeKey: string, file: File) => {
@@ -913,20 +955,38 @@ export default function App() {
     reader.onloadend = () => {
       const base64data = reader.result as string;
       
-      // Compress image first to be under 120KB before writing to database or localStorage
+      // Compress image first to be under 40-50KB before writing to database or localStorage
       compressImage(base64data, 350, 350)
         .then(async (compressedBase64) => {
-          // 1. Immediate local UI update for snappy feedback
-          setCustomSampleImages(prev => ({ ...prev, [compositeKey]: compressedBase64 }));
-
-          // 2. Local fallback sync: Set in IndexedDB
-          try {
-            await imageStore.set(compositeKey, compressedBase64);
-          } catch (dbErr) {
-            console.error('Failed to store in IndexedDB:', dbErr);
+          if (isAdmin) {
+            try {
+              const res = await fetch('/api/disease-images', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${adminPasscode}`
+                },
+                body: JSON.stringify({
+                  key: compositeKey,
+                  image_data: compressedBase64
+                })
+              });
+              
+              if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || 'Failed to save changes on the server.');
+              }
+              console.log('Image saved centrally in the database.');
+            } catch (err: any) {
+              console.error('Database Sync Error:', err);
+              alert('Database Sync Error: ' + err.message);
+            }
           }
 
-          // 3. Local fallback sync: Set in localStorage backup (safely size-guaranteed now)
+          // Update local component state
+          setCustomSampleImages(prev => ({ ...prev, [compositeKey]: compressedBase64 }));
+
+          // Save copy to local storage cache for offline stability
           try {
             let localData: Record<string, string> = {};
             const saved = localStorage.getItem('custom_sample_images');
@@ -938,35 +998,45 @@ export default function App() {
             localData[compositeKey] = compressedBase64;
             localStorage.setItem('custom_sample_images', JSON.stringify(localData));
           } catch (lsErr) {
-            console.error('Failed to write to localStorage fallback:', lsErr);
-          }
-
-          // 4. Secure live cloud save
-          try {
-            await initAuth();
-            await uploadCustomImageToCloud(compositeKey, compressedBase64);
-            console.log(`Successfully backed up custom reference for ${compositeKey} to Firestore Cloud.`);
-          } catch (cloudErr) {
-            console.error(`Failed to sync custom image key ${compositeKey} to cloud database:`, cloudErr);
+            console.error('Failed to write to local storage fallback:', lsErr);
           }
         });
     };
     reader.readAsDataURL(file);
   };
 
-  const handleResetCustomSampleImage = (compositeKey: string) => {
-    // 1. Snappy local UI update
+  const handleResetCustomSampleImage = async (compositeKey: string) => {
+    if (isAdmin) {
+      try {
+        const res = await fetch('/api/disease-images/delete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminPasscode}`
+          },
+          body: JSON.stringify({ key: compositeKey })
+        });
+        
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || 'Failed to delete on the server.');
+        }
+        console.log('Image deleted centrally from Database.');
+      } catch (err: any) {
+        console.error('Database Delete Error:', err);
+        alert('Database Update Error: ' + err.message);
+        return;
+      }
+    }
+
+    // Update local state
     setCustomSampleImages(prev => {
       const updated = { ...prev };
       delete updated[compositeKey];
       return updated;
     });
 
-    // 2. Delete from IndexedDB locally
-    imageStore.delete(compositeKey)
-      .catch(err => console.error('Failed to delete custom image from IndexedDB:', err));
-
-    // 3. Delete from localStorage locally
+    // Remove from local storage cache
     try {
       const saved = localStorage.getItem('custom_sample_images');
       if (saved) {
@@ -975,18 +1045,8 @@ export default function App() {
         localStorage.setItem('custom_sample_images', JSON.stringify(updated));
       }
     } catch (e) {
-      console.error('Failed to clean up localStorage backup:', e);
+      console.error('Failed to clean up local storage cache list:', e);
     }
-
-    // 4. Delete from Live cloud database
-    initAuth()
-      .then(() => deleteCustomImageFromCloud(compositeKey))
-      .then(() => {
-        console.log(`Successfully deleted custom image key ${compositeKey} from Firestore Cloud.`);
-      })
-      .catch(err => {
-        console.error('Failed to remove custom image from cloud database:', err);
-      });
   };
 
   // References
@@ -1899,7 +1959,7 @@ export default function App() {
             <BookOpen className="w-3.5 h-3.5" />
             Disease Guide
           </button>
-          <button 
+  <button 
             id="nav-btn-academy"
             onClick={() => setActiveTab('academy')}
             className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-all shrink-0 ${
@@ -1910,6 +1970,18 @@ export default function App() {
           >
             <GraduationCap className="w-3.5 h-3.5" />
             Thesis & Academy Portal
+          </button>
+          <button 
+            id="nav-btn-admin"
+            onClick={() => setIsShowingAdminModal(true)}
+            className={`ml-auto flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold rounded-lg transition-all shrink-0 border uppercase tracking-wider self-center my-1 ${
+              isAdmin 
+                ? 'border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100/60' 
+                : 'border-slate-300 text-slate-600 bg-slate-50 hover:bg-slate-100'
+            }`}
+          >
+            <Shield className="w-3.5 h-3.5" />
+            {isAdmin ? 'Admin: Active' : 'Admin Panel'}
           </button>
         </div>
       </nav>
@@ -2656,23 +2728,25 @@ export default function App() {
                                 className="w-full h-full object-cover absolute inset-0"
                                 referrerPolicy="no-referrer"
                               />
-                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-2">
-                                <label className="p-1 px-2.5 bg-white text-[10px] font-black rounded shadow-sm text-slate-800 hover:bg-slate-50 transition-all cursor-pointer flex items-center gap-1">
-                                  <span>📷</span> Upload Image
-                                  <input 
-                                    type="file" 
-                                    accept="image/*" 
-                                    className="hidden" 
-                                    onChange={(e) => {
-                                      if (e.target.files && e.target.files[0]) {
-                                        handleCustomSampleImageUpload(`${selectedEncycloGroup}_${selectedEncycloDisease}`, e.target.files[0]);
-                                      }
-                                    }}
-                                  />
-                                </label>
-                              </div>
+                              {isAdmin && (
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-2">
+                                  <label className="p-1 px-2.5 bg-white text-[10px] font-black rounded shadow-sm text-slate-800 hover:bg-slate-50 transition-all cursor-pointer flex items-center gap-1">
+                                    <span>📷</span> Upload Image
+                                    <input 
+                                      type="file" 
+                                      accept="image/*" 
+                                      className="hidden" 
+                                      onChange={(e) => {
+                                        if (e.target.files && e.target.files[0]) {
+                                          handleCustomSampleImageUpload(`${selectedEncycloGroup}_${selectedEncycloDisease}`, e.target.files[0]);
+                                        }
+                                      }}
+                                    />
+                                  </label>
+                                </div>
+                              )}
                             </div>
-                            {customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] && (
+                            {isAdmin && customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] && (
                               <button
                                 onClick={() => handleResetCustomSampleImage(`${selectedEncycloGroup}_${selectedEncycloDisease}`)}
                                 className="block w-full text-[9px] font-bold text-red-500 hover:text-red-700 hover:underline text-center cursor-pointer"
@@ -3121,29 +3195,31 @@ export default function App() {
                             className="w-full h-full object-cover absolute inset-0"
                             referrerPolicy="no-referrer"
                           />
-                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/90 via-slate-950/60 to-transparent p-3 pt-10 flex flex-col gap-2 z-10 opacity-90 group-hover:opacity-100 transition-opacity duration-300">
-                            <label className="w-full py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-lg text-[11px] font-black text-center cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1 shadow-sm border border-emerald-500/20">
-                              📷 Upload Dataset Image (আপনার ইমেজ দিন)
-                              <input 
-                                type="file" 
-                                accept="image/*" 
-                                className="hidden" 
-                                onChange={(e) => {
-                                  if (e.target.files && e.target.files[0]) {
-                                    handleCustomSampleImageUpload(`${selectedEncycloGroup}_${selectedEncycloDisease}`, e.target.files[0]);
-                                  }
-                                }}
-                              />
-                            </label>
-                            {customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] && (
-                              <button
-                                onClick={() => handleResetCustomSampleImage(`${selectedEncycloGroup}_${selectedEncycloDisease}`)}
-                                className="w-full text-[10px] font-bold text-red-300 hover:text-red-200 hover:underline text-center cursor-pointer"
-                              >
-                                Reset to Default (পূর্বাবস্থায় ফিরে যান)
-                              </button>
-                            )}
-                          </div>
+                          {isAdmin && (
+                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/90 via-slate-950/60 to-transparent p-3 pt-10 flex flex-col gap-2 z-10 opacity-90 group-hover:opacity-100 transition-opacity duration-300">
+                              <label className="w-full py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-lg text-[11px] font-black text-center cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1 shadow-sm border border-emerald-500/20">
+                                📷 Upload Dataset Image (আপনার ইমেজ দিন)
+                                <input 
+                                  type="file" 
+                                  accept="image/*" 
+                                  className="hidden" 
+                                  onChange={(e) => {
+                                    if (e.target.files && e.target.files[0]) {
+                                      handleCustomSampleImageUpload(`${selectedEncycloGroup}_${selectedEncycloDisease}`, e.target.files[0]);
+                                    }
+                                  }}
+                                />
+                              </label>
+                              {customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] && (
+                                <button
+                                  onClick={() => handleResetCustomSampleImage(`${selectedEncycloGroup}_${selectedEncycloDisease}`)}
+                                  className="w-full text-[10px] font-bold text-red-300 hover:text-red-200 hover:underline text-center cursor-pointer"
+                                >
+                                  Reset to Default (পূর্বাবস্থায় ফিরে যান)
+                                </button>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -3232,6 +3308,139 @@ export default function App() {
               })()}
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* Admin Panel Login and Status Modal */}
+      {isShowingAdminModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-100 p-6 space-y-4">
+            <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <Shield className="w-5 h-5 text-rose-500" />
+                Administrative Control Panel
+              </h3>
+              <button 
+                onClick={() => {
+                  setIsShowingAdminModal(false);
+                  setAuthError(null);
+                  setAuthPasscodeInput("");
+                }}
+                className="text-slate-400 hover:text-slate-600 font-extrabold text-xs cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {!isAdmin ? (
+              <form onSubmit={handleAdminLoginSubmit} className="space-y-4">
+                <p className="text-xs text-slate-600 leading-normal">
+                  Enter the administrative passcode to unlock disease reference specimen custom uploads. Normal users cannot modify these reference images.
+                </p>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Passcode (পাসকোড)</label>
+                  <input 
+                    type="password"
+                    value={authPasscodeInput}
+                    onChange={(e) => setAuthPasscodeInput(e.target.value)}
+                    placeholder="e.g. admin123"
+                    className="w-full p-2.5 rounded-lg border border-slate-200 text-xs focus:ring-1 focus:ring-rose-500 outline-none"
+                    required
+                  />
+                  {authError && (
+                    <p className="text-[10px] text-red-500 font-bold">{authError}</p>
+                  )}
+                </div>
+                <button
+                  type="submit"
+                  disabled={isAuthenticating}
+                  className="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-black text-xs rounded-lg uppercase tracking-wider flex items-center justify-center gap-1 disabled:opacity-50 transition-all cursor-pointer"
+                >
+                  {isAuthenticating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Verify and Login"}
+                </button>
+              </form>
+            ) : (
+              <div className="space-y-4">
+                <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Database Status (ডাটাবেজ সংযোগ স্ট্যাটাস)</span>
+                  
+                  {dbConfig.supabaseConnected ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-emerald-700 bg-emerald-50 p-2 rounded-lg border border-emerald-100 text-xs font-semibold">
+                        <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
+                        <span>Supabase Cloud Connected (লাইভ ক্লাউড ডাটাবেজ কনেক্টেড)</span>
+                      </div>
+                      
+                      {!dbConfig.tableExists && (
+                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-800 space-y-2 text-left">
+                          <div className="flex items-center gap-1.5 font-bold text-red-700">
+                            <AlertTriangle className="w-4 h-4 text-red-550 shrink-0 animate-pulse" />
+                            <span>Table 'public.disease_images' is missing!</span>
+                          </div>
+                          <p className="text-[10px] text-red-700 leading-normal font-semibold">
+                            আপনার Supabase ডাটাবেজে <code className="bg-red-100 px-1 py-0.5 rounded font-mono">disease_images</code> টেবিলটি পাওয়া যায়নি। এটি তৈরি করার জন্য নিচের SQL কোডটি কপি করে আপনার Supabase SQL Editor-এ রান (Run) করুন:
+                          </p>
+                          <pre className="p-2 bg-slate-900 text-[9px] text-slate-100 font-mono rounded overflow-x-auto select-all max-h-36 border border-slate-800 leading-normal">
+{`CREATE TABLE IF NOT EXISTS public.disease_images (
+    key TEXT PRIMARY KEY,
+    image_data TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.disease_images ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read access" ON public.disease_images 
+    FOR SELECT USING (true);
+
+CREATE POLICY "Allow service/anon write access" ON public.disease_images 
+    FOR ALL USING (true) WITH CHECK (true);`}
+                          </pre>
+                          <div className="text-[9px] text-red-600 font-bold italic text-center">
+                            ক্লিক বা সিলেক্ট করে সম্পূর্ণ কোডটি কপি করুন এবং Supabase SQL-এ Run করুন!
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-100 text-xs font-bold font-semibold">
+                        <AlertTriangle className="w-4 h-4 text-amber-500" />
+                        Using Container Fallback File (লোকাল কন্টেইনার ফাইলে সেভ হচ্ছে)
+                      </div>
+                      <p className="text-[10px] text-slate-500 leading-relaxed font-semibold">
+                        To connect permanently to <strong>Supabase</strong> and prevent image loss when the container resets, set the environment variables in your Settings panel:
+                        <code className="block mt-1 bg-slate-100 p-1 rounded font-mono text-[9px]">SUPABASE_URL</code>
+                        <code className="block mt-0.5 bg-slate-100 p-1 rounded font-mono text-[9px]">SUPABASE_ANON_KEY</code>
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="text-center space-y-2">
+                  <p className="text-xs text-slate-500">You are logged in as administrator. You can now hover over disease encyclopedia images to upload or reset them for all users.</p>
+                  <button
+                    type="button"
+                    onClick={handleAdminLogout}
+                    className="w-full py-2 bg-slate-100 hover:bg-slate-200 border border-slate-350 text-slate-700 text-xs font-bold rounded-lg cursor-pointer transition-all"
+                  >
+                    Logout Admin Mode (অ্যাডমিন মোড থেকে বের হন)
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            <button
+              type="button"
+              onClick={() => {
+                setIsShowingAdminModal(false);
+                setAuthError(null);
+                setAuthPasscodeInput("");
+              }}
+              className="w-full py-2 bg-slate-900 text-white hover:bg-slate-800 rounded-lg text-xs font-black uppercase tracking-wider cursor-pointer transition-all"
+            >
+              Close Panel
+            </button>
           </div>
         </div>
       )}
