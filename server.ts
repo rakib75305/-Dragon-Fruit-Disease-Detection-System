@@ -11,6 +11,7 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 const LOCAL_DB_PATH = path.join(process.cwd(), "disease_images_local.json");
+const FALLBACK_DB_PATH = path.join(process.cwd(), "public", "disease_images_fallback.json");
 
 // Parse large payloads for Base64 images
 app.use(express.json({ limit: "50mb" }));
@@ -43,9 +44,12 @@ if (supabaseUrl && supabaseKey) {
   console.log("Supabase URL or Key missing. Running with local fallback JSON database.");
 }
 
-// Ensure local db exists
+// Ensure local db and fallback db exist
 if (!fs.existsSync(LOCAL_DB_PATH)) {
   fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify({}, null, 2));
+}
+if (!fs.existsSync(FALLBACK_DB_PATH)) {
+  fs.writeFileSync(FALLBACK_DB_PATH, JSON.stringify({}, null, 2));
 }
 
 // Database Operations
@@ -56,6 +60,8 @@ async function getDiseaseImages() {
   try {
     if (fs.existsSync(LOCAL_DB_PATH)) {
       images = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, "utf-8"));
+    } else if (fs.existsSync(FALLBACK_DB_PATH)) {
+      images = JSON.parse(fs.readFileSync(FALLBACK_DB_PATH, "utf-8"));
     }
   } catch (e) {
     console.error("Error reading local JSON file:", e);
@@ -65,7 +71,7 @@ async function getDiseaseImages() {
   if (supabaseClient) {
     try {
       const { data, error } = await supabaseClient
-        .from("disease_images")
+         .from("disease_images")
         .select("*");
 
       if (!error && Array.isArray(data)) {
@@ -75,8 +81,9 @@ async function getDiseaseImages() {
             images[row.key] = row.image_data;
           }
         });
-        // Cache synced data locally
+        // Cache synced data locally in both spots
         fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify(images, null, 2));
+        fs.writeFileSync(FALLBACK_DB_PATH, JSON.stringify(images, null, 2));
       } else if (error) {
         console.log("Supabase notice: Table 'disease_images' might not be created yet. Falling back to local container database file.", error.message);
       }
@@ -94,11 +101,14 @@ async function saveDiseaseImage(key: string, imageData: string) {
   try {
     if (fs.existsSync(LOCAL_DB_PATH)) {
       images = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, "utf-8"));
+    } else if (fs.existsSync(FALLBACK_DB_PATH)) {
+      images = JSON.parse(fs.readFileSync(FALLBACK_DB_PATH, "utf-8"));
     }
   } catch (e) {}
   
   images[key] = imageData;
   fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify(images, null, 2));
+  fs.writeFileSync(FALLBACK_DB_PATH, JSON.stringify(images, null, 2));
 
   // 2. Save copy to Supabase if configured
   if (supabaseClient) {
@@ -127,6 +137,11 @@ async function deleteDiseaseImage(key: string) {
       const images = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, "utf-8"));
       delete images[key];
       fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify(images, null, 2));
+    }
+    if (fs.existsSync(FALLBACK_DB_PATH)) {
+      const images = JSON.parse(fs.readFileSync(FALLBACK_DB_PATH, "utf-8"));
+      delete images[key];
+      fs.writeFileSync(FALLBACK_DB_PATH, JSON.stringify(images, null, 2));
     }
   } catch (e) {}
 

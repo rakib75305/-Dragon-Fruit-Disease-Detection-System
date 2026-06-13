@@ -939,13 +939,25 @@ export default function App() {
           throw new Error('Server returned non-ok status');
         }
       } catch (err) {
-        console.warn('Error fetching unified disease images from server, using local storage cache fallback:', err);
+        console.warn('Error fetching unified disease images from server, attempting static JSON fallback...');
         try {
-          const saved = localStorage.getItem('custom_sample_images');
-          if (saved) {
-            setCustomSampleImages(JSON.parse(saved));
+          const fallbackRes = await fetch('/disease_images_fallback.json');
+          if (fallbackRes.ok) {
+            const fallbackData = await fallbackRes.json();
+            setCustomSampleImages(fallbackData);
+            console.log('Successfully loaded custom disease images from static JSON fallback.');
+          } else {
+            throw new Error('Static fallback returned non-ok status');
           }
-        } catch {}
+        } catch (staticErr) {
+          console.warn('Error fetching static JSON fallback database, using local storage cache fallback:', staticErr);
+          try {
+            const saved = localStorage.getItem('custom_sample_images');
+            if (saved) {
+              setCustomSampleImages(JSON.parse(saved));
+            }
+          } catch {}
+        }
       }
     };
 
