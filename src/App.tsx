@@ -28,6 +28,12 @@ import {
   Camera
 } from 'lucide-react';
 import * as tf from '@tensorflow/tfjs';
+import { 
+  initAuth, 
+  uploadCustomImageToCloud, 
+  deleteCustomImageFromCloud, 
+  fetchCustomImagesFromCloud 
+} from './lib/firebase';
 
 // Define the comprehensive disease metadata structure
 interface DiseaseDetail {
@@ -837,7 +843,7 @@ export default function App() {
   const [customSampleImages, setCustomSampleImages] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    // Safely hydrate from BOTH IndexedDB and localStorage (as backup), migrating older assets
+    // Safely hydrate from BOTH IndexedDB/local backup and Firestore Cloud Database
     const loadImages = async () => {
       let loadedImages: Record<string, string> = {};
       
@@ -867,7 +873,36 @@ export default function App() {
         console.warn('IndexedDB read failed, relying solely on localStorage fallback:', err);
       }
 
+      // Render local assets instantly for instant visual feedback on slow networks
       setCustomSampleImages(loadedImages);
+
+      // 4. Safely authenticate and sync with Cloud Firestore
+      try {
+        await initAuth();
+        const cloudImages = await fetchCustomImagesFromCloud();
+        
+        // Merge cloud images into state
+        const mergedImages = { ...loadedImages, ...cloudImages };
+        setCustomSampleImages(mergedImages);
+
+        // Backup new cloud images to local IndexedDB and localStorage safely
+        for (const [key, b64] of Object.entries(cloudImages)) {
+          await imageStore.set(key, b64).catch(() => {});
+          try {
+            let localData: Record<string, string> = {};
+            const saved = localStorage.getItem('custom_sample_images');
+            if (saved) {
+              try { localData = JSON.parse(saved); } catch {}
+            }
+            if (localData[key] !== b64) {
+              localData[key] = b64;
+              localStorage.setItem('custom_sample_images', JSON.stringify(localData));
+            }
+          } catch {}
+        }
+      } catch (cloudErr) {
+        console.error("Cloud database synchronization deferred or failed:", cloudErr);
+      }
     };
 
     loadImages();
@@ -878,17 +913,20 @@ export default function App() {
     reader.onloadend = () => {
       const base64data = reader.result as string;
       
-      // Compress image first to be under 40-50KB before writing to database or localStorage
+      // Compress image first to be under 120KB before writing to database or localStorage
       compressImage(base64data, 350, 350)
         .then(async (compressedBase64) => {
-          // Dual sync: 1. Set in IndexedDB
+          // 1. Immediate local UI update for snappy feedback
+          setCustomSampleImages(prev => ({ ...prev, [compositeKey]: compressedBase64 }));
+
+          // 2. Local fallback sync: Set in IndexedDB
           try {
             await imageStore.set(compositeKey, compressedBase64);
           } catch (dbErr) {
             console.error('Failed to store in IndexedDB:', dbErr);
           }
 
-          // Dual sync: 2. Set in localStorage backup (safely size-guaranteed now)
+          // 3. Local fallback sync: Set in localStorage backup (safely size-guaranteed now)
           try {
             let localData: Record<string, string> = {};
             const saved = localStorage.getItem('custom_sample_images');
@@ -903,19 +941,32 @@ export default function App() {
             console.error('Failed to write to localStorage fallback:', lsErr);
           }
 
-          // Update parent state
-          setCustomSampleImages(prev => ({ ...prev, [compositeKey]: compressedBase64 }));
+          // 4. Secure live cloud save
+          try {
+            await initAuth();
+            await uploadCustomImageToCloud(compositeKey, compressedBase64);
+            console.log(`Successfully backed up custom reference for ${compositeKey} to Firestore Cloud.`);
+          } catch (cloudErr) {
+            console.error(`Failed to sync custom image key ${compositeKey} to cloud database:`, cloudErr);
+          }
         });
     };
     reader.readAsDataURL(file);
   };
 
   const handleResetCustomSampleImage = (compositeKey: string) => {
-    // 1. Delete from IndexedDB
+    // 1. Snappy local UI update
+    setCustomSampleImages(prev => {
+      const updated = { ...prev };
+      delete updated[compositeKey];
+      return updated;
+    });
+
+    // 2. Delete from IndexedDB locally
     imageStore.delete(compositeKey)
       .catch(err => console.error('Failed to delete custom image from IndexedDB:', err));
 
-    // 2. Delete from localStorage
+    // 3. Delete from localStorage locally
     try {
       const saved = localStorage.getItem('custom_sample_images');
       if (saved) {
@@ -927,12 +978,15 @@ export default function App() {
       console.error('Failed to clean up localStorage backup:', e);
     }
 
-    // 3. Update parent state
-    setCustomSampleImages(prev => {
-      const updated = { ...prev };
-      delete updated[compositeKey];
-      return updated;
-    });
+    // 4. Delete from Live cloud database
+    initAuth()
+      .then(() => deleteCustomImageFromCloud(compositeKey))
+      .then(() => {
+        console.log(`Successfully deleted custom image key ${compositeKey} from Firestore Cloud.`);
+      })
+      .catch(err => {
+        console.error('Failed to remove custom image from cloud database:', err);
+      });
   };
 
   // References
