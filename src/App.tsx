@@ -2314,29 +2314,6 @@ export default function App() {
               ) : ((activeTab === 'leaf' && leafPrediction) || (activeTab === 'fruit' && fruitPrediction)) ? (
                 (() => {
                   const activePrediction = activeTab === 'leaf' ? leafPrediction : fruitPrediction;
-                  
-                  if (activePrediction && activePrediction.confidence < 60) {
-                    return (
-                      <div id="results-panel-box" className="bg-amber-50/60 rounded-xl border border-amber-300 p-6 shadow-sm text-center relative font-sans">
-                        <div className="p-4 bg-amber-100 rounded-full inline-block mb-3 border border-amber-250">
-                          <AlertTriangle className="w-10 h-10 text-amber-600" />
-                        </div>
-                        <h3 className="text-base font-black text-amber-800 uppercase tracking-wider mb-2">Low Confidence Alert (কম নির্ভুলতা সতর্কতা)</h3>
-                        <p className="text-sm font-bold text-slate-800 leading-relaxed max-w-sm mx-auto p-1.5 bg-white/80 rounded border border-amber-200/50 shadow-3xs">
-                          {activeTab === 'leaf' 
-                            ? "⚠️ This image does not appear to be a dragon fruit leaf. Please upload a clear photo of dragon fruit leaf."
-                            : "⚠️ This image does not appear to be a dragon fruit. Please upload a clear photo of dragon fruit."
-                          }
-                        </p>
-                        <p className="text-[10.5px] font-semibold text-slate-500 mt-3 italic leading-normal">
-                          {activeTab === 'leaf'
-                            ? "(অনুগ্ৰহ করে ড্রাগন ফলের পাতার স্পষ্ট ছবি দিন।)"
-                            : "(অনুগ্ৰহ করে ড্রাগন ফলের স্পষ্ট ছবি দিন।)"
-                          }
-                        </p>
-                      </div>
-                    );
-                  }
 
                   const dataMap = activeTab === 'leaf' ? leafDiseasesData : fruitDiseasesData;
                   const detail = dataMap[activePrediction!.className] || {

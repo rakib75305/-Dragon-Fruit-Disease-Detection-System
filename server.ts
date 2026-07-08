@@ -21,6 +21,7 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 const rawSupabaseUrl = process.env.SUPABASE_URL || "";
 const supabaseKey = process.env.SUPABASE_ANON_KEY || "";
 let supabaseClient: any = null;
+let supabaseClientActive = true;
 let supabaseUrl = rawSupabaseUrl.trim();
 
 if (supabaseUrl) {
@@ -33,15 +34,33 @@ if (supabaseUrl) {
   supabaseUrl = supabaseUrl.replace(/\/+$/, "");
 }
 
-if (supabaseUrl && supabaseKey) {
+const isPlaceholder = (val: string) => {
+  if (!val) return true;
+  const lower = val.toLowerCase();
+  return (
+    lower.includes("placeholder") ||
+    lower.includes("your-supabase") ||
+    lower.includes("insert-your") ||
+    lower.includes("my_supabase") ||
+    lower.includes("my-supabase") ||
+    lower.includes("example.com") ||
+    lower.includes("my_") ||
+    lower.includes("dummy") ||
+    !lower.startsWith("http")
+  );
+};
+
+if (supabaseUrl && supabaseKey && !isPlaceholder(supabaseUrl) && !isPlaceholder(supabaseKey)) {
   try {
     supabaseClient = createClient(supabaseUrl, supabaseKey);
     console.log("Supabase Client has been initialized successfully with Base URL:", supabaseUrl);
   } catch (err) {
     console.error("Failed to initialize Supabase client:", err);
+    supabaseClientActive = false;
   }
 } else {
-  console.log("Supabase URL or Key missing. Running with local fallback JSON database.");
+  console.log("Supabase URL or Key missing or placeholder. Running with local fallback JSON database.");
+  supabaseClientActive = false;
 }
 
 // Ensure local db and fallback db exist
@@ -68,7 +87,7 @@ async function getDiseaseImages() {
   }
 
   // 2. If Supabase is configured, fetch and merge/sync
-  if (supabaseClient) {
+  if (supabaseClient && supabaseClientActive) {
     try {
       const { data, error } = await supabaseClient
          .from("disease_images")
@@ -85,10 +104,22 @@ async function getDiseaseImages() {
         fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify(images, null, 2));
         fs.writeFileSync(FALLBACK_DB_PATH, JSON.stringify(images, null, 2));
       } else if (error) {
-        console.log("Supabase notice: Table 'disease_images' might not be created yet. Falling back to local container database file.", error.message);
+        const msg = (error.message || "").toLowerCase();
+        if (msg.includes("fetch failed") || msg.includes("failed to fetch") || msg.includes("network")) {
+          console.log("Supabase network fetch failed. Deactivating Supabase sync and falling back to local database container.");
+          supabaseClientActive = false;
+        } else {
+          console.log("Supabase notice: Table 'disease_images' might not be created yet. Falling back to local container database file.", error.message);
+        }
       }
     } catch (err: any) {
-      console.log("Supabase notice: Connection not configured or table missing. Using local container fallback:", err.message);
+      const msg = (err.message || "").toLowerCase();
+      if (msg.includes("fetch failed") || msg.includes("failed to fetch") || msg.includes("network")) {
+        console.log("Supabase server connection failed. Deactivating Supabase sync and falling back to local database container.");
+        supabaseClientActive = false;
+      } else {
+        console.log("Supabase notice: Connection not configured or table missing. Using local container fallback:", err.message);
+      }
     }
   }
 
@@ -111,7 +142,7 @@ async function saveDiseaseImage(key: string, imageData: string) {
   fs.writeFileSync(FALLBACK_DB_PATH, JSON.stringify(images, null, 2));
 
   // 2. Save copy to Supabase if configured
-  if (supabaseClient) {
+  if (supabaseClient && supabaseClientActive) {
     try {
       console.log(`Attempting to upsert custom image for image key: ${key} to Supabase...`);
       const { error } = await supabaseClient
@@ -120,6 +151,11 @@ async function saveDiseaseImage(key: string, imageData: string) {
 
       if (error) {
         console.error("Supabase upsert error:", error.message);
+        const msg = (error.message || "").toLowerCase();
+        if (msg.includes("fetch failed") || msg.includes("failed to fetch") || msg.includes("network")) {
+          console.log("Supabase network fetch failed during save. Deactivating Supabase sync.");
+          supabaseClientActive = false;
+        }
         throw error;
       } else {
         console.log(`Successfully persisted image key: ${key} to Supabase.`);
@@ -146,7 +182,7 @@ async function deleteDiseaseImage(key: string) {
   } catch (e) {}
 
   // 2. Remove from Supabase if configured
-  if (supabaseClient) {
+  if (supabaseClient && supabaseClientActive) {
     try {
       console.log(`Attempting to delete image key: ${key} from Supabase...`);
       const { error } = await supabaseClient
@@ -156,6 +192,11 @@ async function deleteDiseaseImage(key: string) {
 
       if (error) {
         console.error("Supabase delete error:", error.message);
+        const msg = (error.message || "").toLowerCase();
+        if (msg.includes("fetch failed") || msg.includes("failed to fetch") || msg.includes("network")) {
+          console.log("Supabase network fetch failed during delete. Deactivating Supabase sync.");
+          supabaseClientActive = false;
+        }
         throw error;
       } else {
         console.log(`Successfully deleted image key: ${key} from Supabase.`);
@@ -190,7 +231,7 @@ const verifyAdminPasscode = (req: express.Request, res: express.Response, next: 
 // Get Configuration Status
 app.get("/api/config", async (req, res) => {
   let tableExists = false;
-  if (supabaseClient) {
+  if (supabaseClient && supabaseClientActive) {
     try {
       const { error } = await supabaseClient
         .from("disease_images")
@@ -203,18 +244,24 @@ app.get("/api/config", async (req, res) => {
         tableExists = true;
       } else if (error && error.message) {
         const msg = error.message.toLowerCase();
-        if (!msg.includes("does not exist") && !msg.includes("could not find the table") && !msg.includes("relation")) {
+        if (msg.includes("fetch failed") || msg.includes("failed to fetch") || msg.includes("network")) {
+          supabaseClientActive = false;
+        } else if (!msg.includes("does not exist") && !msg.includes("could not find the table") && !msg.includes("relation")) {
           tableExists = true;
         }
       }
-    } catch (err) {
+    } catch (err: any) {
+      const msg = (err.message || "").toLowerCase();
+      if (msg.includes("fetch failed") || msg.includes("failed to fetch") || msg.includes("network")) {
+        supabaseClientActive = false;
+      }
       tableExists = false;
     }
   }
 
   res.json({
-    supabaseConnected: !!supabaseClient,
-    supabaseUrlConfigured: !!rawSupabaseUrl,
+    supabaseConnected: !!supabaseClient && supabaseClientActive,
+    supabaseUrlConfigured: !!rawSupabaseUrl && !isPlaceholder(rawSupabaseUrl),
     hasLocalDb: fs.existsSync(LOCAL_DB_PATH),
     tableExists,
   });
