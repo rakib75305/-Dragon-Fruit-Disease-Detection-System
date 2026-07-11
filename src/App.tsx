@@ -737,9 +737,13 @@ export default function App() {
   const [fruitNormalizationMode, setFruitNormalizationMode] = useState<string>("div255");
 
   // Academic / Thesis Metadata States
-  const [thesisTitle, setThesisTitle] = useState<string>(() => 
-    localStorage.getItem('df_thesis_title') || "Deep Learning-Based Foliar and Carpoplane Phytopathology for Selenicereus undatus (Dragon Fruit)"
-  );
+  const [thesisTitle, setThesisTitle] = useState<string>(() => {
+    const saved = localStorage.getItem('df_thesis_title');
+    if (!saved || saved.includes("Foliar and Carpoplane") || saved === "Deep Learning-Based Foliar and Carpoplane Phytopathology for Selenicereus undatus (Dragon Fruit)") {
+      return "Deep Learning Framework for Dragon Fruit and Leaf Quality Assessment";
+    }
+    return saved;
+  });
   const [university, setUniversity] = useState<string>(() => {
     const saved = localStorage.getItem('df_thesis_university');
     if (!saved || saved === "Department of Phytopathology & AI Science • University Project" || saved === "Department of Digital Agronomy and AI") {
@@ -2777,7 +2781,7 @@ export default function App() {
                 <div className="relative z-10 space-y-4 max-w-4xl">
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-full text-[10px] font-bold uppercase tracking-wider border border-emerald-500/30">
                     <Award className="w-3.5 h-3.5 text-emerald-400" />
-                    University Final Year Thesis Defense Project (বিশ্ববিদ্যালয় থিসিস প্রজেক্ট)
+                    University Final Year Thesis Defense Project
                   </div>
 
                   {isEditingAcademic ? (
@@ -2825,7 +2829,7 @@ export default function App() {
                   )}
 
                   <p className="text-xs text-slate-300 leading-relaxed text-justify max-w-3xl">
-                    <strong>Abstract (সারসংক্ষেপ):</strong> Selenicereus undatus (Dragon fruit) crops suffer extensively from pathological constraints like Stem Anthracnose, Spot, and Rot decays which affect crop quality and market yields. This research implements custom Deep Convolutional Neural Networks, leverage transfer learning via light-weight <strong>MobileNetV2</strong>, and compiles model parameters directly onto TensorFlow.js. This architecture executes real-time digital phytopathology scans securely in-client without server-side compute lag, securing immediate pathology remedial frameworks to aid agro-intelligence applications.
+                    <strong>Abstract:</strong> Dragon fruits and their leaves can be affected by different diseases, such as <strong>Anthracnose, Spot, and Rot</strong>. These diseases can damage the quality of the fruits and leaves and may reduce overall crop production. This research develops a deep learning model to identify diseases in both dragon fruits and leaves. <strong>MobileNetV2</strong> is used to improve the disease detection process. The trained model is integrated into a web-based system using <strong>TensorFlow.js</strong>. Users can upload an image of a dragon fruit or leaf and detect the disease directly through a web browser. This system provides a fast and simple way to identify diseases and can help farmers manage dragon fruit plant diseases more effectively.
                   </p>
 
                   <div className="pt-2 flex gap-3">
