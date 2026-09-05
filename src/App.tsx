@@ -1608,12 +1608,12 @@ export default function App() {
 
         const confidence = parseFloat((maxVal * 100).toFixed(1));
         const className = classesList[maxIndex] || "Healthy";
-        const isConfident = confidence >= 90.0;
+        const isConfident = confidence >= 80.0;
 
         if (isConfident) {
-          logDiagnostic(`✅ Prediction verified! Output class: ${className} with high confidence: ${confidence}% (>= 90% threshold).`);
+          logDiagnostic(`✅ Prediction verified! Output class: ${className} with high confidence: ${confidence}% (>= 80% threshold).`);
         } else {
-          logDiagnostic(`⚠️ Low confidence rejection: ${confidence}% is below 90% threshold. (Dragon fruit specimen could not be verified with >=90% certainty; disease diagnosis withheld).`);
+          logDiagnostic(`⚠️ Low confidence rejection: ${confidence}% is below 80% threshold. (Dragon fruit specimen could not be verified with >=80% certainty; disease diagnosis withheld).`);
         }
 
         // Generate probability breakdown
@@ -1630,7 +1630,7 @@ export default function App() {
           setFruitPrediction({ className, confidence, isConfident, domainScore: domainConsistency });
         }
         
-        // Update encyclopedia sidebar only when prediction meets the strict 90% confidence threshold
+        // Update encyclopedia sidebar only when prediction meets the 80% confidence threshold
         if (isConfident) {
           setSelectedEncycloGroup(type);
           setSelectedEncycloDisease(className);
@@ -1706,18 +1706,18 @@ export default function App() {
     const targetClass = classes[seedIndex] || "Healthy";
     
     const offset = (Math.abs(seed * 7 + 13) % 1000) / 1000;
-    // For non-plant or non-dataset images, confidence remains strictly under 90%
+    // For non-plant or non-dataset images, confidence remains strictly under 80%
     const deterministicPercent = domainConsistency < 0.20
-      ? parseFloat((40.0 + (offset * 32.0)).toFixed(1)) // 40% - 72% (<90%)
-      : parseFloat((91.0 + (offset * 8.5)).toFixed(1));  // 91% - 99.5% (>=90%)
+      ? parseFloat((35.0 + (offset * 35.0)).toFixed(1)) // 35% - 70% (<80%)
+      : parseFloat((82.0 + (offset * 17.5)).toFixed(1));  // 82% - 99.5% (>=80%)
     
-    const isConfident = deterministicPercent >= 90.0;
+    const isConfident = deterministicPercent >= 80.0;
     
     setTimeout(() => {
       if (isConfident) {
-        logDiagnostic(`Diagnostic prediction complete! Verified category: ${targetClass} with high certainty: ${deterministicPercent}% (>=90% threshold)`);
+        logDiagnostic(`Diagnostic prediction complete! Verified category: ${targetClass} with high certainty: ${deterministicPercent}% (>=80% threshold)`);
       } else {
-        logDiagnostic(`Diagnostic prediction withheld! Specimen certainty ${deterministicPercent}% is below 90% threshold. (Out-of-Distribution / Non-Dragon Fruit Image)`);
+        logDiagnostic(`Diagnostic prediction withheld! Specimen certainty ${deterministicPercent}% is below 80% threshold. (Out-of-Distribution / Non-Dragon Fruit Image)`);
       }
       
       const probabilityBreakdown = classes.map((cls, idx) => {
@@ -2664,9 +2664,9 @@ export default function App() {
                   const activePrediction = activeTab === 'leaf' ? leafPrediction : fruitPrediction;
                   if (!activePrediction) return null;
 
-                  const isConfidenceSufficient = Boolean(activePrediction.isConfident && activePrediction.confidence >= 90.0);
+                  const isConfidenceSufficient = Boolean(activePrediction.isConfident && activePrediction.confidence >= 80.0);
 
-                  // If confidence is below 90% or non-dataset specimen, withhold diagnosis to prevent misclassification
+                  // If confidence is below 80% or non-dataset specimen, withhold diagnosis to prevent misclassification
                   if (!isConfidenceSufficient) {
                     return (
                       <div id="results-panel-box" className="bg-white rounded-xl border border-rose-200 p-5 shadow-sm overflow-hidden relative font-sans animate-fade-in">
@@ -2712,15 +2712,23 @@ export default function App() {
                           </div>
                           
                           <h2 className="text-xl sm:text-2xl font-black tracking-tight leading-tight my-1 text-slate-800 font-sans">
-                            সঠিক ড্রাগন ফলের ছবি আপলোড করুন
+                            {activeTab === 'leaf' 
+                              ? 'সঠিক ড্রাগন ফলের পাতার ছবি আপলোড করুন' 
+                              : 'সঠিক ড্রাগন ফলের ছবি আপলোড করুন'}
                           </h2>
 
                           <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white font-bold text-xs border border-rose-200 text-rose-800 shadow-xs">
-                            <span>ড্রাগন ফলের সঠিক ছবি ছাড়া কোনো প্রেডিকশন দেওয়া হবে না</span>
+                            <span>
+                              {activeTab === 'leaf' 
+                                ? 'ড্রাগন ফলের পাতার সঠিক ছবি ছাড়া কোনো প্রেডিকশন দেওয়া হবে না' 
+                                : 'ড্রাগন ফলের সঠিক ছবি ছাড়া কোনো প্রেডিকশন দেওয়া হবে না'}
+                            </span>
                           </div>
 
                           <p className="text-[12px] text-slate-600 mt-3 font-medium leading-relaxed max-w-md mx-auto">
-                            আপনার আপলোড করা ছবিটি ড্রাগন ফলের কান্ড বা ফলের নমুনা হিসেবে শনাক্ত করা যায়নি। ভুল রোগ নির্ণয় রোধে শুধুমাত্র ড্রাগন ফলের সঠিক ছবি ছাড়া অন্য কোনো ছবির প্রেডিকশন বা চিকিৎসা পদ্ধতি দেওয়া হয় না।
+                            {activeTab === 'leaf'
+                              ? 'আপনার আপলোড করা ছবিটি ড্রাগন ফলের পাতার (বা কান্ডের) নমুনা হিসেবে নিশ্চিতভাবে শনাক্ত করা যায়নি। ভুল রোগ নির্ণয় রোধে শুধুমাত্র ড্রাগন ফলের পাতার সঠিক ছবি ছাড়া অন্য কোনো ছবির প্রেডিকশন বা চিকিৎসা পদ্ধতি দেওয়া হয় না।'
+                              : 'আপনার আপলোড করা ছবিটি ড্রাগন ফলের নমুনা হিসেবে নিশ্চিতভাবে শনাক্ত করা যায়নি। ভুল রোগ নির্ণয় রোধে শুধুমাত্র ড্রাগন ফলের সঠিক ছবি ছাড়া অন্য কোনো ছবির প্রেডিকশন বা চিকিৎসা পদ্ধতি দেওয়া হয় না।'}
                           </p>
                         </div>
 
@@ -2733,7 +2741,11 @@ export default function App() {
                           <ul className="pl-4 space-y-1.5 text-slate-600 text-[11px]">
                             <li className="flex items-start gap-1.5">
                               <span className="text-emerald-600 font-bold">✓</span>
-                              <span>ড্রাগন ফলের কান্ড (Stem) অথবা ফলের (Fruit) স্পষ্ট ও পরিষ্কার ছবি আপলোড করুন।</span>
+                              <span>
+                                {activeTab === 'leaf'
+                                  ? 'ড্রাগন গাছের কান্ড বা পাতার (Leaf/Stem) স্পষ্ট ও পরিষ্কার ছবি আপলোড করুন।'
+                                  : 'ড্রাগন ফলের (Fruit) স্পষ্ট ও পরিষ্কার ছবি আপলোড করুন।'}
+                              </span>
                             </li>
                             <li className="flex items-start gap-1.5">
                               <span className="text-emerald-600 font-bold">✓</span>
@@ -2764,7 +2776,7 @@ export default function App() {
                             className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11.5px] font-bold shadow-xs transition-colors cursor-pointer"
                           >
                             <Upload className="w-3.5 h-3.5" />
-                            সঠিক ছবি সিলেক্ট করুন
+                            {activeTab === 'leaf' ? 'সঠিক পাতার ছবি সিলেক্ট করুন' : 'সঠিক ফলের ছবি সিলেক্ট করুন'}
                           </button>
                           <button
                             type="button"
