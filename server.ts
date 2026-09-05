@@ -63,11 +63,19 @@ if (supabaseUrl && supabaseKey && !isPlaceholder(supabaseUrl) && !isPlaceholder(
   supabaseClientActive = false;
 }
 
-// Ensure local db and fallback db exist
-if (!fs.existsSync(LOCAL_DB_PATH)) {
-  fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify({}, null, 2));
-}
-if (!fs.existsSync(FALLBACK_DB_PATH)) {
+// Ensure fallback database and local db exist with default fallback data
+if (fs.existsSync(FALLBACK_DB_PATH)) {
+  if (!fs.existsSync(LOCAL_DB_PATH) || fs.statSync(LOCAL_DB_PATH).size <= 5) {
+    try {
+      fs.copyFileSync(FALLBACK_DB_PATH, LOCAL_DB_PATH);
+    } catch (e) {
+      console.warn("Could not copy fallback to local db:", e);
+    }
+  }
+} else {
+  if (!fs.existsSync(LOCAL_DB_PATH)) {
+    fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify({}, null, 2));
+  }
   fs.writeFileSync(FALLBACK_DB_PATH, JSON.stringify({}, null, 2));
 }
 
@@ -75,12 +83,25 @@ if (!fs.existsSync(FALLBACK_DB_PATH)) {
 async function getDiseaseImages() {
   let images: Record<string, string> = {};
 
-  // 1. First fetch what we have locally
+  // 1. First load baseline fallback images
+  try {
+    if (fs.existsSync(FALLBACK_DB_PATH)) {
+      const fallbackParsed = JSON.parse(fs.readFileSync(FALLBACK_DB_PATH, "utf-8"));
+      if (fallbackParsed && typeof fallbackParsed === "object") {
+        images = { ...fallbackParsed };
+      }
+    }
+  } catch (e) {
+    console.error("Error reading fallback JSON file:", e);
+  }
+
+  // 2. Overlay any updated images stored locally
   try {
     if (fs.existsSync(LOCAL_DB_PATH)) {
-      images = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, "utf-8"));
-    } else if (fs.existsSync(FALLBACK_DB_PATH)) {
-      images = JSON.parse(fs.readFileSync(FALLBACK_DB_PATH, "utf-8"));
+      const localParsed = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, "utf-8"));
+      if (localParsed && typeof localParsed === "object") {
+        images = { ...images, ...localParsed };
+      }
     }
   } catch (e) {
     console.error("Error reading local JSON file:", e);

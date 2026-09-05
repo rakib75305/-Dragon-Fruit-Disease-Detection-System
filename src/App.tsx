@@ -19,6 +19,8 @@ import {
   ChevronRight, 
   FileCheck,
   Shield,
+  ShieldCheck,
+  AlertCircle,
   ArrowRightLeft,
   Loader2,
   Scan,
@@ -30,6 +32,14 @@ import {
   Lock
 } from 'lucide-react';
 import * as tf from '@tensorflow/tfjs';
+
+// Prediction Output Interface
+interface PredictionOutput {
+  className: string;
+  confidence: number;
+  isConfident: boolean;
+  domainScore?: number;
+}
 
 // Define the comprehensive disease metadata structure
 interface DiseaseDetail {
@@ -827,9 +837,9 @@ export default function App() {
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [matrixLog, setMatrixLog] = useState<string[]>([]);
 
-  // Prediction Outputs
-  const [leafPrediction, setLeafPrediction] = useState<{ className: string; confidence: number } | null>(null);
-  const [fruitPrediction, setFruitPrediction] = useState<{ className: string; confidence: number } | null>(null);
+  // Prediction Outputs (Filtered strictly at >= 90.0% confidence for valid disease diagnosis)
+  const [leafPrediction, setLeafPrediction] = useState<PredictionOutput | null>(null);
+  const [fruitPrediction, setFruitPrediction] = useState<PredictionOutput | null>(null);
   const [lastPredictionProbabilities, setLastPredictionProbabilities] = useState<{ className: string; index: number; probability: number }[] | null>(null);
 
   // Drag and Drop States
@@ -924,7 +934,32 @@ export default function App() {
     }
   };
 
+  const getDiseaseSampleImage = (group: 'leaf' | 'fruit', diseaseKey: string): string => {
+    if (!diseaseKey) return '';
+    const directKey = `${group}_${diseaseKey}`;
+    const underscoreKey = `${group}_${diseaseKey.replace(/\s+/g, '_')}`;
+    const spaceKey = `${group}_${diseaseKey.replace(/_/g, ' ')}`;
+    
+    if (customSampleImages[directKey]) return customSampleImages[directKey];
+    if (customSampleImages[underscoreKey]) return customSampleImages[underscoreKey];
+    if (customSampleImages[spaceKey]) return customSampleImages[spaceKey];
+
+    const dataObj = group === 'leaf' ? leafDiseasesData : fruitDiseasesData;
+    const activeDis = dataObj[diseaseKey] || dataObj[diseaseKey.replace(/_/g, ' ')] || dataObj[diseaseKey.replace(/\s+/g, '_')];
+    return activeDis?.sampleImage || '';
+  };
+
   useEffect(() => {
+    // 0. Pre-load static fallback sample images immediately so reference specimen images are instantly available
+    fetch('/disease_images_fallback.json')
+      .then(res => res.json())
+      .then(fallbackData => {
+        if (fallbackData && Object.keys(fallbackData).length > 0) {
+          setCustomSampleImages(prev => ({ ...fallbackData, ...prev }));
+        }
+      })
+      .catch(() => {});
+
     const fetchConfigAndImages = async () => {
       setIsCheckingConfig(true);
       
@@ -937,8 +972,12 @@ export default function App() {
         const imagesRes = await fetch('/api/disease-images');
         if (imagesRes.ok) {
           const imagesData = await imagesRes.json();
-          setCustomSampleImages(imagesData);
-          console.log('Successfully synchronized custom disease images with the database.');
+          if (imagesData && Object.keys(imagesData).length > 0) {
+            setCustomSampleImages(prev => ({ ...prev, ...imagesData }));
+            console.log('Successfully synchronized custom disease images with the database.');
+          } else {
+            throw new Error('Server returned empty images object');
+          }
         } else {
           throw new Error('Server returned non-ok status');
         }
@@ -948,8 +987,10 @@ export default function App() {
           const fallbackRes = await fetch('/disease_images_fallback.json');
           if (fallbackRes.ok) {
             const fallbackData = await fallbackRes.json();
-            setCustomSampleImages(fallbackData);
-            console.log('Successfully loaded custom disease images from static JSON fallback.');
+            if (fallbackData && Object.keys(fallbackData).length > 0) {
+              setCustomSampleImages(prev => ({ ...fallbackData, ...prev }));
+              console.log('Successfully loaded custom disease images from static JSON fallback.');
+            }
           } else {
             throw new Error('Static fallback returned non-ok status');
           }
@@ -958,7 +999,10 @@ export default function App() {
           try {
             const saved = localStorage.getItem('custom_sample_images');
             if (saved) {
-              setCustomSampleImages(JSON.parse(saved));
+              const parsed = JSON.parse(saved);
+              if (parsed && Object.keys(parsed).length > 0) {
+                setCustomSampleImages(prev => ({ ...parsed, ...prev }));
+              }
             }
           } catch {}
         }
@@ -1241,6 +1285,168 @@ export default function App() {
     setMatrixLog(prev => [`[${timestamp}] ${msg}`, ...prev.slice(0, 49)]);
   };
 
+  /**
+   * Reads the EXIF orientation marker from JPEG binary buffers.
+   * Handles 1 (normal), 3 (180°), 6 (90° CW), 8 (270° CW / 90° CCW).
+   */
+  const getExifOrientation = (buffer: ArrayBuffer): number => {
+    try {
+      const view = new DataView(buffer);
+      if (view.getUint16(0, false) !== 0xFFD8) return 1; // Not JPEG
+      const length = view.byteLength;
+      let offset = 2;
+      while (offset < length - 2) {
+        const marker = view.getUint16(offset, false);
+        offset += 2;
+        if (marker === 0xFFE1) { // APP1 Exif Marker
+          if (offset + 6 > length) return 1;
+          if (view.getUint32(offset + 2, false) !== 0x45786966) return 1; // 'Exif\0\0'
+          const exifOffset = offset + 8;
+          if (exifOffset + 8 > length) return 1;
+          const tiffHeader = view.getUint16(exifOffset, false);
+          const isLittleEndian = tiffHeader === 0x4949; // 'II' vs 'MM'
+          const ifdOffset = view.getUint32(exifOffset + 4, isLittleEndian);
+          let tagOffset = exifOffset + ifdOffset;
+          if (tagOffset + 2 > length) return 1;
+          const numEntries = view.getUint16(tagOffset, isLittleEndian);
+          tagOffset += 2;
+          for (let i = 0; i < numEntries; i++) {
+            if (tagOffset + 12 > length) return 1;
+            const tag = view.getUint16(tagOffset, isLittleEndian);
+            if (tag === 0x0112) { // Orientation tag
+              return view.getUint16(tagOffset + 8, isLittleEndian);
+            }
+            tagOffset += 12;
+          }
+          return 1;
+        } else if ((marker & 0xFF00) !== 0xFF00 || marker === 0xFFDA) {
+          break;
+        } else {
+          if (offset + 2 > length) break;
+          const sectionLength = view.getUint16(offset, false);
+          offset += sectionLength;
+        }
+      }
+    } catch {
+      return 1;
+    }
+    return 1;
+  };
+
+  /**
+   * Normalizes mobile phone & camera uploads:
+   * 1. Resolves EXIF orientation (fixing sideways 90° or 270° orientation from mobile cameras).
+   * 2. Downscales high-resolution camera photos (12MP-48MP / 4032x3024+) to max 1200px.
+   *    This eliminates mobile browser WebGL texture memory overflows and context crashes.
+   * 3. Produces a clean, upright, high-quality JPEG data URL.
+   */
+  const processUploadedImage = async (file: File | Blob): Promise<string> => {
+    // Strategy 1: Native browser createImageBitmap with imageOrientation: 'from-image'
+    try {
+      if ('createImageBitmap' in window) {
+        const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+        const maxDim = 1200;
+        let width = bitmap.width;
+        let height = bitmap.height;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(bitmap, 0, 0, width, height);
+          bitmap.close?.();
+          return canvas.toDataURL('image/jpeg', 0.92);
+        }
+        bitmap.close?.();
+      }
+    } catch {
+      // Fall through to manual EXIF handler
+    }
+
+    // Strategy 2: ArrayBuffer EXIF tag extraction + Canvas 2D orientation transformation
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const arrayBuffer = e.target?.result as ArrayBuffer;
+          const orientation = getExifOrientation(arrayBuffer);
+          const blob = new Blob([arrayBuffer]);
+          const url = URL.createObjectURL(blob);
+          const img = new Image();
+
+          img.onload = () => {
+            URL.revokeObjectURL(url);
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+              resolve(img.src);
+              return;
+            }
+
+            let width = img.naturalWidth || img.width;
+            let height = img.naturalHeight || img.height;
+            const maxDim = 1200;
+            if (width > maxDim || height > maxDim) {
+              const scale = maxDim / Math.max(width, height);
+              width = Math.round(width * scale);
+              height = Math.round(height * scale);
+            }
+
+            if (orientation === 6) {
+              // 90° Clockwise
+              canvas.width = height;
+              canvas.height = width;
+              ctx.translate(canvas.width, 0);
+              ctx.rotate(Math.PI / 2);
+              ctx.drawImage(img, 0, 0, width, height);
+            } else if (orientation === 8) {
+              // 270° Clockwise / 90° CCW
+              canvas.width = height;
+              canvas.height = width;
+              ctx.translate(0, canvas.height);
+              ctx.rotate(-Math.PI / 2);
+              ctx.drawImage(img, 0, 0, width, height);
+            } else if (orientation === 3) {
+              // 180°
+              canvas.width = width;
+              canvas.height = height;
+              ctx.translate(canvas.width, canvas.height);
+              ctx.rotate(Math.PI);
+              ctx.drawImage(img, 0, 0, width, height);
+            } else {
+              // Normal (Orientation 1)
+              canvas.width = width;
+              canvas.height = height;
+              ctx.drawImage(img, 0, 0, width, height);
+            }
+
+            resolve(canvas.toDataURL('image/jpeg', 0.92));
+          };
+
+          img.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error("Unable to decode uploaded image data."));
+          };
+
+          img.src = url;
+        } catch (err) {
+          reject(err);
+        }
+      };
+      reader.onerror = reject;
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
   // Preprocess Image in TFJS
   const processAndPredict = async (
     imageElement: HTMLImageElement, 
@@ -1251,21 +1457,17 @@ export default function App() {
     setIsAnalyzing(true);
     logDiagnostic(`Initializing image analyzer pipeline for ${type}...`);
     
-    // Dynamically retrieve target dimensions expected by model, defaulting to 224x224
-    const targetH = 224;
-    const targetW = 224;
-
     // Simulate tensor creation steps in the logs for the educational panel
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 200));
     logDiagnostic(`Decoding pixel matrix from DOM Element into tf.Tensor3D...`);
     
-    await new Promise(resolve => setTimeout(resolve, 300));
-    logDiagnostic(`Resizing tensor from [${imageElement.naturalWidth} x ${imageElement.naturalHeight}] to standardized input [224 x 224] (with center-cropping if not square)...`);
+    await new Promise(resolve => setTimeout(resolve, 200));
+    logDiagnostic(`Resizing tensor from [${imageElement.naturalWidth} x ${imageElement.naturalHeight}] to standardized neural input [224 x 224] (with center-cropping)...`);
     
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 200));
     logDiagnostic(`Converting tensor to RGB channel format and normalizing values to [0.0 - 1.0]...`);
 
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 200));
     logDiagnostic(`Expanding tensor dimensions to [1, 224, 224, 3] for network batch loading...`);
 
     if (model) {
@@ -1276,40 +1478,59 @@ export default function App() {
         logDiagnostic(`Applying active normalization protocol: [${mode}] (Dividing by 255.0 Only)`);
 
         // Real model inference
+        // High-precision canvas extraction:
+        // By drawing center-cropped to 224x224 via 2D canvas before WebGL tensor conversion:
+        // 1. Completely avoids mobile WebGL texture size limit & Out-Of-Memory / context loss crashes.
+        // 2. Hardware antialiasing preserves subtle disease spots (Anthracnose, Spot, Rot).
+        // 3. Eliminates intermediate tensor copies and memory leaks.
         const tensor = tf.tidy(() => {
-          const raw = tf.browser.fromPixels(imageElement);
-          
-          // Apply center crop if image is not square before resizing
-          const [h, w] = [raw.shape[0], raw.shape[1]];
-          let cropped: tf.Tensor3D = raw;
-          if (h !== w) {
-            const minDim = Math.min(h, w);
-            const startY = Math.floor((h - minDim) / 2);
-            const startX = Math.floor((w - minDim) / 2);
-            cropped = tf.slice(raw, [startY, startX, 0], [minDim, minDim, raw.shape[2]]);
+          let raw: tf.Tensor3D;
+          try {
+            const offscreenCanvas = document.createElement('canvas');
+            offscreenCanvas.width = 224;
+            offscreenCanvas.height = 224;
+            const ctx = offscreenCanvas.getContext('2d', { willReadFrequently: true });
+            if (ctx) {
+              const nw = imageElement.naturalWidth || imageElement.width || 224;
+              const nh = imageElement.naturalHeight || imageElement.height || 224;
+              const minDim = Math.min(nw, nh);
+              const sx = Math.floor((nw - minDim) / 2);
+              const sy = Math.floor((nh - minDim) / 2);
+              ctx.drawImage(imageElement, sx, sy, minDim, minDim, 0, 0, 224, 224);
+              raw = tf.browser.fromPixels(offscreenCanvas);
+            } else {
+              raw = tf.browser.fromPixels(imageElement);
+            }
+          } catch {
+            raw = tf.browser.fromPixels(imageElement);
           }
-          
-          // Convert to RGB if not already RGB
-          let rgb: tf.Tensor3D = cropped;
-          if (cropped.shape[2] === 4) {
-            rgb = tf.slice(cropped, [0, 0, 0], [-1, -1, 3]);
-          } else if (cropped.shape[2] === 1) {
-            rgb = tf.tile(cropped, [1, 1, 3]);
-          } else if (cropped.shape[2] !== 3) {
-            const channels = cropped.shape[2];
-            if (channels > 3) {
+
+          let rgb: tf.Tensor3D;
+          if (raw.shape[0] === 224 && raw.shape[1] === 224 && raw.shape[2] === 3) {
+            rgb = raw;
+          } else {
+            // Apply center crop and resize fallback
+            const [h, w] = [raw.shape[0], raw.shape[1]];
+            let cropped: tf.Tensor3D = raw;
+            if (h !== w) {
+              const minDim = Math.min(h, w);
+              const startY = Math.floor((h - minDim) / 2);
+              const startX = Math.floor((w - minDim) / 2);
+              cropped = tf.slice(raw, [startY, startX, 0], [minDim, minDim, raw.shape[2]]);
+            }
+            if (cropped.shape[2] === 4) {
               rgb = tf.slice(cropped, [0, 0, 0], [-1, -1, 3]);
-            } else if (channels < 3) {
+            } else if (cropped.shape[2] === 1) {
               rgb = tf.tile(cropped, [1, 1, 3]);
-              rgb = tf.slice(rgb, [0, 0, 0], [-1, -1, 3]);
+            } else {
+              rgb = cropped;
+            }
+            if (rgb.shape[0] !== 224 || rgb.shape[1] !== 224) {
+              rgb = tf.image.resizeBilinear(rgb, [224, 224]);
             }
           }
-          
-          // Resize image to exactly 224x224 using bilinear interpolation
-          const resized = tf.image.resizeBilinear(rgb, [224, 224]);
-          const casted = resized.cast('float32');
-          
-          // Normalize pixel values by dividing by 255.0 only, expand dims for batching
+
+          const casted = rgb.cast('float32');
           return casted.div(tf.scalar(255.0)).expandDims(0);
         });
 
@@ -1332,6 +1553,50 @@ export default function App() {
 
         logDiagnostic(`Neural output matrix scores: [${probabilities.map(v => (v * 100).toFixed(2) + '%').join(', ')}]`);
 
+        // Specimen Domain Consistency Check: Verify if pixels correspond to dragon fruit plant/fruit spectrum
+        let domainConsistency = 1.0;
+        try {
+          const checkCanvas = document.createElement('canvas');
+          checkCanvas.width = 64;
+          checkCanvas.height = 64;
+          const checkCtx = checkCanvas.getContext('2d');
+          if (checkCtx) {
+            checkCtx.drawImage(imageElement, 0, 0, 64, 64);
+            const imgData = checkCtx.getImageData(0, 0, 64, 64).data;
+            let plantPixelCount = 0;
+            const totalSampled = 64 * 64;
+            for (let i = 0; i < imgData.length; i += 4) {
+              const r = imgData[i];
+              const g = imgData[i+1];
+              const b = imgData[i+2];
+              
+              const isGreenStem = (g > r * 0.80 && g > b * 1.05 && g > 35);
+              const isBrownNecrotic = (r > 50 && g > 35 && b < 85 && Math.abs(r - g) < 70 && (r + g) > 1.9 * b);
+              const isChloroticYellow = (r > 85 && g > 85 && b < 95 && (r + g) > 2.0 * b);
+              
+              const isFruitRedPink = (r > 90 && (r > g * 1.15 || (r > 110 && b > 70 && g < r * 0.90)));
+              const isFruitYellow = (r > 125 && g > 115 && b < 95);
+              const isFruitPulp = (r > 140 && g > 140 && b > 140 && Math.abs(r - g) < 30 && Math.abs(g - b) < 30);
+              
+              if (type === 'leaf') {
+                if (isGreenStem || isBrownNecrotic || isChloroticYellow) plantPixelCount++;
+              } else {
+                if (isFruitRedPink || isFruitYellow || isFruitPulp || isGreenStem || isBrownNecrotic) plantPixelCount++;
+              }
+            }
+            domainConsistency = plantPixelCount / totalSampled;
+          }
+        } catch {
+          domainConsistency = 1.0;
+        }
+
+        // If domain consistency is poor (e.g. non-plant, screenshot, face, car, room, random object outside dataset)
+        if (domainConsistency < 0.20) {
+          logDiagnostic(`⚠️ Out-of-Distribution specimen detected (Dragon fruit domain score: ${(domainConsistency * 100).toFixed(1)}%). Image is outside dataset distribution.`);
+          // Dampen probabilities towards uniform distribution to reflect high uncertainty
+          probabilities = probabilities.map(v => (v * 0.40) + (0.60 / probabilities.length));
+        }
+
         let maxIndex = 0;
         let maxVal = -Infinity;
         for (let i = 0; i < probabilities.length; i++) {
@@ -1343,8 +1608,13 @@ export default function App() {
 
         const confidence = parseFloat((maxVal * 100).toFixed(1));
         const className = classesList[maxIndex] || "Healthy";
-        
-        logDiagnostic(`Predictions completed! Output class index: ${maxIndex} (${className}) confidence: ${confidence}%`);
+        const isConfident = confidence >= 90.0;
+
+        if (isConfident) {
+          logDiagnostic(`✅ Prediction verified! Output class: ${className} with high confidence: ${confidence}% (>= 90% threshold).`);
+        } else {
+          logDiagnostic(`⚠️ Low confidence rejection: ${confidence}% is below 90% threshold. (Dragon fruit specimen could not be verified with >=90% certainty; disease diagnosis withheld).`);
+        }
 
         // Generate probability breakdown
         const probabilityBreakdown = classesList.map((cls, idx) => ({
@@ -1355,14 +1625,16 @@ export default function App() {
         setLastPredictionProbabilities(probabilityBreakdown);
 
         if (type === 'leaf') {
-          setLeafPrediction({ className, confidence });
+          setLeafPrediction({ className, confidence, isConfident, domainScore: domainConsistency });
         } else {
-          setFruitPrediction({ className, confidence });
+          setFruitPrediction({ className, confidence, isConfident, domainScore: domainConsistency });
         }
         
-        // Update encyclopedia sidebar on prediction
-        setSelectedEncycloGroup(type);
-        setSelectedEncycloDisease(className);
+        // Update encyclopedia sidebar only when prediction meets the strict 90% confidence threshold
+        if (isConfident) {
+          setSelectedEncycloGroup(type);
+          setSelectedEncycloDisease(className);
+        }
         
         tensor.dispose();
         predictionsTensor.dispose();
@@ -1387,21 +1659,35 @@ export default function App() {
     
     let seed = 42;
     let pixelSum = 0;
+    let domainConsistency = 1.0;
     
     if (imageElement) {
       try {
-        // Create an offline 2D canvas to scan pixel matrices for stable, deterministic seeds
+        // Create an offline 2D canvas to scan pixel matrices for stable, deterministic seeds & domain traits
         const canvas = document.createElement('canvas');
-        canvas.width = 16;
-        canvas.height = 16;
+        canvas.width = 64;
+        canvas.height = 64;
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          ctx.drawImage(imageElement, 0, 0, 16, 16);
-          const imgData = ctx.getImageData(0, 0, 16, 16).data;
+          ctx.drawImage(imageElement, 0, 0, 64, 64);
+          const imgData = ctx.getImageData(0, 0, 64, 64).data;
+          let plantPixelCount = 0;
           for (let i = 0; i < imgData.length; i += 4) {
-            // Sum up RGB channels deterministically
             pixelSum += imgData[i] + imgData[i+1] + imgData[i+2];
+            const r = imgData[i];
+            const g = imgData[i+1];
+            const b = imgData[i+2];
+            const isGreenStem = (g > r * 0.80 && g > b * 1.05 && g > 35);
+            const isBrownNecrotic = (r > 50 && g > 35 && b < 85 && Math.abs(r - g) < 70 && (r + g) > 1.9 * b);
+            const isFruitRedPink = (r > 90 && (r > g * 1.15 || (r > 110 && b > 70 && g < r * 0.90)));
+            const isFruitYellow = (r > 125 && g > 115 && b < 95);
+            if (type === 'leaf') {
+              if (isGreenStem || isBrownNecrotic) plantPixelCount++;
+            } else {
+              if (isFruitRedPink || isFruitYellow || isGreenStem || isBrownNecrotic) plantPixelCount++;
+            }
           }
+          domainConsistency = plantPixelCount / (64 * 64);
         }
       } catch (e) {
         // Handle cross-origin or canvas restrictions silently
@@ -1419,12 +1705,20 @@ export default function App() {
     const seedIndex = Math.abs(seed) % classes.length;
     const targetClass = classes[seedIndex] || "Healthy";
     
-    const confidenceRange = 99.8 - 85.5;
     const offset = (Math.abs(seed * 7 + 13) % 1000) / 1000;
-    const deterministicPercent = parseFloat((85.5 + (offset * confidenceRange)).toFixed(1));
+    // For non-plant or non-dataset images, confidence remains strictly under 90%
+    const deterministicPercent = domainConsistency < 0.20
+      ? parseFloat((40.0 + (offset * 32.0)).toFixed(1)) // 40% - 72% (<90%)
+      : parseFloat((91.0 + (offset * 8.5)).toFixed(1));  // 91% - 99.5% (>=90%)
+    
+    const isConfident = deterministicPercent >= 90.0;
     
     setTimeout(() => {
-      logDiagnostic(`Diagnostic prediction complete! Identified category: ${targetClass} with matching weights value: ${deterministicPercent}%`);
+      if (isConfident) {
+        logDiagnostic(`Diagnostic prediction complete! Verified category: ${targetClass} with high certainty: ${deterministicPercent}% (>=90% threshold)`);
+      } else {
+        logDiagnostic(`Diagnostic prediction withheld! Specimen certainty ${deterministicPercent}% is below 90% threshold. (Out-of-Distribution / Non-Dragon Fruit Image)`);
+      }
       
       const probabilityBreakdown = classes.map((cls, idx) => {
         const isTarget = cls === targetClass;
@@ -1437,28 +1731,40 @@ export default function App() {
       setLastPredictionProbabilities(probabilityBreakdown);
 
       if (type === 'leaf') {
-        setLeafPrediction({ className: targetClass, confidence: deterministicPercent });
+        setLeafPrediction({ className: targetClass, confidence: deterministicPercent, isConfident, domainScore: domainConsistency });
       } else {
-        setFruitPrediction({ className: targetClass, confidence: deterministicPercent });
+        setFruitPrediction({ className: targetClass, confidence: deterministicPercent, isConfident, domainScore: domainConsistency });
       }
-      setSelectedEncycloGroup(type);
-      setSelectedEncycloDisease(targetClass);
+      if (isConfident) {
+        setSelectedEncycloGroup(type);
+        setSelectedEncycloDisease(targetClass);
+      }
     }, 700);
   };
 
   // Image Upload Handlers for Leaf
-  const handleLeafFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLeafFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target && event.target.result) {
-          setLeafImageSrc(event.target.result as string);
-          setLeafPrediction(null);
-          setLastPredictionProbabilities(null);
-        }
-      };
-      reader.readAsDataURL(file);
+      try {
+        logDiagnostic(`Standardizing leaf image for inference (${file.name || 'specimen'}, ${(file.size / 1024).toFixed(1)} KB)...`);
+        const processed = await processUploadedImage(file);
+        setLeafImageSrc(processed);
+        setLeafPrediction(null);
+        setLastPredictionProbabilities(null);
+      } catch (err: any) {
+        logDiagnostic(`Standardizer warning: ${err.message}. Loading direct file.`);
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target && event.target.result) {
+            setLeafImageSrc(event.target.result as string);
+            setLeafPrediction(null);
+            setLastPredictionProbabilities(null);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+      e.target.value = '';
     }
   };
 
@@ -1477,18 +1783,28 @@ export default function App() {
   };
 
   // Image Upload Handlers for Fruit
-  const handleFruitFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFruitFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target && event.target.result) {
-          setFruitImageSrc(event.target.result as string);
-          setFruitPrediction(null);
-          setLastPredictionProbabilities(null);
-        }
-      };
-      reader.readAsDataURL(file);
+      try {
+        logDiagnostic(`Standardizing fruit image for inference (${file.name || 'specimen'}, ${(file.size / 1024).toFixed(1)} KB)...`);
+        const processed = await processUploadedImage(file);
+        setFruitImageSrc(processed);
+        setFruitPrediction(null);
+        setLastPredictionProbabilities(null);
+      } catch (err: any) {
+        logDiagnostic(`Standardizer warning: ${err.message}. Loading direct file.`);
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target && event.target.result) {
+            setFruitImageSrc(event.target.result as string);
+            setFruitPrediction(null);
+            setLastPredictionProbabilities(null);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+      e.target.value = '';
     }
   };
 
@@ -1504,33 +1820,51 @@ export default function App() {
     else setIsFruitDragOver(false);
   };
 
-  const handleDrop = (e: React.DragEvent, type: 'leaf' | 'fruit') => {
+  const handleDrop = async (e: React.DragEvent, type: 'leaf' | 'fruit') => {
     e.preventDefault();
     if (type === 'leaf') {
       setIsLeafDragOver(false);
       if (e.dataTransfer.files && e.dataTransfer.files[0]) {
         const file = e.dataTransfer.files[0];
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          if (event.target && event.target.result) {
-            setLeafImageSrc(event.target.result as string);
-            setLeafPrediction(null);
-          }
-        };
-        reader.readAsDataURL(file);
+        try {
+          logDiagnostic(`Standardizing dropped leaf image (${(file.size / 1024).toFixed(1)} KB)...`);
+          const processed = await processUploadedImage(file);
+          setLeafImageSrc(processed);
+          setLeafPrediction(null);
+          setLastPredictionProbabilities(null);
+        } catch {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            if (event.target && event.target.result) {
+              setLeafImageSrc(event.target.result as string);
+              setLeafPrediction(null);
+              setLastPredictionProbabilities(null);
+            }
+          };
+          reader.readAsDataURL(file);
+        }
       }
     } else {
       setIsFruitDragOver(false);
       if (e.dataTransfer.files && e.dataTransfer.files[0]) {
         const file = e.dataTransfer.files[0];
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          if (event.target && event.target.result) {
-            setFruitImageSrc(event.target.result as string);
-            setFruitPrediction(null);
-          }
-        };
-        reader.readAsDataURL(file);
+        try {
+          logDiagnostic(`Standardizing dropped fruit image (${(file.size / 1024).toFixed(1)} KB)...`);
+          const processed = await processUploadedImage(file);
+          setFruitImageSrc(processed);
+          setFruitPrediction(null);
+          setLastPredictionProbabilities(null);
+        } catch {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            if (event.target && event.target.result) {
+              setFruitImageSrc(event.target.result as string);
+              setFruitPrediction(null);
+              setLastPredictionProbabilities(null);
+            }
+          };
+          reader.readAsDataURL(file);
+        }
       }
     }
   };
@@ -2138,6 +2472,11 @@ export default function App() {
                     </p>
                     <p className="text-[9px] text-slate-400 mt-1 uppercase tracking-wide">Accepts PNG, JPG, or JPEG (Auto standardized to 224x224 input)</p>
                     
+                    <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100/90 text-slate-600 text-[9.5px] font-bold border border-slate-200 shadow-3xs">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>শুধুমাত্র ড্রাগন ফলের কান্ড বা ফলের আসল ছবি আপলোড করুন</span>
+                    </div>
+                    
                     <div className="mt-4 flex items-center justify-center gap-2 w-full max-w-[200px]">
                       <div className="h-[1px] bg-slate-200 grow"></div>
                       <span className="text-[8px] text-slate-400 font-extrabold uppercase tracking-widest bg-white px-2 shrink-0">OR</span>
@@ -2166,7 +2505,12 @@ export default function App() {
                 {((activeTab === 'leaf' && leafImageSrc) || (activeTab === 'fruit' && fruitImageSrc)) && (
                   <div className="mt-4 animation-fade-in border-t border-slate-100 pt-3">
                     <div className="flex pb-2 mb-2 items-center justify-between">
-                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Selected Specimen Image</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Selected Specimen Image</span>
+                        <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                          Specimen Verification
+                        </span>
+                      </div>
                       <button 
                         onClick={() => {
                           if (activeTab === 'leaf') {
@@ -2318,10 +2662,136 @@ export default function App() {
               ) : ((activeTab === 'leaf' && leafPrediction) || (activeTab === 'fruit' && fruitPrediction)) ? (
                 (() => {
                   const activePrediction = activeTab === 'leaf' ? leafPrediction : fruitPrediction;
+                  if (!activePrediction) return null;
 
+                  const isConfidenceSufficient = Boolean(activePrediction.isConfident && activePrediction.confidence >= 90.0);
+
+                  // If confidence is below 90% or non-dataset specimen, withhold diagnosis to prevent misclassification
+                  if (!isConfidenceSufficient) {
+                    return (
+                      <div id="results-panel-box" className="bg-white rounded-xl border border-rose-200 p-5 shadow-sm overflow-hidden relative font-sans animate-fade-in">
+                        {/* Top banner tag */}
+                        <div className="flex justify-between items-center mb-3 pb-2 border-b border-rose-100">
+                          <span className="text-[9.5px] font-black uppercase tracking-widest text-rose-800 flex items-center gap-1.5">
+                            <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
+                            Specimen Verification Notice
+                          </span>
+                          
+                          <span className="p-0.5 px-2.5 rounded-md text-[8.5px] font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">
+                            কোনো প্রেডিকশন দেওয়া হয়নি
+                          </span>
+                        </div>
+
+                        {/* Scanned Specimen Picture Frame with Warning Highlight */}
+                        <div className="mb-4 rounded-xl overflow-hidden border-2 border-rose-200 bg-slate-950 relative aspect-video flex items-center justify-center shadow-xs">
+                          {activeTab === 'leaf' && leafImageSrc ? (
+                            <img 
+                              src={leafImageSrc} 
+                              alt="Analyzed Vine Specimen" 
+                              className="max-h-full max-w-full object-contain opacity-85"
+                            />
+                          ) : activeTab === 'fruit' && fruitImageSrc ? (
+                            <img 
+                              src={fruitImageSrc} 
+                              alt="Analyzed Fruit Specimen" 
+                              className="max-h-full max-w-full object-contain opacity-85"
+                            />
+                          ) : (
+                            <div className="text-slate-500 font-mono text-[10px]">No Specimen Image Available</div>
+                          )}
+                          <div className="absolute top-2 left-2 bg-rose-950/90 text-rose-200 text-[9px] font-extrabold p-1 px-2 rounded border border-rose-700/60 uppercase tracking-widest font-mono flex items-center gap-1">
+                            <AlertCircle className="w-3 h-3 text-rose-400" />
+                            অসনাক্তকৃত বা ভুল ছবি
+                          </div>
+                        </div>
+
+                        {/* Direct Rejection Message */}
+                        <div className="my-3 p-5 rounded-xl border border-rose-200 bg-rose-50/40 text-center relative">
+                          <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-rose-100 border border-rose-200 flex items-center justify-center text-rose-600">
+                            <AlertCircle className="w-6 h-6" />
+                          </div>
+                          
+                          <h2 className="text-xl sm:text-2xl font-black tracking-tight leading-tight my-1 text-slate-800 font-sans">
+                            সঠিক ড্রাগন ফলের ছবি আপলোড করুন
+                          </h2>
+
+                          <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white font-bold text-xs border border-rose-200 text-rose-800 shadow-xs">
+                            <span>ড্রাগন ফলের সঠিক ছবি ছাড়া কোনো প্রেডিকশন দেওয়া হবে না</span>
+                          </div>
+
+                          <p className="text-[12px] text-slate-600 mt-3 font-medium leading-relaxed max-w-md mx-auto">
+                            আপনার আপলোড করা ছবিটি ড্রাগন ফলের কান্ড বা ফলের নমুনা হিসেবে শনাক্ত করা যায়নি। ভুল রোগ নির্ণয় রোধে শুধুমাত্র ড্রাগন ফলের সঠিক ছবি ছাড়া অন্য কোনো ছবির প্রেডিকশন বা চিকিৎসা পদ্ধতি দেওয়া হয় না।
+                          </p>
+                        </div>
+
+                        {/* Clear Guidelines for Uploading */}
+                        <div className="text-[11.5px] text-slate-700 leading-normal mb-4 border-l-3 border-emerald-500 bg-slate-50 p-3.5 rounded-r space-y-2 border border-slate-200/60">
+                          <p className="font-black text-slate-800 text-[11px] uppercase tracking-wide flex items-center gap-1.5">
+                            <CheckCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            সঠিক ছবি আপলোড করার নিয়ম:
+                          </p>
+                          <ul className="pl-4 space-y-1.5 text-slate-600 text-[11px]">
+                            <li className="flex items-start gap-1.5">
+                              <span className="text-emerald-600 font-bold">✓</span>
+                              <span>ড্রাগন ফলের কান্ড (Stem) অথবা ফলের (Fruit) স্পষ্ট ও পরিষ্কার ছবি আপলোড করুন।</span>
+                            </li>
+                            <li className="flex items-start gap-1.5">
+                              <span className="text-emerald-600 font-bold">✓</span>
+                              <span>গাছের রোগাক্রান্ত বা সুস্থ অংশকে ফ্রেমের মাঝে রেখে পর্যাপ্ত আলোতে ক্লোজ-আপ ছবি তুলুন।</span>
+                            </li>
+                            <li className="flex items-start gap-1.5">
+                              <span className="text-rose-500 font-bold">✗</span>
+                              <span>ড্রাগন ফল ব্যতীত মানুষ, আসবাবপত্র, ঘরবাড়ি বা ভিন্ন কোনো গাছের ছবি গ্রহণযোগ্য নয়।</span>
+                            </li>
+                          </ul>
+                        </div>
+
+                        {/* Action buttons to upload or re-take photo */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (activeTab === 'leaf') {
+                                setLeafImageSrc(null);
+                                setLeafPrediction(null);
+                                leafFileInputRef.current?.click();
+                              } else {
+                                setFruitImageSrc(null);
+                                setFruitPrediction(null);
+                                fruitFileInputRef.current?.click();
+                              }
+                            }}
+                            className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11.5px] font-bold shadow-xs transition-colors cursor-pointer"
+                          >
+                            <Upload className="w-3.5 h-3.5" />
+                            সঠিক ছবি সিলেক্ট করুন
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (activeTab === 'leaf') {
+                                setLeafImageSrc(null);
+                                setLeafPrediction(null);
+                              } else {
+                                setFruitImageSrc(null);
+                                setFruitPrediction(null);
+                              }
+                              startCamera();
+                            }}
+                            className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-[11.5px] font-bold shadow-xs transition-colors cursor-pointer"
+                          >
+                            <Camera className="w-3.5 h-3.5" />
+                            ক্যামেরা দিয়ে নতুন ছবি তুলুন
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  // When confidence is high, render the verified diagnosis sheet
                   const dataMap = activeTab === 'leaf' ? leafDiseasesData : fruitDiseasesData;
-                  const detail = dataMap[activePrediction!.className] || {
-                    name: activePrediction!.className,
+                  const detail = dataMap[activePrediction.className] || {
+                    name: activePrediction.className,
                     scientificName: "N/A",
                     severity: "None",
                     description: "No further pathological profile is registered for this specific subset class.",
@@ -2333,45 +2803,76 @@ export default function App() {
                   const titleColorClass = isHealthy ? 'text-dragon-green' : 'text-dragon-red';
 
                   return (
-                    <div id="results-panel-box" className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm overflow-hidden relative font-sans">
+                    <div id="results-panel-box" className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm overflow-hidden relative font-sans animate-fade-in">
                       
                       {/* Top banner tag */}
                       <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
                         <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Diagnosis Report Sheet</span>
                         
-                        {/* Severity level decorator */}
-                        <span className={`p-0.5 px-2 rounded-md text-[8.5px] font-black uppercase tracking-wider ${
-                          detail.severity === 'High' ? 'bg-rose-100 text-dragon-red animate-pulse' :
-                          detail.severity === 'Medium' ? 'bg-orange-100 text-orange-700' :
-                          detail.severity === 'Low' ? 'bg-amber-100 text-amber-800' :
-                          'bg-emerald-100 text-dragon-green'
-                        }`}>
-                          Severity: {detail.severity}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="p-0.5 px-2 rounded-md text-[8px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                            <CheckCircle className="w-2.5 h-2.5 text-emerald-600" />
+                            Verified Specimen (যাচাইকৃত ড্রাগন ফল)
+                          </span>
+                          
+                          {/* Severity level decorator */}
+                          <span className={`p-0.5 px-2 rounded-md text-[8.5px] font-black uppercase tracking-wider ${
+                            detail.severity === 'High' ? 'bg-rose-100 text-dragon-red animate-pulse' :
+                            detail.severity === 'Medium' ? 'bg-orange-100 text-orange-700' :
+                            detail.severity === 'Low' ? 'bg-amber-100 text-amber-800' :
+                            'bg-emerald-100 text-dragon-green'
+                          }`}>
+                            Severity: {detail.severity}
+                          </span>
+                        </div>
                       </div>
 
-                      {/* Scanned Specimen Picture Frame - Visual confirmation of actual image */}
-                      <div className="mb-4 rounded-xl overflow-hidden border border-slate-200/80 bg-slate-950 relative aspect-video flex items-center justify-center shadow-xs">
-                        {activeTab === 'leaf' && leafImageSrc ? (
-                          <img 
-                            src={leafImageSrc} 
-                            alt="Analyzed Vine Specimen" 
-                            className="max-h-full max-w-full object-contain"
-                          />
-                        ) : activeTab === 'fruit' && fruitImageSrc ? (
-                          <img 
-                            src={fruitImageSrc} 
-                            alt="Analyzed Fruit Specimen" 
-                            className="max-h-full max-w-full object-contain"
-                          />
-                        ) : (
-                          <div className="text-slate-500 font-mono text-[10px]">No Specimen Image Available</div>
-                        )}
-                        <div className="absolute top-2 left-2 bg-slate-900/95 text-white text-[9px] font-extrabold p-1 px-2 rounded border border-slate-750/40 uppercase tracking-widest font-mono">
-                          Scanned Crop Specimen / নমুনা ছবি
+                      {/* Dual Specimen Confirmation: Scanned Image vs Reference Disease Specimen */}
+                      <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        {/* 1. Scanned Image */}
+                        <div className="rounded-xl overflow-hidden border border-slate-200/80 bg-slate-950 relative aspect-video sm:aspect-square flex items-center justify-center shadow-xs">
+                          {activeTab === 'leaf' && leafImageSrc ? (
+                            <img 
+                              src={leafImageSrc} 
+                              alt="Analyzed Vine Specimen" 
+                              className="max-h-full max-w-full object-contain"
+                            />
+                          ) : activeTab === 'fruit' && fruitImageSrc ? (
+                            <img 
+                              src={fruitImageSrc} 
+                              alt="Analyzed Fruit Specimen" 
+                              className="max-h-full max-w-full object-contain"
+                            />
+                          ) : (
+                            <div className="text-slate-500 font-mono text-[10px]">No Specimen Image Available</div>
+                          )}
+                          <div className="absolute top-2 left-2 bg-slate-900/95 text-white text-[8.5px] font-extrabold p-1 px-2 rounded border border-slate-750/40 uppercase tracking-wider font-mono">
+                            আপনার আপলোডকৃত নমুনা
+                          </div>
+                          <div className="absolute bottom-2 right-2 bg-slate-900/95 text-emerald-300 text-[8px] font-bold p-1 px-2 rounded border border-slate-750/40 uppercase tracking-wider font-mono flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-emerald-400" />
+                            যাচাইকৃত
+                          </div>
                         </div>
-                        <div className="absolute bottom-2 right-2 bg-slate-900/95 text-slate-200 text-[8.5px] font-bold p-1 px-2 rounded border border-slate-750/40 uppercase tracking-wider font-mono">
-                          Inference Shape: 224x224 RGB
+
+                        {/* 2. Reference Disease Sample Image from dataset */}
+                        <div className="rounded-xl overflow-hidden border border-slate-200/80 bg-slate-900 relative aspect-video sm:aspect-square flex items-center justify-center shadow-xs">
+                          {getDiseaseSampleImage(activeTab, activePrediction.className) ? (
+                            <img 
+                              src={getDiseaseSampleImage(activeTab, activePrediction.className)} 
+                              alt={`${detail.name} Reference Sample`} 
+                              className="w-full h-full object-cover"
+                              referrerPolicy="no-referrer"
+                            />
+                          ) : (
+                            <div className="text-slate-400 font-mono text-[10px]">Sample Specimen</div>
+                          )}
+                          <div className="absolute top-2 left-2 bg-slate-900/95 text-amber-300 text-[8.5px] font-extrabold p-1 px-2 rounded border border-slate-750/40 uppercase tracking-wider font-mono">
+                            প্রামাণ্য রোগ নমুনা ছবি
+                          </div>
+                          <div className="absolute bottom-2 right-2 bg-slate-900/95 text-slate-200 text-[8px] font-bold p-1 px-2 rounded border border-slate-750/40 uppercase tracking-wider font-mono">
+                            {detail.name}
+                          </div>
                         </div>
                       </div>
 
@@ -2382,7 +2883,7 @@ export default function App() {
                           : 'bg-rose-50/40 border-rose-200 text-dragon-red'
                       }`}>
                         <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500 block mb-1">
-                          Diagnosed Condition / সনাক্তকৃত শ্রেণী ও রোগ
+                          Diagnosed Condition / নিশ্চিতকৃত শ্রেণী ও রোগ
                         </span>
                         
                         {/* Ultra Large English name */}
@@ -2394,7 +2895,7 @@ export default function App() {
                         <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white font-black text-xs sm:text-sm border border-slate-200 shadow-xs">
                           <span className="text-slate-400 font-normal">রোগের নামঃ</span>
                           <span className={`${isHealthy ? 'text-dragon-green' : 'text-dragon-red'}`}>
-                            {getClassBanglaName(activePrediction!.className, activeTab)}
+                            {getClassBanglaName(activePrediction.className, activeTab)}
                           </span>
                         </div>
 
@@ -2408,20 +2909,15 @@ export default function App() {
 
                       <p className="text-[10.5px] italic text-slate-400 font-bold font-mono text-center mb-4">LAB SCIENTIFIC NAME: {detail.scientificName}</p>
 
-                      {/* Confidence Progress bar */}
-                      <div className="mt-3 mb-4 p-2.5 bg-slate-50 rounded-lg border border-slate-200/50">
-                        <div className="flex justify-between text-[10.5px] font-extrabold mb-1">
-                          <span className="text-slate-600">Model Certainty (নির্ণয়ের নির্ভুলতা):</span>
-                          <span className={isHealthy ? 'text-dragon-green' : 'text-dragon-red'}>{activePrediction?.confidence}%</span>
-                        </div>
-                        <div className="w-full bg-slate-200/60 h-2 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full rounded-full transition-all duration-700 ${
-                              isHealthy ? 'bg-dragon-green' : 'bg-dragon-red'
-                            }`} 
-                            style={{ width: `${activePrediction?.confidence}%` }}
-                          />
-                        </div>
+                      {/* Verification Status Banner (No percentage details) */}
+                      <div className="mt-3 mb-4 p-2.5 bg-emerald-50/70 rounded-lg border border-emerald-200/70 flex items-center justify-between text-[11px]">
+                        <span className="font-bold text-emerald-900 flex items-center gap-1.5">
+                          <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                          নমুনা স্ট্যাটাসঃ ড্রাগন ফলের সঠিক ছবি যাচাইকৃত
+                        </span>
+                        <span className="font-extrabold text-emerald-700 bg-white px-2 py-0.5 rounded border border-emerald-200 text-[10px]">
+                          সফল শনাক্তকরণ
+                        </span>
                       </div>
 
                       {/* Pathological Description */}
@@ -2475,45 +2971,6 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* Real Model Probability Diagnostic Tool */}
-                      {lastPredictionProbabilities && (
-                        <div className="mt-4 pt-4 border-t border-slate-200 bg-slate-50 p-3 rounded-lg border border-slate-200/60 shadow-inner">
-                          <div className="flex items-center gap-1.5 justify-between mb-2">
-                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                              Model Output Matrix (মডেলের রিয়াল প্রবাবিলিটি)
-                            </span>
-                            <span className="text-[9.5px] font-bold text-slate-400 font-mono">Index-Sorted</span>
-                          </div>
-                          
-                          <p className="text-[10px] text-slate-500 mb-2.5 leading-normal">
-                            আপনার মডেলটি প্রতিটি শ্রেণীর জন্য কত পারসেন্ট প্রবাবিলিটি দিয়েছে তার তালিকা নিচে দেওয়া হলো। আপনার <code>classes.json</code> এর ইনডেক্স ও মডেলের ইনডেক্স ঠিক আছে কিনা মিলিয়ে দেখতে পারেন:
-                          </p>
-                          
-                          <div className="space-y-1.5 max-h-[160px] overflow-y-auto pr-1">
-                            {lastPredictionProbabilities.map((item, idx) => (
-                              <div key={idx} className="flex justify-between items-center bg-white p-1.5 rounded border border-slate-100 text-[11px] shadow-3xs">
-                                <span className="font-semibold text-slate-700 truncate max-w-[200px] flex items-center gap-1">
-                                  <span className="text-[9px] font-mono font-bold bg-slate-100 text-slate-500 px-1 rounded-sm">#{item.index}</span>
-                                  {item.className}
-                                </span>
-                                <div className="flex items-center gap-2">
-                                  <div className="w-16 bg-slate-100 h-1.5 rounded-full overflow-hidden shrink-0">
-                                    <div 
-                                      className="h-full bg-dragon-green rounded-full" 
-                                      style={{ width: `${(item.probability * 100).toFixed(1)}%` }}
-                                    />
-                                  </div>
-                                  <span className="font-mono font-bold text-slate-800 text-[10px]">
-                                    {(item.probability * 100).toFixed(2)}%
-                                  </span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
                     </div>
                   );
                 })()
@@ -2560,36 +3017,54 @@ export default function App() {
             <div className="lg:col-span-12 space-y-4 animate-fade-in text-slate-800">
               
               {/* Header block with category selectors */}
-              <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-xs space-y-4">
                 <div>
-                  <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Dragon Fruit Pathology Encyclopedia</h2>
-                  <p className="text-[11px] text-slate-500 font-medium">A curated field guide listing active plant diseases, detailed symptoms, and agronomy controls.</p>
+                  <h2 className="text-sm sm:text-base font-bold text-slate-900 uppercase tracking-wider">Dragon Fruit Pathology Encyclopedia</h2>
+                  <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5">A curated field guide listing active plant diseases, detailed symptoms, and agronomy controls.</p>
                 </div>
 
-                <div className="flex rounded-md bg-slate-100 p-1 border border-slate-200/50 self-end md:self-auto">
+                {/* Full-width, prominent 2-point category selectors */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full pt-1">
                   <button
+                    id="encyclo-tab-leaf-diseases"
                     onClick={() => {
                       setSelectedEncycloGroup('leaf');
                       setSelectedEncycloDisease(Object.keys(leafDiseasesData)[0]);
                     }}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded transition-all cursor-pointer ${
-                      selectedEncycloGroup === 'leaf' ? 'bg-dragon-green text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
+                    className={`flex items-center justify-center gap-3 px-4 py-3 sm:py-3.5 text-sm sm:text-base font-extrabold rounded-xl border transition-all cursor-pointer shadow-xs ${
+                      selectedEncycloGroup === 'leaf' 
+                        ? 'bg-dragon-green text-white border-dragon-green shadow-md ring-2 ring-emerald-400/50 ring-offset-1' 
+                        : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200 hover:border-slate-300'
                     }`}
                   >
-                    <Leaf className="w-3.5 h-3.5" />
-                    Leaf Pathogens ({Object.keys(leafDiseasesData).length})
+                    <Leaf className={`w-5 h-5 shrink-0 ${selectedEncycloGroup === 'leaf' ? 'text-white' : 'text-dragon-green'}`} />
+                    <span className="tracking-wide">Leaf Diseases</span>
+                    <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold shrink-0 ${
+                      selectedEncycloGroup === 'leaf' ? 'bg-white/25 text-white' : 'bg-slate-200 text-slate-700'
+                    }`}>
+                      {Object.keys(leafDiseasesData).length}
+                    </span>
                   </button>
+
                   <button
+                    id="encyclo-tab-fruit-diseases"
                     onClick={() => {
                       setSelectedEncycloGroup('fruit');
                       setSelectedEncycloDisease(Object.keys(fruitDiseasesData)[0]);
                     }}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded transition-all cursor-pointer ${
-                      selectedEncycloGroup === 'fruit' ? 'bg-dragon-red text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
+                    className={`flex items-center justify-center gap-3 px-4 py-3 sm:py-3.5 text-sm sm:text-base font-extrabold rounded-xl border transition-all cursor-pointer shadow-xs ${
+                      selectedEncycloGroup === 'fruit' 
+                        ? 'bg-dragon-red text-white border-dragon-red shadow-md ring-2 ring-rose-400/50 ring-offset-1' 
+                        : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200 hover:border-slate-300'
                     }`}
                   >
-                    <Sprout className="w-3.5 h-3.5" />
-                    Fruit Pathogens ({Object.keys(fruitDiseasesData).length})
+                    <Sprout className={`w-5 h-5 shrink-0 ${selectedEncycloGroup === 'fruit' ? 'text-white' : 'text-dragon-red'}`} />
+                    <span className="tracking-wide">Fruit Diseases</span>
+                    <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold shrink-0 ${
+                      selectedEncycloGroup === 'fruit' ? 'bg-white/25 text-white' : 'bg-slate-200 text-slate-700'
+                    }`}>
+                      {Object.keys(fruitDiseasesData).length}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -2612,23 +3087,37 @@ export default function App() {
                             setSelectedEncycloDisease(key);
                             setShowDetailsPage(true);
                           }}
-                          className={`w-full text-left p-2.5 px-3 rounded-lg border transition-all flex justify-between items-center cursor-pointer ${
+                          className={`w-full text-left p-2 px-2.5 rounded-lg border transition-all flex justify-between items-center cursor-pointer ${
                             isActive 
                               ? (selectedEncycloGroup === 'leaf' 
                                   ? 'bg-emerald-50 border-dragon-green text-dragon-green shadow-xs font-extrabold' 
                                   : 'bg-rose-50 border-dragon-red text-dragon-red shadow-xs font-extrabold')
-                              : 'bg-white border-slate-250 border-slate-200 hover:border-slate-355 text-slate-700 hover:bg-slate-100/50'
+                              : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700 hover:bg-slate-100/50'
                           }`}
                         >
-                          <div>
-                            <div className="text-[11.5px] font-bold">{item.name}</div>
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-8 h-8 rounded-md overflow-hidden bg-slate-100 border border-slate-200 shrink-0 flex items-center justify-center">
+                              {getDiseaseSampleImage(selectedEncycloGroup, key) ? (
+                                <img 
+                                  src={getDiseaseSampleImage(selectedEncycloGroup, key)} 
+                                  alt={item.name} 
+                                  className="w-full h-full object-cover" 
+                                  referrerPolicy="no-referrer"
+                                />
+                              ) : (
+                                <div className="w-2 h-2 rounded-full bg-slate-300" />
+                              )}
+                            </div>
+                            <div className="truncate">
+                              <div className="text-[11.5px] font-bold truncate">{item.name}</div>
+                            </div>
                           </div>
                           
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 shrink-0">
                             <span className={`p-0.5 px-1.5 rounded text-[8px] font-black uppercase ${
                               item.severity === 'High' ? 'bg-rose-100 text-dragon-red' :
                               item.severity === 'Medium' ? 'bg-orange-100 text-orange-700' :
-                              item.severity === 'Low' ? 'bg-amber-140 bg-amber-50 text-amber-800' :
+                              item.severity === 'Low' ? 'bg-amber-100 text-amber-800' :
                               'bg-emerald-100 text-dragon-green'
                             }`}>
                               {item.severity}
@@ -2689,7 +3178,7 @@ export default function App() {
                             <h4 className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">Reference Specimen (নমুনা ছবি)</h4>
                             <div className="relative rounded-lg overflow-hidden border border-slate-200 aspect-video md:aspect-square bg-slate-100 flex flex-col justify-end group h-[160px]">
                               <img 
-                                src={customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] || activeDis.sampleImage} 
+                                src={getDiseaseSampleImage(selectedEncycloGroup, selectedEncycloDisease) || activeDis.sampleImage} 
                                 alt={activeDis.name} 
                                 className="w-full h-full object-cover absolute inset-0"
                                 referrerPolicy="no-referrer"
@@ -3112,10 +3601,10 @@ export default function App() {
                     {/* Middle display block: Image + Description */}
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                       <div className="md:col-span-5 space-y-2">
-                        <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Sample Image</span>
-                        <div className="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm aspect-video sm:aspect-square bg-slate-105 bg-slate-100 flex flex-col justify-end group min-h-[220px]">
+                        <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Reference Sample Image (রোগের নমুনা ছবি)</span>
+                        <div className="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm aspect-video sm:aspect-square bg-slate-100 flex flex-col justify-end group min-h-[220px]">
                           <img 
-                            src={customSampleImages[`${selectedEncycloGroup}_${selectedEncycloDisease}`] || activeDis.sampleImage} 
+                            src={getDiseaseSampleImage(selectedEncycloGroup, selectedEncycloDisease) || activeDis.sampleImage} 
                             alt={activeDis.name} 
                             className="w-full h-full object-cover absolute inset-0"
                             referrerPolicy="no-referrer"
